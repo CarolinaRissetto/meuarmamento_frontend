@@ -55,7 +55,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onFilled }) =>
         sx={{
           borderColor: 'primary.light',
           '&:hover': { background: '#E3DFDC' },
-          borderRadius: "20px"
+          borderRadius: "5px"
         }}
       >
         <Grid item xs={11}>

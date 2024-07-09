@@ -7,7 +7,7 @@ const CustomDivider = styled('div')({
   display: 'flex',
   alignItems: 'center',
   textAlign: 'center',
-  margin: '40px 0',
+  margin: '10px 0',
   '&::before, &::after': {
     content: '""',
     flex: 1,

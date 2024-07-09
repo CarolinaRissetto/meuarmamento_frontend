@@ -70,7 +70,7 @@ export default function Checkout() {
 
   return (
     <ThemeProvider theme={defaultTheme}>
-      <AppBar position="static">
+      <AppBar className="mui-fixed" position="fixed">
         <Toolbar
           sx={{
             flexDirection: { xs: "column", md: "row" },
@@ -137,8 +137,11 @@ export default function Checkout() {
           </Box>
         </Toolbar>
       </AppBar>
+      <Toolbar sx={{ height: "6vw" }} /> {/* Adiciona um espaço equivalente ao Toolbar para ajuste do position fixed */}
+      <Box sx={{ paddingTop: { xs: '250px', sm: '0', md: '0' } }} />
+
       <CssBaseline />
-      <Grid container sx={{ height: { xs: "100%", sm: "100dvh" } }}>
+      <Grid container sx={{ minHeight: "100vh" }}>
         <Grid
           item
           xs={12}
@@ -154,6 +157,9 @@ export default function Checkout() {
             pt: 4,
             px: 10,
             gap: 4,
+            position: "sticky",
+            top: '6vw',
+            height: "100vh",
           }}
         >
           <Box

@@ -13,6 +13,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import IconButton from "@mui/material/IconButton";
 import Collapse from "@mui/material/Collapse";
+import Box from '@mui/material/Box';
 
 const FormGrid = styled(Grid)(() => ({
     display: "flex",
@@ -78,16 +79,24 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled }) =>
 
     return (
         <div>
-            <Grid container alignItems="center">
-                <Grid item xs={11}>
-                    <SectionHeader title="Endereço" />
+            <Box sx={{ my: 2 }}>
+                <Grid container alignItems="center"
+                    sx={{
+                        borderColor: 'primary.light',
+                        '&:hover': { background: '#E3DFDC' },
+                        borderRadius: "5px"
+                    }}
+                >
+                    <Grid item xs={11}>
+                        <SectionHeader title="Endereço" />
+                    </Grid>
+                    <Grid item xs={1}>
+                        <IconButton onClick={handleToggle}>
+                            {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                        </IconButton>
+                    </Grid>
                 </Grid>
-                <Grid item xs={1}>
-                    <IconButton onClick={handleToggle}>
-                        {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                    </IconButton>
-                </Grid>
-            </Grid>
+            </Box>
             <Collapse in={open}>
                 <Grid container spacing={3} marginTop={"5px"} marginBottom={"70px"} id="endereco-form">
                     <FormGrid item xs={12}>
