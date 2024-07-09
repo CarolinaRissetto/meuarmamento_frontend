@@ -1,30 +1,28 @@
 import * as React from "react";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  Avatar,
+  CssBaseline,
+  Grid,
+  ThemeProvider,
+  createTheme,
+  PaletteMode
+} from "@mui/material";
 
-import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CssBaseline from "@mui/material/CssBaseline";
-import Grid from "@mui/material/Grid";
-import Stack from "@mui/material/Stack";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
-import Stepper from "@mui/material/Stepper";
-import Typography from "@mui/material/Typography";
-import { Box } from "@mui/material";
-
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { AppBar, Avatar, PaletteMode, Toolbar } from "@mui/material";
-
-import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import HomeIcon from "@mui/icons-material/Home";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 
 import logo from "./logo-libera-defesa.png"
 import IconeCac from "./icone-cac.png";
 import DadosPessoais from "../components/form/DadosPessoais"
-
-const steps = ["Shipping address", "Payment details", "Review your order"];
+import Endereco from "../components/form/Endereco"
+import DocumentosParaAssinar from "../components/form/DocumentosParaAssinar"
 
 const logoStyle = {
   width: "140px",
@@ -34,27 +32,56 @@ const logoStyle = {
 };
 
 export default function Checkout() {
-  const [mode, setMode] = React.useState<PaletteMode>("light");
+
+  const [sectionVisibility, setSectionVisibility] = React.useState({
+    dadosPessoais: true,
+    endereco: true,
+    documentosParaAssinar: true,
+  });
+
+  const handleSectionFilled = (section: string) => {
+    setSectionVisibility((prev) => ({
+      ...prev,
+      [section]: false,
+      [getNextSection(section)]: true,
+    }));
+  };
+
+  const handleToggle = (section: string) => {
+    setSectionVisibility((prev) => ({
+      ...prev,
+      [section]: !prev[section as keyof typeof prev],
+    }));
+  };
+
+  const getNextSection = (currentSection: string) => {
+    switch (currentSection) {
+      case "dadosPessoais":
+        return "endereco";
+      case "endereco":
+        return "documentosParaAssinar";
+      default:
+        return "";
+    }
+  };
+
+  const [mode, setMode] = React.useState<PaletteMode>('light');
   const defaultTheme = createTheme({ palette: { mode } });
-  const [activeStep, setActiveStep] = React.useState(0);
-
-  const handleNext = () => {
-    setActiveStep(activeStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep(activeStep - 1);
-  };
 
   return (
     <ThemeProvider theme={defaultTheme}>
       <AppBar position="static">
         <Toolbar
           sx={{
-            minHeight: "450px", // Ajuste a altura da Toolbar conforme necessário
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: "center",
+            justifyContent: "space-between",
+            minHeight: "300px",
             height: "6vw",
             backgroundColor: "#F3F0EE",
             position: "relative",
+            padding: { xs: 1, md: '45px' },
+            borderBottom: "1px solid #cccccc",
             "&::after": {
               content: '""',
               position: "absolute",
@@ -62,11 +89,11 @@ export default function Checkout() {
               bottom: 0,
               width: "100%",
               height: "1px",
-              backgroundColor: "#cccccc", // Cor da linha
+              backgroundColor: "#cccccc",
+              display: { xs: 'none', md: 'none', lg: 'none' } // Aqui escondemos a linha em telas pequenas e médias
             },
           }}
         >
-          {/* Logo */}
           <Box
             sx={{
               display: "flex",
@@ -77,7 +104,6 @@ export default function Checkout() {
             alt="Logo"
             src={logo}
             sx={{
-              marginRight: "10px",
               width: "80px",
               height: "80px",
               objectFit: "contain",
@@ -87,22 +113,28 @@ export default function Checkout() {
           {/* Título Centralizado */}
           <Box sx={{ flexGrow: 1, textAlign: "center" }}>
             <Typography
+              margin={"30px"}
               variant="h4"
               component="div"
-              sx={{ fontFamily: "Raleway, sans-serif", color: "black" }}
+              sx={{ fontFamily: "Raleway, sans-serif", color: "black", fontSize: { xs: "1.2rem", md: "1.5rem" } }}
             >
               Autorização de Aquisição de Armas de Fogo - PF
             </Typography>
           </Box>
-
-          {/* Botão Página Inicial */}
-          <Button
-            color="inherit"
-            startIcon={<HomeIcon />}
-            sx={{ color: "black" }}
-          >
-            Página Inicial
-          </Button>
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: "center" }}>
+            <a href="https://liberadefesa-com-br.webflow.io/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+              <Button
+                color="inherit"
+                startIcon={<AssignmentTurnedInIcon />}
+                sx={{ color: "black", marginBottom: { xs: "8px", md: 0 } }}
+              >
+                Serviços
+              </Button>
+            </a>
+            <Button color="inherit" startIcon={<HomeIcon />} sx={{ color: "black" }}>
+              Página Inicial
+            </Button>
+          </Box>
         </Toolbar>
       </AppBar>
       <CssBaseline />
@@ -241,57 +273,30 @@ export default function Checkout() {
               maxWidth: { sm: "100%", md: 600 },
             }}
           >
-            <DadosPessoais/>
+            <DadosPessoais
+              isVisible={sectionVisibility.dadosPessoais}
+              onToggle={() => handleToggle('dadosPessoais')}
+              onFilled={() => handleSectionFilled('dadosPessoais')}
+            />
+            <Endereco
+              isVisible={sectionVisibility.endereco}
+              onToggle={() => handleToggle('dadosPessoais')}
+              onFilled={() => handleSectionFilled('dadosPessoais')}
+            />
+
+            <DocumentosParaAssinar />
           </Box>
-          <Box
+          <Button
+
+            variant="contained"
+            endIcon={<ChevronRightRoundedIcon />}
             sx={{
-              display: "flex",
-              flexDirection: { xs: "column-reverse", sm: "row" },
-              justifyContent: activeStep !== 0 ? "space-between" : "flex-end",
-              alignItems: "end",
-              gap: 1,
-              pb: 0,
-              mt: 0,
-              mb: 0,
+              width: { xs: "100%", sm: "fit-content" },
+              mt: 2, // Ajuste conforme necessário para aproximar do formulário
             }}
           >
-            {activeStep !== 0 && (
-              <Button
-                startIcon={<ChevronLeftRoundedIcon />}
-                onClick={handleBack}
-                variant="text"
-                sx={{
-                  display: { xs: "none", sm: "flex" },
-                }}
-              >
-                Previous
-              </Button>
-            )}
-            {activeStep !== 0 && (
-              <Button
-                startIcon={<ChevronLeftRoundedIcon />}
-                onClick={handleBack}
-                variant="outlined"
-                fullWidth
-                sx={{
-                  display: { xs: "flex", sm: "none" },
-                }}
-              >
-                Previous
-              </Button>
-            )}
-            <Button
-              variant="contained"
-              endIcon={<ChevronRightRoundedIcon />}
-              onClick={handleNext}
-              sx={{
-                width: { xs: "100%", sm: "fit-content" },
-                mt: 2, // Ajuste conforme necessário para aproximar do formulário
-              }}
-            >
-              {activeStep === steps.length - 1 ? "Place order" : "Next"}
-            </Button>
-          </Box>
+            Finalizar
+          </Button>
         </Grid>
       </Grid>
     </ThemeProvider>
