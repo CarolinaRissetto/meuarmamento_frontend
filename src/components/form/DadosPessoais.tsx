@@ -19,12 +19,14 @@ interface DadosPessoaisProps {
   isVisible: boolean;
   onToggle: () => void;
   onFilled: () => void;
+  handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  formData: { [key: string]: string };
+  uuid: string | null;
 }
 
-const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onFilled }) => {
+const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onFilled, handleInputChange, formData }) => {
   const [filled, setFilled] = useState(false);
   const [open, setOpen] = useState(isVisible);
-
 
   useEffect(() => {
     if (!filled && isFormFilled()) {
@@ -35,7 +37,6 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onFilled }) =>
   }, [filled]);
 
   const isFormFilled = () => {
-    // Verifique se todos os campos obrigatórios estão preenchidos
     const inputs = document.querySelectorAll("#dados-pessoais-form input[required]");
     for (let i = 0; i < inputs.length; i++) {
       if (!(inputs[i] as HTMLInputElement).value) {
@@ -51,11 +52,13 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onFilled }) =>
 
   return (
     <div>
-      <Grid container alignItems="center"
+      <Grid
+        container
+        alignItems="center"
         sx={{
           borderColor: 'primary.light',
           '&:hover': { background: '#E3DFDC' },
-          borderRadius: "5px"
+          borderRadius: "5px",
         }}
       >
         <Grid item xs={11}>
@@ -73,43 +76,105 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onFilled }) =>
             <FormLabel htmlFor="first-name" required>
               Nome completo
             </FormLabel>
-            <OutlinedInput id="first-name" name="first-name" type="name" autoComplete="first name" required />
+            <OutlinedInput
+              id="first-name"
+              name="first-name"
+              type="name"
+              autoComplete="first name"
+              required
+              value={formData["first-name"] || ""}
+              onChange={handleInputChange}
+            />
           </FormGrid>
           <FormGrid item xs={12} md={6}>
             <FormLabel htmlFor="cpf" required>
               CPF
             </FormLabel>
-            <OutlinedInput id="cpf" name="cpf" type="text" placeholder="000.000.000-00" autoComplete="cpf" required />
+            <OutlinedInput
+              id="cpf"
+              name="cpf"
+              type="text"
+              placeholder="000.000.000-00"
+              autoComplete="cpf"
+              required
+              value={formData["cpf"] || ""}
+              onChange={handleInputChange}
+            />
           </FormGrid>
           <FormGrid item xs={12} md={6}>
             <FormLabel htmlFor="rg" required>
               RG
             </FormLabel>
-            <OutlinedInput id="rg" name="rg" type="text" placeholder="00.000.000-0" autoComplete="rg" required />
+            <OutlinedInput
+              id="rg"
+              name="rg"
+              type="text"
+              placeholder="00.000.000-0"
+              autoComplete="rg"
+              required
+              value={formData["rg"] || ""}
+              onChange={handleInputChange}
+            />
           </FormGrid>
           <FormGrid item xs={12} md={6}>
             <FormLabel htmlFor="nationality" required>
               Nacionalidade
             </FormLabel>
-            <OutlinedInput id="nationality" name="nationality" type="text" placeholder="Brasileiro(a)" autoComplete="nationality" required />
+            <OutlinedInput
+              id="nationality"
+              name="nationality"
+              type="text"
+              placeholder="Brasileiro(a)"
+              autoComplete="nationality"
+              required
+              value={formData["nationality"] || ""}
+              onChange={handleInputChange}
+            />
           </FormGrid>
           <FormGrid item xs={12} md={6}>
             <FormLabel htmlFor="birthdate" required>
               Data de Nascimento
             </FormLabel>
-            <OutlinedInput id="birthdate" name="birthdate" type="date" placeholder="DD/MM/AAAA" autoComplete="bdate" required />
+            <OutlinedInput
+              id="birthdate"
+              name="birthdate"
+              type="date"
+              placeholder="DD/MM/AAAA"
+              autoComplete="bdate"
+              required
+              value={formData["birthdate"] || ""}
+              onChange={handleInputChange}
+            />
           </FormGrid>
           <FormGrid item xs={12}>
             <FormLabel htmlFor="mother-name" required>
               Nome Completo da Mãe
             </FormLabel>
-            <OutlinedInput id="mother-name" name="mother-name" type="text" placeholder="Nome Completo da Mãe" autoComplete="mother-name" required />
+            <OutlinedInput
+              id="mother-name"
+              name="mother-name"
+              type="text"
+              placeholder="Nome Completo da Mãe"
+              autoComplete="mother-name"
+              required
+              value={formData["mother-name"] || ""}
+              onChange={handleInputChange}
+            />
           </FormGrid>
           <FormGrid item xs={12}>
             <FormLabel htmlFor="father-name" required>
               Nome Completo do Pai
             </FormLabel>
-            <OutlinedInput id="father-name" name="father-name" type="text" placeholder="Nome Completo do Pai" autoComplete="father-name" required />
+            <OutlinedInput
+              id="father-name"
+              name="father-name"
+              type="text"
+              placeholder="Nome Completo do Pai"
+              autoComplete="father-name"
+              required
+              value={formData["father-name"] || ""}
+              onChange={handleInputChange}
+            />
           </FormGrid>
         </Grid>
       </Collapse>

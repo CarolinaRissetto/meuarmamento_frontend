@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useEffect, useState } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -12,7 +12,7 @@ import {
   createTheme,
   PaletteMode
 } from "@mui/material";
-
+import { nanoid } from 'nanoid';
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import HomeIcon from "@mui/icons-material/Home";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
@@ -23,6 +23,8 @@ import IconeCac from "./icone-cac.png";
 import DadosPessoais from "../components/form/DadosPessoais"
 import Endereco from "../components/form/Endereco"
 import DocumentosParaAssinar from "../components/form/DocumentosParaAssinar"
+import axios from 'axios';
+
 
 const logoStyle = {
   width: "140px",
@@ -32,6 +34,66 @@ const logoStyle = {
 };
 
 export default function Checkout() {
+
+  const [uuid, setUuid] = useState<string | null>(null);
+  const [formData, setFormData] = useState<{ [key: string]: string }>({});
+
+  useEffect(() => {
+    // Verifica se já existe um UUID curto no localStorage
+    const storedUuid = localStorage.getItem('user-uuid');
+    if (storedUuid) {
+      setUuid(storedUuid);
+      const storedFormData = localStorage.getItem(`form-data-${storedUuid}`);
+      if (storedFormData) {
+        setFormData(JSON.parse(storedFormData));
+      }
+    } else {
+      // Se não houver UUID, gera um novo curto e armazena
+      const newUuid = nanoid(6); // Gera um ID curto com 10 caracteres
+      localStorage.setItem('user-uuid', newUuid);
+      setUuid(newUuid);
+    }
+  }, []);
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    const updatedFormData = { ...formData, [name]: value };
+    setFormData(updatedFormData);
+    if (uuid) {
+      localStorage.setItem(`form-data-${uuid}`, JSON.stringify(updatedFormData));
+    }
+  };
+
+
+  const handleNewRegistration = () => {
+    // Gera um novo UUID e limpa os dados do formulário
+    const newUuid = nanoid(6);
+    localStorage.setItem('user-uuid', newUuid);
+    setUuid(newUuid);
+    setFormData({});
+    localStorage.removeItem(`form-data-${uuid}`);
+  };
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    // Aqui você pode adicionar a lógica para enviar o formulário junto com o UUID curto
+    console.log('UUID:', uuid, 'Form Data:', formData);
+    // Enviar para o backend...
+  };
+
+
+
+
+
+  const handleButtonClick = async () => {
+    try {
+      const response = await axios.get('https://jd5ueykib6.execute-api.us-east-1.amazonaws.com/default/testeFunction');
+      console.log(response.data);
+      alert(response.data.message);
+    } catch (error) {
+      console.error("There was an error!", error);
+    }
+  };
 
   const [sectionVisibility, setSectionVisibility] = React.useState({
     dadosPessoais: true,
@@ -90,7 +152,7 @@ export default function Checkout() {
               width: "100%",
               height: "1px",
               backgroundColor: "#cccccc",
-              display: { xs: 'none', md: 'none', lg: 'none' } // Aqui escondemos a linha em telas pequenas e médias
+              display: { xs: 'none', md: 'none', lg: 'none' }
             },
           }}
         >
@@ -245,6 +307,7 @@ export default function Checkout() {
             sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}
           >
             <Button
+              onClick={handleButtonClick}
               variant="contained"
               color="primary"
               href="#"
@@ -254,6 +317,9 @@ export default function Checkout() {
               Como funciona
             </Button>
           </Box>
+          <div>
+            Seu ID: {uuid}
+          </div>
         </Grid>
         <Grid
           item
@@ -283,6 +349,9 @@ export default function Checkout() {
               isVisible={sectionVisibility.dadosPessoais}
               onToggle={() => handleToggle('dadosPessoais')}
               onFilled={() => handleSectionFilled('dadosPessoais')}
+              handleInputChange={handleInputChange}
+              formData={formData}
+              uuid={uuid}
             />
             <Endereco
               isVisible={sectionVisibility.endereco}
@@ -292,19 +361,31 @@ export default function Checkout() {
 
             <DocumentosParaAssinar />
           </Box>
-          <Button
-
-            variant="contained"
-            endIcon={<ChevronRightRoundedIcon />}
-            sx={{
-              width: { xs: "100%", sm: "fit-content" },
-              mt: 2, // Ajuste conforme necessário para aproximar do formulário
-            }}
+          <Box sx={{ display: "flex", justifyContent: "space-between", width: "55%", marginBottom: "20px" }}
           >
-            Finalizar
-          </Button>
+            <Button
+              onClick={handleNewRegistration}
+              variant="contained"
+              sx={{
+                width: { xs: "100%", sm: "fit-content" },
+                mt: 2,
+              }}
+            >
+              Novo Cadastro
+            </Button>
+            <Button
+              variant="contained"
+              endIcon={<ChevronRightRoundedIcon />}
+              sx={{
+                width: { xs: "100%", sm: "fit-content" },
+                mt: 2, // Ajuste conforme necessário para aproximar do formulário
+              }}
+            >
+              Finalizar
+            </Button>
+          </Box>
         </Grid>
       </Grid>
-    </ThemeProvider>
+    </ThemeProvider >
   );
 }
