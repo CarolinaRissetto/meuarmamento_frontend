@@ -1,8 +1,3 @@
-```sh
-npm install
-npm start
-```
-
 # Projeto CAC Despachante
 
 Um sistema para gerenciamento e registro de certificados e emissão de autorizações CAC (Colecionador, Atirador e Caçador), incluindo formulários de registro, armazenamento de dados.
@@ -30,7 +25,7 @@ https://github.com/CarolinaRissetto/cac_facil
 ```
 Navegue até o diretório do projeto:
 ```sh
-cd cac-facil
+cd cac_facil
 ```
 Instale as dependências:
 ```sh
@@ -40,6 +35,34 @@ Inicie o servidor de desenvolvimento:
 ```sh
 npm start
 ```
+
+## 📦 Implantação
+
+Adicione notas adicionais sobre como implantar isso em um sistema ativo
+
+O projeto front-end está configurado para ser implantado na AWS utilizando S3 e CloudFront.
+
+Para implantar o projeto, siga os passos abaixo:
+
+1. Faça o build do projeto:
+```sh
+npm run build
+```
+2. Faça upload dos arquivos do build para o S3.
+
+Para detalhes específicos sobre cada etapa, consulte a documentação da AWS.
+
+## 🛠️ Construído com
+
+* [React](https://reactjs.org/) - Biblioteca JavaScript para construção de interfaces de usuário
+* [TypeScript](https://www.typescriptlang.org/) - Superset do JavaScript que adiciona tipagem estática
+* [Material-UI](https://material-ui.com/) - Biblioteca de componentes React
+* [AWS S3](https://aws.amazon.com/s3/) - Armazenamento de objetos
+* [AWS CloudFront](https://aws.amazon.com/cloudfront/) - Rede de distribuição de conteúdo
+* [AWS API Gateway](https://aws.amazon.com/api-gateway/) - Serviço para criar, publicar, manter, monitorar e proteger APIs
+* [AWS Lambda](https://aws.amazon.com/lambda/) - Serviço de computação serverless
+
+
 
 
 
