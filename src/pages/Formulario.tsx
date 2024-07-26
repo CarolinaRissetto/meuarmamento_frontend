@@ -41,6 +41,7 @@ export default function Checkout() {
   useEffect(() => {
     // Verifica se já existe um UUID curto no localStorage
     const storedUuid = localStorage.getItem('user-uuid');
+
     if (storedUuid) {
       setUuid(storedUuid);
       const storedFormData = localStorage.getItem(`form-data-${storedUuid}`);
@@ -80,10 +81,6 @@ export default function Checkout() {
     console.log('UUID:', uuid, 'Form Data:', formData);
     // Enviar para o backend...
   };
-
-
-
-
 
   const handleButtonClick = async () => {
     try {
@@ -138,11 +135,11 @@ export default function Checkout() {
             flexDirection: { xs: "column", md: "row" },
             alignItems: "center",
             justifyContent: "space-between",
-            minHeight: "300px",
-            height: "6vw",
+            minHeight: "200px",
+            height: "auto",
             backgroundColor: "#F3F0EE",
             position: "relative",
-            padding: { xs: 1, md: '45px' },
+            padding: { xs: 1, md: '25px' },
             borderBottom: "1px solid #cccccc",
             "&::after": {
               content: '""',
@@ -178,7 +175,11 @@ export default function Checkout() {
               margin={"30px"}
               variant="h4"
               component="div"
-              sx={{ fontFamily: "Raleway, sans-serif", color: "black", fontSize: { xs: "1.2rem", md: "1.5rem" } }}
+              sx={{ 
+              fontFamily: "Raleway, sans-serif", 
+              color: "black", 
+              fontSize: { xs: "1.2rem", md: "1.5rem" },
+            }}
             >
               Autorização de Aquisição de Armas de Fogo - PF
             </Typography>
@@ -199,11 +200,10 @@ export default function Checkout() {
           </Box>
         </Toolbar>
       </AppBar>
-      <Toolbar sx={{ height: "6vw" }} /> {/* Adiciona um espaço equivalente ao Toolbar para ajuste do position fixed */}
-      <Box sx={{ paddingTop: { xs: '250px', sm: '0', md: '0' } }} />
 
       <CssBaseline />
-      <Grid container sx={{ minHeight: "100vh" }}>
+
+      <Grid container sx={{ height: "100vh", overflow: "hidden", paddingTop: { xs: '300px', sm: '270px', md: '145px' } }}>
         <Grid
           item
           xs={12}
@@ -220,8 +220,8 @@ export default function Checkout() {
             px: 10,
             gap: 4,
             position: "sticky",
-            top: '6vw',
-            height: "100vh",
+            top: '0',
+            maxHeight: '100%',
           }}
         >
           <Box
@@ -230,6 +230,7 @@ export default function Checkout() {
               alignItems: "center",
               marginBottom: "20px",
               marginTop: "20px",
+              position: 'sticky'
             }}
           >
             <Avatar
@@ -329,9 +330,11 @@ export default function Checkout() {
           sx={{
             display: "flex",
             flexDirection: "column",
-            maxWidth: "100%",
+            maxWidth: "auto",
             width: "100%",
+            maxHeight: "85vh",
             backgroundColor: "#F3F0EE",
+            overflowY: "scroll",
             alignItems: "start",
             pt: { xs: 2, sm: 4 },
             px: { xs: 2, sm: 10 },
