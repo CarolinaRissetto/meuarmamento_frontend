@@ -6,6 +6,7 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import { styled } from "@mui/system";
 import Collapse from "@mui/material/Collapse";
 import SectionHeader from "./Cabecalho";
+import Box from '@mui/material/Box';
 import IconButton from "@mui/material/IconButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -112,7 +113,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
   };
 
   return (
-    <div>
+    <Box>
       <Grid
         container
         alignItems="center"
@@ -120,13 +121,15 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
           borderColor: 'primary.light',
           '&:hover': { background: '#E3DFDC' },
           borderRadius: "5px",
+          cursor: 'pointer'
         }}
+        onClick={handleToggle}
       >
         <Grid item xs={11}>
           <SectionHeader title="Dados Pessoais" />
         </Grid>
         <Grid item xs={1}>
-          <IconButton onClick={handleToggle}>
+          <IconButton>
             {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </IconButton>
         </Grid>
@@ -246,7 +249,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
           </FormGrid>
         </Grid>
       </Collapse>
-    </div>
+    </Box>
   );
 };
 
