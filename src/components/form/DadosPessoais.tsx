@@ -6,11 +6,9 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import { styled } from "@mui/system";
 import Collapse from "@mui/material/Collapse";
 import SectionHeader from "./Cabecalho";
-import Box from '@mui/material/Box';
 import IconButton from "@mui/material/IconButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { uuid } from "short-uuid";
 
 const FormGrid = styled(Grid)(() => ({
   display: "flex",
@@ -29,7 +27,7 @@ interface DadosPessoaisProps {
 const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFilled, handleInputChange, formData, uuid }) => {
   const [filled, setFilled] = useState(false);
   const [open, setOpen] = useState(isVisible);
-  const [inputTouched, setInputTouched] = useState(false);
+  const [, setInputTouched] = useState(false);
   const [dirty, setDirty] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
 
@@ -96,7 +94,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [filled, dirty, formData]);
+  }, [filled, dirty, formData, uuid]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     handleInputChange(event);
@@ -113,15 +111,15 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
   };
 
   return (
-    <Box>
+    <div>
       <Grid
         container
         alignItems="center"
         sx={{
           borderColor: 'primary.light',
-          '&:hover': { background: '#E3DFDC' },
+          '&:hover': { background: '#E3DFDC' }, 
           borderRadius: "5px",
-          cursor: 'pointer'
+          cursor: 'pointer',
         }}
         onClick={handleToggle}
       >
@@ -249,7 +247,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
           </FormGrid>
         </Grid>
       </Collapse>
-    </Box>
+    </div>
   );
 };
 

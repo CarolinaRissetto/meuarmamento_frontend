@@ -55,7 +55,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled }) =>
             onFilled();
             setOpen(false); // Colapsar a seção quando preenchida pela primeira vez
         }
-    }, [filled]);
+    }, [filled, onFilled]);
 
     const isFormFilled = () => {
         // Verifique se todos os campos obrigatórios estão preenchidos

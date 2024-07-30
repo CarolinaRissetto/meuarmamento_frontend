@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Typography, Divider } from '@mui/material';
+import { Typography } from '@mui/material';
 import { styled } from '@mui/system';
 
 const CustomDivider = styled('div')({

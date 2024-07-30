@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar,
@@ -26,21 +26,13 @@ import Endereco from "../components/form/Endereco"
 import DocumentosParaAssinar from "../components/form/DocumentosParaAssinar"
 import axios from 'axios';
 
-
-const logoStyle = {
-  width: "140px",
-  height: "56px",
-  marginLeft: "-4px",
-  marginRight: "-8px",
-};
-
 export default function Checkout() {
 
   const [uuid, setUuid] = useState<string | null>(null);
   const [formData, setFormData] = useState<{ [key: string]: string }>({});
   const navigate = useNavigate();
   const location = useLocation();
-  const urlParams = new URLSearchParams(location.search);
+  const urlParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
   useEffect(() => {
     // Verifica se já existe um UUID curto no localStorage
@@ -64,7 +56,7 @@ export default function Checkout() {
       urlParams.set('uuid', newUuid);
       navigate(`?${urlParams.toString()}`, { replace: true });
     }
-  }, [location, navigate]);
+  }, [location, navigate, urlParams]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -85,13 +77,6 @@ export default function Checkout() {
 
     urlParams.set('uuid', newUuid);
     navigate(`?${urlParams.toString()}`, { replace: true });
-  };
-
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    // Aqui você pode adicionar a lógica para enviar o formulário junto com o UUID curto
-    console.log('UUID:', uuid, 'Form Data:', formData);
-    // Enviar para o backend...
   };
 
   const handleButtonComoFuncionaClick = async () => {
@@ -136,7 +121,7 @@ export default function Checkout() {
     }
   };
 
-  const [mode, setMode] = React.useState<PaletteMode>('light');
+  const [mode,] = React.useState<PaletteMode>('light');
   const defaultTheme = createTheme({ palette: { mode } });
 
   return (
