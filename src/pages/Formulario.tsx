@@ -82,7 +82,7 @@ export default function Checkout() {
     // Enviar para o backend...
   };
 
-  const handleButtonClick = async () => {
+  const handleButtonComoFuncionaClick = async () => {
     try {
       const response = await axios.get('https://jd5ueykib6.execute-api.us-east-1.amazonaws.com/default/testeFunction');
       console.log(response.data);
@@ -308,7 +308,7 @@ export default function Checkout() {
             sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}
           >
             <Button
-              onClick={handleButtonClick}
+              onClick={handleButtonComoFuncionaClick}
               variant="contained"
               color="primary"
               href="#"

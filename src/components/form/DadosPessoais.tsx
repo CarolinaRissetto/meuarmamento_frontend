@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import FormLabel from "@mui/material/FormLabel";
 import Grid from "@mui/material/Grid";
 import OutlinedInput from "@mui/material/OutlinedInput";
@@ -24,17 +24,12 @@ interface DadosPessoaisProps {
   uuid: string | null;
 }
 
-const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onFilled, handleInputChange, formData }) => {
+const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFilled, handleInputChange, formData }) => {
   const [filled, setFilled] = useState(false);
   const [open, setOpen] = useState(isVisible);
-
-  useEffect(() => {
-    if (!filled && isFormFilled()) {
-      setFilled(true);
-      onFilled();
-      setOpen(false); // Colapsar a seção quando preenchida pela primeira vez
-    }
-  }, [filled]);
+  const [inputTouched, setInputTouched] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const isFormFilled = () => {
     const inputs = document.querySelectorAll("#dados-pessoais-form input[required]");
@@ -46,8 +41,72 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onFilled, hand
     return true;
   };
 
+  const saveFormData = async (data: any) => {
+    try {
+      const response = await fetch('http://localhost:3001/hello', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao salvar dados.');
+      }
+
+      console.log('Dados salvos com sucesso!');
+    } catch (error) {
+      console.error('Erro ao salvar dados:', error);
+    }finally {
+      setDirty(false); // Reset dirty state after saving
+    }
+  };
+
+  useEffect(() => {
+    if (isFormFilled() && !filled) {
+      setFilled(true);
+      onFilled();
+    }
+  }, [filled, onFilled]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (formRef.current && !formRef.current.contains(event.target as Node)) {
+        if (filled && dirty) {
+          setOpen(false); // Colapsar a seção quando clicado fora, se preenchido
+          saveFormData({
+            nomeCompleto: formData["first-name"] || "",
+            cpf: formData["cpf"] || "",
+            rg: formData["rg"] || "",
+            nacionalidade: formData["nationality"] || "",
+            dataNascimento: formData["birthdate"] || "",
+            nomeMae: formData["mother-name"] || "",
+            nomePai: formData["father-name"] || ""
+          });
+        }
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [filled, dirty, formData]);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleInputChange(event);
+    setDirty(true); // Set dirty state on change
+  };  
+
   const handleToggle = () => {
     setOpen(!open);
+    onToggle();
+  };
+
+  const handleInputBlur = () => {
+    setInputTouched(true);
   };
 
   return (
@@ -71,7 +130,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onFilled, hand
         </Grid>
       </Grid>
       <Collapse in={open}>
-        <Grid container spacing={3} marginTop={"5px"} id="dados-pessoais-form">
+        <Grid container spacing={3} marginTop={"5px"} id="dados-pessoais-form" ref={formRef}>
           <FormGrid item xs={12}>
             <FormLabel htmlFor="first-name" required>
               Nome completo
@@ -79,11 +138,12 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onFilled, hand
             <OutlinedInput
               id="first-name"
               name="first-name"
-              type="name"
-              autoComplete="first name"
+              type="text"
+              autoComplete="first-name"
               required
               value={formData["first-name"] || ""}
-              onChange={handleInputChange}
+              onChange={handleChange}
+              onBlur={handleInputBlur}
             />
           </FormGrid>
           <FormGrid item xs={12} md={6}>
@@ -98,7 +158,8 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onFilled, hand
               autoComplete="cpf"
               required
               value={formData["cpf"] || ""}
-              onChange={handleInputChange}
+              onChange={handleChange}
+              onBlur={handleInputBlur}
             />
           </FormGrid>
           <FormGrid item xs={12} md={6}>
@@ -113,7 +174,8 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onFilled, hand
               autoComplete="rg"
               required
               value={formData["rg"] || ""}
-              onChange={handleInputChange}
+              onChange={handleChange}
+              onBlur={handleInputBlur}
             />
           </FormGrid>
           <FormGrid item xs={12} md={6}>
@@ -128,7 +190,8 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onFilled, hand
               autoComplete="nationality"
               required
               value={formData["nationality"] || ""}
-              onChange={handleInputChange}
+              onChange={handleChange}
+              onBlur={handleInputBlur}
             />
           </FormGrid>
           <FormGrid item xs={12} md={6}>
@@ -140,10 +203,11 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onFilled, hand
               name="birthdate"
               type="date"
               placeholder="DD/MM/AAAA"
-              autoComplete="bdate"
+              autoComplete="birthdate"
               required
               value={formData["birthdate"] || ""}
-              onChange={handleInputChange}
+              onChange={handleChange}
+              onBlur={handleInputBlur}
             />
           </FormGrid>
           <FormGrid item xs={12}>
@@ -158,7 +222,8 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onFilled, hand
               autoComplete="mother-name"
               required
               value={formData["mother-name"] || ""}
-              onChange={handleInputChange}
+              onChange={handleChange}
+              onBlur={handleInputBlur}
             />
           </FormGrid>
           <FormGrid item xs={12}>
@@ -173,7 +238,8 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onFilled, hand
               autoComplete="father-name"
               required
               value={formData["father-name"] || ""}
-              onChange={handleInputChange}
+              onChange={handleChange}
+              onBlur={handleInputBlur}
             />
           </FormGrid>
         </Grid>
