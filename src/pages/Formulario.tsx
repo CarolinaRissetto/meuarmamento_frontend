@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -37,6 +38,9 @@ export default function Checkout() {
 
   const [uuid, setUuid] = useState<string | null>(null);
   const [formData, setFormData] = useState<{ [key: string]: string }>({});
+  const navigate = useNavigate();
+  const location = useLocation();
+  const urlParams = new URLSearchParams(location.search);
 
   useEffect(() => {
     // Verifica se já existe um UUID curto no localStorage
@@ -48,13 +52,19 @@ export default function Checkout() {
       if (storedFormData) {
         setFormData(JSON.parse(storedFormData));
       }
+      if (!urlParams.has('uuid')) {
+        urlParams.set('uuid', storedUuid);
+        navigate(`?${urlParams.toString()}`, { replace: true });
+      }
     } else {
       // Se não houver UUID, gera um novo curto e armazena
       const newUuid = nanoid(6); // Gera um ID curto com 10 caracteres
       localStorage.setItem('user-uuid', newUuid);
       setUuid(newUuid);
+      urlParams.set('uuid', newUuid);
+      navigate(`?${urlParams.toString()}`, { replace: true });
     }
-  }, []);
+  }, [location, navigate]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -65,7 +75,6 @@ export default function Checkout() {
     }
   };
 
-
   const handleNewRegistration = () => {
     // Gera um novo UUID e limpa os dados do formulário
     const newUuid = nanoid(6);
@@ -73,6 +82,9 @@ export default function Checkout() {
     setUuid(newUuid);
     setFormData({});
     localStorage.removeItem(`form-data-${uuid}`);
+
+    urlParams.set('uuid', newUuid);
+    navigate(`?${urlParams.toString()}`, { replace: true });
   };
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -175,11 +187,11 @@ export default function Checkout() {
               margin={"30px"}
               variant="h4"
               component="div"
-              sx={{ 
-              fontFamily: "Raleway, sans-serif", 
-              color: "black", 
-              fontSize: { xs: "1.2rem", md: "1.5rem" },
-            }}
+              sx={{
+                fontFamily: "Raleway, sans-serif",
+                color: "black",
+                fontSize: { xs: "1.2rem", md: "1.5rem" },
+              }}
             >
               Autorização de Aquisição de Armas de Fogo - PF
             </Typography>

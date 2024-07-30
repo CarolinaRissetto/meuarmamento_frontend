@@ -9,6 +9,7 @@ import SectionHeader from "./Cabecalho";
 import IconButton from "@mui/material/IconButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import { uuid } from "short-uuid";
 
 const FormGrid = styled(Grid)(() => ({
   display: "flex",
@@ -24,7 +25,7 @@ interface DadosPessoaisProps {
   uuid: string | null;
 }
 
-const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFilled, handleInputChange, formData }) => {
+const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFilled, handleInputChange, formData, uuid }) => {
   const [filled, setFilled] = useState(false);
   const [open, setOpen] = useState(isVisible);
   const [inputTouched, setInputTouched] = useState(false);
@@ -43,7 +44,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
 
   const saveFormData = async (data: any) => {
     try {
-      const response = await fetch('http://localhost:3001/hello', {
+      const response = await fetch('http://localhost:3001/dados-pessoais', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,6 +77,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
         if (filled && dirty) {
           setOpen(false); // Colapsar a seção quando clicado fora, se preenchido
           saveFormData({
+            uuid: uuid,
             nomeCompleto: formData["first-name"] || "",
             cpf: formData["cpf"] || "",
             rg: formData["rg"] || "",
