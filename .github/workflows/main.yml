@@ -33,3 +33,9 @@ jobs:
 
     - name: Sync S3 bucket
       run: aws s3 sync build/ s3://cac-facil-front-end-code --delete
+
+    - name: Invalidate CloudFront cache
+      run: aws cloudfront create-invalidation --distribution-id E1P5PSE6OX1DFQ --paths "/*"
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
