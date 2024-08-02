@@ -43,7 +43,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
 
   const saveFormData = async (data: any) => {
     try {
-      const response = await fetch('http://localhost:3001/dados-pessoais', {
+      const response = await fetch('http://localhost:3001/processos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
       console.log('Dados salvos com sucesso!');
     } catch (error) {
       console.error('Erro ao salvar dados:', error);
-    }finally {
+    } finally {
       setDirty(false); // Reset dirty state after saving
     }
   };
@@ -76,14 +76,17 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
         if (filled && dirty) {
           setOpen(false); // Colapsar a seção quando clicado fora, se preenchido
           saveFormData({
-            uuid: uuid,
-            nomeCompleto: formData["first-name"] || "",
-            cpf: formData["cpf"] || "",
-            rg: formData["rg"] || "",
-            nacionalidade: formData["nationality"] || "",
-            dataNascimento: formData["birthdate"] || "",
-            nomeMae: formData["mother-name"] || "",
-            nomePai: formData["father-name"] || ""
+            tipo: "dadosPessoais",
+            data: {
+              uuid: uuid,
+              nomeCompleto: formData["first-name"] || "",
+              cpf: formData["cpf"] || "",
+              rg: formData["rg"] || "",
+              nacionalidade: formData["nationality"] || "",
+              dataNascimento: formData["birthdate"] || "",
+              nomeMae: formData["mother-name"] || "",
+              nomePai: formData["father-name"] || ""
+            }
           });
         }
       }
@@ -99,7 +102,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     handleInputChange(event);
     setDirty(true); // Set dirty state on change
-  };  
+  };
 
   const handleToggle = () => {
     setOpen(!open);
@@ -117,7 +120,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
         alignItems="center"
         sx={{
           borderColor: 'primary.light',
-          '&:hover': { background: '#E3DFDC' }, 
+          '&:hover': { background: '#E3DFDC' },
           borderRadius: "5px",
           cursor: 'pointer',
         }}

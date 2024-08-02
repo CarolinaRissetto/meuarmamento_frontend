@@ -29,6 +29,7 @@ import axios from 'axios';
 export default function Checkout() {
 
   const [uuid, setUuid] = useState<string | null>(null);
+  const [documentos, setDocumentos] = useState<number>(0);
   const [formData, setFormData] = useState<{ [key: string]: string }>({});
   const navigate = useNavigate();
   const location = useLocation();
@@ -266,7 +267,7 @@ export default function Checkout() {
               variant="h4"
               sx={{ color: "#4caf50", textAlign: "center" }}
             >
-              4
+              3
             </Typography>
           </Box>
           <Typography variant="body1" sx={{ marginBottom: "10px" }}>
@@ -284,7 +285,7 @@ export default function Checkout() {
               variant="h4"
               sx={{ color: "#4caf50", textAlign: "center" }}
             >
-              1
+              {documentos}
             </Typography>
           </Box>
           <Typography
@@ -372,16 +373,6 @@ export default function Checkout() {
               }}
             >
               Novo Cadastro
-            </Button>
-            <Button
-              variant="contained"
-              endIcon={<ChevronRightRoundedIcon />}
-              sx={{
-                width: { xs: "100%", sm: "fit-content" },
-                mt: 2, // Ajuste conforme necessário para aproximar do formulário
-              }}
-            >
-              Finalizar
             </Button>
           </Box>
         </Grid>

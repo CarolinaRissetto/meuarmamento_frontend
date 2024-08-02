@@ -143,7 +143,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled }) =>
                     </FormGrid>
                     <FormGrid item xs={12}>
                         <FormLabel htmlFor="address" required>
-                            Endereço
+                            Rua
                         </FormLabel>
                         <OutlinedInput
                             id="address"
