@@ -110,6 +110,11 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
   };
 
   const handleInputBlur = () => {
+    if (isFormFilled()) {
+      setFilled(true);
+      setOpen(false);
+      onFilled();
+  }
     setInputTouched(true);
   };
 

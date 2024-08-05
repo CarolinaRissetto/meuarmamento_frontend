@@ -14,7 +14,6 @@ import {
   PaletteMode
 } from "@mui/material";
 import { nanoid } from 'nanoid';
-import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import HomeIcon from "@mui/icons-material/Home";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
@@ -36,7 +35,6 @@ export default function Checkout() {
   const urlParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
   useEffect(() => {
-    // Verifica se já existe um UUID curto no localStorage
     const storedUuid = localStorage.getItem('user-uuid');
 
     if (storedUuid) {
@@ -50,8 +48,7 @@ export default function Checkout() {
         navigate(`?${urlParams.toString()}`, { replace: true });
       }
     } else {
-      // Se não houver UUID, gera um novo curto e armazena
-      const newUuid = nanoid(6); // Gera um ID curto com 10 caracteres
+      const newUuid = nanoid(6); 
       localStorage.setItem('user-uuid', newUuid);
       setUuid(newUuid);
       urlParams.set('uuid', newUuid);
@@ -69,7 +66,6 @@ export default function Checkout() {
   };
 
   const handleNewRegistration = () => {
-    // Gera um novo UUID e limpa os dados do formulário
     const newUuid = nanoid(6);
     localStorage.setItem('user-uuid', newUuid);
     setUuid(newUuid);
@@ -100,7 +96,6 @@ export default function Checkout() {
     setSectionVisibility((prev) => ({
       ...prev,
       [section]: false,
-      [getNextSection(section)]: true,
     }));
   };
 
@@ -109,17 +104,6 @@ export default function Checkout() {
       ...prev,
       [section]: !prev[section as keyof typeof prev],
     }));
-  };
-
-  const getNextSection = (currentSection: string) => {
-    switch (currentSection) {
-      case "dadosPessoais":
-        return "endereco";
-      case "endereco":
-        return "documentosParaAssinar";
-      default:
-        return "";
-    }
   };
 
   const [mode,] = React.useState<PaletteMode>('light');
@@ -356,8 +340,11 @@ export default function Checkout() {
             />
             <Endereco
               isVisible={sectionVisibility.endereco}
-              onToggle={() => handleToggle('dadosPessoais')}
-              onFilled={() => handleSectionFilled('dadosPessoais')}
+              onToggle={() => handleToggle('endereco')}
+              onFilled={() => handleSectionFilled('endereco')}
+              handleInputChange={handleInputChange}
+              formData={formData}
+              uuid={uuid}
             />
 
             <DocumentosParaAssinar />
