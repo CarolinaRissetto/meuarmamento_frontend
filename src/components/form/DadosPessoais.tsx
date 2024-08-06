@@ -43,7 +43,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
 
   const saveFormData = async (data: any) => {
     try {
-      const response = await fetch('http://localhost:3001/processos', {
+      const response = await fetch('http://localhost:3004/processos/dadosPessoais', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -152,7 +152,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
               type="text"
               autoComplete="first-name"
               required
-              value={formData["first-name"] || ""}
+              value={formData["nomeCompleto"] || ""}
               onChange={handleChange}
               onBlur={handleInputBlur}
             />
@@ -200,7 +200,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
               placeholder="Brasileiro(a)"
               autoComplete="nationality"
               required
-              value={formData["nationality"] || ""}
+              value={formData["nacionalidade"] || ""}
               onChange={handleChange}
               onBlur={handleInputBlur}
             />
@@ -216,7 +216,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
               placeholder="DD/MM/AAAA"
               autoComplete="birthdate"
               required
-              value={formData["birthdate"] || ""}
+              value={formData["dataNascimento"] || ""}
               onChange={handleChange}
               onBlur={handleInputBlur}
             />
@@ -232,7 +232,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
               placeholder="Nome Completo da Mãe"
               autoComplete="mother-name"
               required
-              value={formData["mother-name"] || ""}
+              value={formData["nomeMae"] || ""}
               onChange={handleChange}
               onBlur={handleInputBlur}
             />
@@ -248,7 +248,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
               placeholder="Nome Completo do Pai"
               autoComplete="father-name"
               required
-              value={formData["father-name"] || ""}
+              value={formData["nomePai"] || ""}
               onChange={handleChange}
               onBlur={handleInputBlur}
             />

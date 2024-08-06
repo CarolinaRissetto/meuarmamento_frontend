@@ -71,7 +71,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
     const saveFormData = async (data: any) => {
         try {
             console.log('Dados a serem enviados:', data); // Log dos dados
-            const response = await fetch('http://localhost:3001/processos/endereco', {
+            const response = await fetch('http://localhost:3004/processos/endereco', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -103,7 +103,6 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
         const handleClickOutside = (event: MouseEvent) => {
             if (formRef.current && !formRef.current.contains(event.target as Node)) {
                 if (filled && dirty) {
-                    console.log('Click outside detected, collapsing section');
                     setOpen(false); // Colapsar a seção quando clicado fora, se preenchido
 
                     let uuidEndereco = localStorage.getItem('uuidEndereco');
@@ -115,12 +114,12 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                     saveFormData({
                         tipo: "endereco",
                         data: {
-                            uuidEndereco: formData["uuidEndereco"] || "",
-                            quantosEnderecosMorou: formData["quantosEnderecosMorou"] || "",
+                            uuidEndereco: uuidEndereco,
+                            quantosEnderecosMorou: formData["num-addresses"] || "",
                             cep: formData["cep"] || "",
                             rua: formData["rua"] || "",
-                            numero: formData["numero"] || "",
-                            complemento: formData["complemento"] || "",
+                            numero: formData["number"] || "",
+                            complemento: formData["complement"] || "",
                             cidade: formData["cidade"] || "",
                             bairro: formData["bairro"] || "",
                             uf: formData["uf"] || "",
@@ -157,6 +156,25 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
         setInputTouched(true);
     };
 
+    interface Endereco {
+        uuidEndereco: string;
+        quantosEnderecosMorou: string;
+        cep: string;
+        rua: string;
+        numero: string;
+        complemento: string;
+        cidade: string;
+        bairro: string;
+        uf: string;
+      }
+      
+      interface FormData {
+        endereco: Endereco[] | string; // Endereco pode ser um array de objetos Endereco ou uma string
+        [key: string]: any; // Outras propriedades do formData
+      }
+      
+      const endereco: Endereco = Array.isArray(formData.endereco) && formData.endereco.length > 0 ? formData.endereco[0] : {} as Endereco;
+      
     return (
         <div>
             <Box sx={{ my: 2 }}>
@@ -205,7 +223,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                                 name="num-addresses"
                                 type="number"
                                 autoComplete="num-addresses"
-                                value={formData["num-addresses"] || ""}
+                                value={endereco.quantosEnderecosMorou || ""}
                                 onChange={handleChange}
                                 onBlur={handleInputBlur}
                             />
@@ -221,22 +239,22 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                             type="text"
                             autoComplete="cep"
                             required
-                            value={formData["cep"] || ""}
+                            value={endereco.cep || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
                     </FormGrid>
                     <FormGrid item xs={12}>
-                        <FormLabel htmlFor="address" required>
+                        <FormLabel htmlFor="rua" required>
                             Rua
                         </FormLabel>
                         <OutlinedInput
-                            id="address"
-                            name="address"
+                            id="rua"
+                            name="rua"
                             type="text"
-                            autoComplete="address"
+                            autoComplete="rua"
                             required
-                            value={formData["address"] || ""}
+                            value={endereco.rua || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
@@ -251,7 +269,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                             type="text"
                             autoComplete="number"
                             required
-                            value={formData["number"] || ""}
+                            value={endereco.numero || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
@@ -265,52 +283,52 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                             name="complement"
                             type="text"
                             autoComplete="complement"
-                            value={formData["complement"] || ""}
+                            value={endereco.complemento || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
                     </FormGrid>
                     <FormGrid item xs={12} md={6}>
-                        <FormLabel htmlFor="city" required>
+                        <FormLabel htmlFor="cidade" required>
                             Cidade
                         </FormLabel>
                         <OutlinedInput
-                            id="city"
-                            name="city"
+                            id="cidade"
+                            name="cidade"
                             type="text"
-                            autoComplete="city"
+                            autoComplete="cidade"
                             required
-                            value={formData["city"] || ""}
+                            value={endereco.cidade || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
                     </FormGrid>
                     <FormGrid item xs={12} md={6}>
-                        <FormLabel htmlFor="neighborhood" required>
+                        <FormLabel htmlFor="bairro" required>
                             Bairro
                         </FormLabel>
                         <OutlinedInput
-                            id="neighborhood"
-                            name="neighborhood"
+                            id="bairro"
+                            name="bairro"
                             type="text"
-                            autoComplete="neighborhood"
+                            autoComplete="bairro"
                             required
-                            value={formData["neighborhood"] || ""}
+                            value={endereco.bairro|| ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
                     </FormGrid>
                     <FormGrid item xs={12} md={6}>
-                        <FormLabel htmlFor="state" required>
+                        <FormLabel htmlFor="uf" required>
                             UF
                         </FormLabel>
                         <OutlinedInput
-                            id="state"
-                            name="state"
+                            id="uf"
+                            name="uf"
                             type="text"
-                            autoComplete="state"
+                            autoComplete="uf"
                             required
-                            value={formData["state"] || ""}
+                            value={endereco.uf   || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />

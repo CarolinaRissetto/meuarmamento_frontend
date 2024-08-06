@@ -34,26 +34,47 @@ export default function Checkout() {
   const location = useLocation();
   const urlParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
-  useEffect(() => {
-    const storedUuid = localStorage.getItem('user-uuid');
+  const buscarDados = async (uuid: string) => {
+    try {
+      const response = await axios.get(`http://localhost:3020/processos/buscaDados`, {
+        params: {
+          tipo: 'buscaDados',
+          uuid: uuid
+        }
+      });
 
-    if (storedUuid) {
-      setUuid(storedUuid);
-      const storedFormData = localStorage.getItem(`form-data-${storedUuid}`);
-      if (storedFormData) {
-        setFormData(JSON.parse(storedFormData));
+      if (response.data) {
+        setFormData(response.data);
+        console.log(response.data)
+        localStorage.setItem(`form-data-${uuid}`, JSON.stringify(response.data));
       }
-      if (!urlParams.has('uuid')) {
-        urlParams.set('uuid', storedUuid);
+    } catch (error) {
+      console.error("There was an error fetching the data!", error);
+    }
+  };
+
+  useEffect(() => {
+    const buscarDadosEAtualizarEstado = async () => {
+
+      const storedUuid = localStorage.getItem('user-uuid');
+
+      if (storedUuid) {
+        setUuid(storedUuid);
+        await buscarDados(storedUuid); // Buscar dados do cliente no banco de dados
+        if (!urlParams.has('uuid')) {
+          urlParams.set('uuid', storedUuid);
+          navigate(`?${urlParams.toString()}`, { replace: true });
+        }
+      } else {
+        const newUuid = nanoid(6);
+        localStorage.setItem('user-uuid', newUuid);
+        setUuid(newUuid);
+        await buscarDados(newUuid); // Buscar dados para o novo UUID
+        urlParams.set('uuid', newUuid);
         navigate(`?${urlParams.toString()}`, { replace: true });
       }
-    } else {
-      const newUuid = nanoid(6); 
-      localStorage.setItem('user-uuid', newUuid);
-      setUuid(newUuid);
-      urlParams.set('uuid', newUuid);
-      navigate(`?${urlParams.toString()}`, { replace: true });
     }
+    buscarDadosEAtualizarEstado();
   }, [location, navigate, urlParams]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
