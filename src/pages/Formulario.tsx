@@ -1,12 +1,8 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  AppBar,
-  Toolbar,
-  Typography,
   Button,
   Box,
-  Avatar,
   CssBaseline,
   Grid,
   ThemeProvider,
@@ -14,18 +10,15 @@ import {
   PaletteMode
 } from "@mui/material";
 import { nanoid } from 'nanoid';
-import HomeIcon from "@mui/icons-material/Home";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 
-import logo from "./logo-libera-defesa.png"
-import IconeCac from "./icone-cac.png";
 import DadosPessoais from "../components/form/DadosPessoais"
 import Endereco from "../components/form/Endereco"
 import DocumentosParaAssinar from "../components/form/DocumentosParaAssinar"
 import axios from 'axios';
+import BarraDeNavegacao from '../components/form/BarraDeNavegacao';
+import BarraLateral from '../components/form/BarraLateral';
 
-export default function Checkout() {
+export default function Formulario() {
 
   const [uuid, setUuid] = useState<string | null>(null);
   const [documentos, setDocumentos] = useState<number>(0);
@@ -36,7 +29,7 @@ export default function Checkout() {
 
   const buscarDados = async (uuid: string) => {
     try {
-      const response = await axios.get(`http://localhost:3020/processos/buscaDados`, {
+      const response = await axios.get(`http://localhost:3010/processos/buscaDados`, {
         params: {
           tipo: 'buscaDados',
           uuid: uuid
@@ -132,199 +125,15 @@ export default function Checkout() {
 
   return (
     <ThemeProvider theme={defaultTheme}>
-      <AppBar className="mui-fixed" position="fixed">
-        <Toolbar
-          sx={{
-            flexDirection: { xs: "column", md: "row" },
-            alignItems: "center",
-            justifyContent: "space-between",
-            minHeight: "200px",
-            height: "auto",
-            backgroundColor: "#F3F0EE",
-            position: "relative",
-            padding: { xs: 1, md: '25px' },
-            borderBottom: "1px solid #cccccc",
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              left: 0,
-              bottom: 0,
-              width: "100%",
-              height: "1px",
-              backgroundColor: "#cccccc",
-              display: { xs: 'none', md: 'none', lg: 'none' }
-            },
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-            }}
-          />
-          <Avatar
-            alt="Logo"
-            src={logo}
-            sx={{
-              width: "80px",
-              height: "80px",
-              objectFit: "contain",
-            }}
-          />
 
-          {/* Título Centralizado */}
-          <Box sx={{ flexGrow: 1, textAlign: "center" }}>
-            <Typography
-              margin={"30px"}
-              variant="h4"
-              component="div"
-              sx={{
-                fontFamily: "Raleway, sans-serif",
-                color: "black",
-                fontSize: { xs: "1.2rem", md: "1.5rem" },
-              }}
-            >
-              Autorização de Aquisição de Armas de Fogo - PF
-            </Typography>
-          </Box>
-          <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: "center" }}>
-            <a href="https://liberadefesa-com-br.webflow.io/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-              <Button
-                color="inherit"
-                startIcon={<AssignmentTurnedInIcon />}
-                sx={{ color: "black", marginBottom: { xs: "8px", md: 0 } }}
-              >
-                Serviços
-              </Button>
-            </a>
-            <Button color="inherit" startIcon={<HomeIcon />} sx={{ color: "black" }}>
-              Página Inicial
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
+      <BarraDeNavegacao />
 
       <CssBaseline />
 
       <Grid container sx={{ height: "100vh", overflow: "hidden", paddingTop: { xs: '300px', sm: '270px', md: '145px' } }}>
-        <Grid
-          item
-          xs={12}
-          sm={5}
-          lg={4}
-          sx={{
-            display: { xs: "none", md: "flex" },
-            flexDirection: "column",
-            backgroundColor: "#E3DFDC",
-            borderRight: { sm: "none", md: "1px solid" },
-            borderColor: { sm: "none", md: "divider" },
-            alignItems: "start",
-            pt: 4,
-            px: 10,
-            gap: 4,
-            position: "sticky",
-            top: '0',
-            maxHeight: '100%',
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              marginBottom: "20px",
-              marginTop: "20px",
-              position: 'sticky'
-            }}
-          >
-            <Avatar
-              alt="IconeCac"
-              src={IconeCac}
-              sx={{
-                width: "70px",
-                height: "70px",
-                marginRight: "10px",
-              }}
-            />
-            <Typography
-              variant="h5"
-              sx={{
-                fontFamily: "Montserrat, sans-serif", // Fonte Montserrat
-                color: "black",
-                textAlign: "center",
-              }}
-            >
-              Seu Processo CAC Simplificado
-            </Typography>
-          </Box>
-          <Typography variant="body1" sx={{ marginBottom: "10px" }}>
-            Número de documentos que serão gerados automaticamente com esses
-            dados:
-          </Typography>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              width: "100%",
-              marginBottom: "10px",
-            }}
-          >
-            <Typography
-              variant="h4"
-              sx={{ color: "#4caf50", textAlign: "center" }}
-            >
-              3
-            </Typography>
-          </Box>
-          <Typography variant="body1" sx={{ marginBottom: "10px" }}>
-            Documentos já concluídos:
-          </Typography>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              width: "100%",
-              marginBottom: "10px",
-            }}
-          >
-            <Typography
-              variant="h4"
-              sx={{ color: "#4caf50", textAlign: "center" }}
-            >
-              {documentos}
-            </Typography>
-          </Box>
-          <Typography
-            variant="body1"
-            sx={{
-              color: "#4caf50",
-              fontWeight: "bold",
-              fontSize: "1.2rem",
-              textAlign: "center",
-            }}
-          >
-            Custo:{" "}
-            <span style={{ color: "green", fontSize: "1.2rem" }}>
-              Gratuito!
-            </span>
-          </Typography>
-          <Box
-            sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}
-          >
-            <Button
-              onClick={handleButtonComoFuncionaClick}
-              variant="contained"
-              color="primary"
-              href="#"
-              startIcon={<PlayArrowIcon />}
-              sx={{ marginTop: "20px" }}
-            >
-              Como funciona
-            </Button>
-          </Box>
-          <div>
-            Seu ID: {uuid}
-          </div>
-        </Grid>
+        
+        <BarraLateral documentos={documentos} uuid={uuid} handleButtonComoFuncionaClick={handleButtonComoFuncionaClick} />
+
         <Grid
           item
           sm={12}

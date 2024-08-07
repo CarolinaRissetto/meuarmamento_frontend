@@ -71,7 +71,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
     const saveFormData = async (data: any) => {
         try {
             console.log('Dados a serem enviados:', data); // Log dos dados
-            const response = await fetch('http://localhost:3004/processos/endereco', {
+            const response = await fetch('http://localhost:3010/processos/endereco', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -156,24 +156,24 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
         setInputTouched(true);
     };
 
-    interface Endereco {
-        uuidEndereco: string;
-        quantosEnderecosMorou: string;
-        cep: string;
-        rua: string;
-        numero: string;
-        complemento: string;
-        cidade: string;
-        bairro: string;
-        uf: string;
-      }
+    // interface Endereco {
+    //     uuidEndereco: string;
+    //     quantosEnderecosMorou: string;
+    //     cep: string;
+    //     rua: string;
+    //     numero: string;
+    //     complemento: string;
+    //     cidade: string;
+    //     bairro: string;
+    //     uf: string;
+    //   }
       
-      interface FormData {
-        endereco: Endereco[] | string; // Endereco pode ser um array de objetos Endereco ou uma string
-        [key: string]: any; // Outras propriedades do formData
-      }
+    //   interface FormData {
+    //     endereco: Endereco[] | string; // Endereco pode ser um array de objetos Endereco ou uma string
+    //     [key: string]: any; // Outras propriedades do formData
+    //   }
       
-      const endereco: Endereco = Array.isArray(formData.endereco) && formData.endereco.length > 0 ? formData.endereco[0] : {} as Endereco;
+    //   const endereco: Endereco = Array.isArray(formData.endereco) && formData.endereco.length > 0 ? formData.endereco[0] : {} as Endereco;
       
     return (
         <div>
@@ -223,7 +223,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                                 name="num-addresses"
                                 type="number"
                                 autoComplete="num-addresses"
-                                value={endereco.quantosEnderecosMorou || ""}
+                                // value={endereco.quantosEnderecosMorou || ""}
                                 onChange={handleChange}
                                 onBlur={handleInputBlur}
                             />
@@ -239,7 +239,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                             type="text"
                             autoComplete="cep"
                             required
-                            value={endereco.cep || ""}
+                            // value={endereco.cep || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
@@ -254,7 +254,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                             type="text"
                             autoComplete="rua"
                             required
-                            value={endereco.rua || ""}
+                            // value={endereco.rua || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
@@ -269,7 +269,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                             type="text"
                             autoComplete="number"
                             required
-                            value={endereco.numero || ""}
+                            // value={endereco.numero || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
@@ -283,7 +283,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                             name="complement"
                             type="text"
                             autoComplete="complement"
-                            value={endereco.complemento || ""}
+                            // value={endereco.complemento || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
@@ -298,7 +298,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                             type="text"
                             autoComplete="cidade"
                             required
-                            value={endereco.cidade || ""}
+                            // value={endereco.cidade || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
@@ -313,7 +313,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                             type="text"
                             autoComplete="bairro"
                             required
-                            value={endereco.bairro|| ""}
+                            // value={endereco.bairro|| ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
@@ -328,7 +328,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                             type="text"
                             autoComplete="uf"
                             required
-                            value={endereco.uf   || ""}
+                            // value={endereco.uf   || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
