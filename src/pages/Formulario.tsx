@@ -17,58 +17,63 @@ import DocumentosParaAssinar from "../components/form/DocumentosParaAssinar"
 import axios from 'axios';
 import BarraDeNavegacao from '../components/form/BarraDeNavegacao';
 import BarraLateral from '../components/form/BarraLateral';
+import { apiRequest } from '../components/services/apiService';
 
 export default function Formulario() {
 
   const [uuid, setUuid] = useState<string | null>(null);
-  const [documentos, setDocumentos] = useState<number>(0);
+  const [documentosCriados, setDocumentosCriados] = useState<number>(0);
   const [formData, setFormData] = useState<{ [key: string]: string }>({});
   const navigate = useNavigate();
   const location = useLocation();
   const urlParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
-
-  const buscarDados = async (uuid: string) => {
-    try {
-      const response = await axios.get(`http://localhost:3010/processos/buscaDados`, {
-        params: {
-          tipo: 'buscaDados',
-          uuid: uuid
-        }
-      });
-
-      if (response.data) {
-        setFormData(response.data);
-        console.log(response.data)
-        localStorage.setItem(`form-data-${uuid}`, JSON.stringify(response.data));
-      }
-    } catch (error) {
-      console.error("There was an error fetching the data!", error);
+  const [sectionVisibility, setSectionVisibility] = React.useState({
+    dadosPessoais: true,
+    endereco: true,
+    documentosParaAssinar: true,
+  });
+  
+  const atualizaUrlELocalStorage = useCallback((uuid : string) => {
+    localStorage.setItem('user-uuid', uuid);
+    const urlParams = new URLSearchParams(location.search);
+    if (!urlParams.has('uuid') || urlParams.get('uuid') !== uuid) {
+      urlParams.set('uuid', uuid);
+      navigate(`?${urlParams.toString()}`, { replace: true });
     }
-  };
+  }, [navigate, location]);
+
+  const buscarDados = useCallback(async (uuid: string) => {
+    const data = await apiRequest('GET', { tipo: 'buscaDados', uuid });
+    if (data) {
+      setFormData(data);
+      localStorage.setItem(`form-data-${uuid}`, JSON.stringify(data));
+    }
+  }, []);
 
   useEffect(() => {
     const buscarDadosEAtualizarEstado = async () => {
-
+      const urlParams = new URLSearchParams(location.search);
+      const urlUuid = urlParams.get('uuid');
       const storedUuid = localStorage.getItem('user-uuid');
 
-      if (storedUuid) {
+      if (urlUuid) {
+        setUuid(urlUuid);
+        await buscarDados(urlUuid);
+        atualizaUrlELocalStorage(urlUuid);
+      } else if (storedUuid) {
         setUuid(storedUuid);
-        await buscarDados(storedUuid); // Buscar dados do cliente no banco de dados
-        if (!urlParams.has('uuid')) {
-          urlParams.set('uuid', storedUuid);
-          navigate(`?${urlParams.toString()}`, { replace: true });
-        }
+        await buscarDados(storedUuid);
+        atualizaUrlELocalStorage(storedUuid);
       } else {
         const newUuid = nanoid(6);
-        localStorage.setItem('user-uuid', newUuid);
         setUuid(newUuid);
-        await buscarDados(newUuid); // Buscar dados para o novo UUID
-        urlParams.set('uuid', newUuid);
-        navigate(`?${urlParams.toString()}`, { replace: true });
+        await buscarDados(newUuid);
+        atualizaUrlELocalStorage(newUuid);
       }
-    }
+    };
+
     buscarDadosEAtualizarEstado();
-  }, [location, navigate, urlParams]);
+  }, [location, buscarDados, atualizaUrlELocalStorage]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -79,7 +84,7 @@ export default function Formulario() {
     }
   };
 
-  const handleNewRegistration = () => {
+  const handleNovoCadastro = () => {
     const newUuid = nanoid(6);
     localStorage.setItem('user-uuid', newUuid);
     setUuid(newUuid);
@@ -90,7 +95,7 @@ export default function Formulario() {
     navigate(`?${urlParams.toString()}`, { replace: true });
   };
 
-  const handleButtonComoFuncionaClick = async () => {
+  const handleButtonComoFunciona = async () => {
     try {
       const response = await axios.get('https://jd5ueykib6.execute-api.us-east-1.amazonaws.com/default/testeFunction');
       console.log(response.data);
@@ -100,20 +105,14 @@ export default function Formulario() {
     }
   };
 
-  const [sectionVisibility, setSectionVisibility] = React.useState({
-    dadosPessoais: true,
-    endereco: true,
-    documentosParaAssinar: true,
-  });
-
-  const handleSectionFilled = (section: string) => {
+  const handleSecaoPreenchida = (section: string) => {
     setSectionVisibility((prev) => ({
       ...prev,
       [section]: false,
     }));
   };
 
-  const handleToggle = (section: string) => {
+  const handleAlternarVisibilidade = (section: string) => {
     setSectionVisibility((prev) => ({
       ...prev,
       [section]: !prev[section as keyof typeof prev],
@@ -131,8 +130,8 @@ export default function Formulario() {
       <CssBaseline />
 
       <Grid container sx={{ height: "100vh", overflow: "hidden", paddingTop: { xs: '300px', sm: '270px', md: '145px' } }}>
-        
-        <BarraLateral documentos={documentos} uuid={uuid} handleButtonComoFuncionaClick={handleButtonComoFuncionaClick} />
+
+        <BarraLateral documentos={documentosCriados} uuid={uuid} handleButtonComoFuncionaClick={handleButtonComoFunciona} />
 
         <Grid
           item
@@ -162,27 +161,29 @@ export default function Formulario() {
           >
             <DadosPessoais
               isVisible={sectionVisibility.dadosPessoais}
-              onToggle={() => handleToggle('dadosPessoais')}
-              onFilled={() => handleSectionFilled('dadosPessoais')}
+              onToggle={() => handleAlternarVisibilidade('dadosPessoais')}
+              onFilled={() => handleSecaoPreenchida('dadosPessoais')}
               handleInputChange={handleInputChange}
               formData={formData}
               uuid={uuid}
             />
+
             <Endereco
               isVisible={sectionVisibility.endereco}
-              onToggle={() => handleToggle('endereco')}
-              onFilled={() => handleSectionFilled('endereco')}
+              onToggle={() => handleAlternarVisibilidade('endereco')}
+              onFilled={() => handleSecaoPreenchida('endereco')}
               handleInputChange={handleInputChange}
               formData={formData}
               uuid={uuid}
             />
 
             <DocumentosParaAssinar />
+
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", width: "55%", marginBottom: "20px" }}
           >
             <Button
-              onClick={handleNewRegistration}
+              onClick={handleNovoCadastro}
               variant="contained"
               sx={{
                 width: { xs: "100%", sm: "fit-content" },

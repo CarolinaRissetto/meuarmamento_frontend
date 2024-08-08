@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import IconeCac from "../../assets/images/icone-cac.png";
+import axios from 'axios';
 
 interface BarraLateralProps {
   documentos: number;
@@ -15,7 +16,18 @@ interface BarraLateralProps {
   handleButtonComoFuncionaClick: () => void;
 }
 
-const BarraLateral: React.FC<BarraLateralProps> = ({ documentos, uuid, handleButtonComoFuncionaClick }) => {
+const BarraLateral: React.FC<BarraLateralProps> = ({ documentos, uuid }) => {
+
+  const handleButtonComoFunciona = async () => {
+    try {
+      const response = await axios.get('https://jd5ueykib6.execute-api.us-east-1.amazonaws.com/default/testeFunction');
+      console.log(response.data);
+      alert(response.data.message);
+    } catch (error) {
+      console.error("There was an error!", error);
+    }
+  };
+
   return (
     <Grid
       item
@@ -121,7 +133,7 @@ const BarraLateral: React.FC<BarraLateralProps> = ({ documentos, uuid, handleBut
         sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}
       >
         <Button
-          onClick={handleButtonComoFuncionaClick}
+          onClick={handleButtonComoFunciona}
           variant="contained"
           color="primary"
           href="#"
