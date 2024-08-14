@@ -220,6 +220,8 @@ export default function Formulario() {
               onToggle={() => handleAlternarVisibilidade('endereco')}
               onFilled={() => handleSecaoPreenchida('endereco')}
               handleInputChange={handleInputChange}
+              handleInputBlur={handleInputBlur('endereco')} // Passando handleInputBlur como prop
+
               formData={formData}
               uuid={uuid}
             />

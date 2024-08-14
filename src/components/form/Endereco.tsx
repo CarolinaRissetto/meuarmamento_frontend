@@ -14,7 +14,6 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import IconButton from "@mui/material/IconButton";
 import Collapse from "@mui/material/Collapse";
 import Box from '@mui/material/Box';
-import { nanoid } from 'nanoid';
 
 const FormGrid = styled(Grid)(() => ({
     display: "flex",
@@ -39,11 +38,12 @@ interface EnderecoProps {
     onToggle: () => void;
     onFilled: () => void;
     handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    handleInputBlur: (event: React.FocusEvent<HTMLInputElement>) => void;
     formData: { [key: string]: string };
     uuid: string | null;
 }
 
-const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, handleInputChange, formData, uuid }) => {
+const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, handleInputChange, formData, uuid, handleInputBlur }) => {
     const [filled, setFilled] = useState(false);
     const [open, setOpen] = useState(isVisible);
     const [sameAddress, setSameAddress] = useState('yes');
@@ -68,29 +68,6 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
         return true;
     };
 
-    const saveFormData = async (data: any) => {
-        try {
-            console.log('Dados a serem enviados:', data); // Log dos dados
-            const response = await fetch('http://localhost:3010/processos/endereco', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            });
-
-            if (!response.ok) {
-                throw new Error('Erro ao salvar dados.');
-            }
-
-            console.log('Dados salvos com sucesso!');
-        } catch (error) {
-            console.error('Erro ao salvar dados:', error);
-        } finally {
-            setDirty(false); // Reset dirty state after saving
-        }
-    };
-
     useEffect(() => {
         if (isFormFilled() && !filled) {
             setFilled(true);
@@ -98,34 +75,50 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
         }
     }, [filled, onFilled, formData]);
 
+    // const saveFormData = async (data: any) => {
+    //     try {
+    //         console.log('Dados a serem enviados:', data); // Log dos dados
+    //         const response = await fetch('http://localhost:3010/processos/endereco', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify(data),
+    //         });
+
+    //         if (!response.ok) {
+    //             throw new Error('Erro ao salvar dados.');
+    //         }
+
+    //         console.log('Dados salvos com sucesso!');
+    //     } catch (error) {
+    //         console.error('Erro ao salvar dados:', error);
+    //     } finally {
+    //         setDirty(false); // Reset dirty state after saving
+    //     }
+    // };
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (formRef.current && !formRef.current.contains(event.target as Node)) {
                 if (filled && dirty) {
-                    setOpen(false); // Colapsar a seção quando clicado fora, se preenchido
-
-                    let uuidEndereco = localStorage.getItem('uuidEndereco');
-                    if (!uuidEndereco) {
-                        uuidEndereco = nanoid(6);
-                        localStorage.setItem('uuidEndereco', uuidEndereco);
+                    if (open) {
+                        setOpen(false); // Colapsar a seção quando clicado fora, se preenchido
                     }
-
-                    saveFormData({
-                        tipo: "endereco",
-                        data: {
-                            uuidEndereco: uuidEndereco,
-                            quantosEnderecosMorou: formData["num-addresses"] || "",
-                            cep: formData["cep"] || "",
-                            rua: formData["rua"] || "",
-                            numero: formData["number"] || "",
-                            complemento: formData["complement"] || "",
-                            cidade: formData["cidade"] || "",
-                            bairro: formData["bairro"] || "",
-                            uf: formData["uf"] || "",
-                            uuidCliente: uuid
-                        }
-                    });
+                    // saveFormData({
+                    //     tipo: "endereco",
+                    //     data: {
+                    //         quantosEnderecosMorou: formData["num-addresses"] || "",
+                    //         cep: formData["cep"] || "",
+                    //         rua: formData["rua"] || "",
+                    //         numero: formData["number"] || "",
+                    //         complemento: formData["complement"] || "",
+                    //         cidade: formData["cidade"] || "",
+                    //         bairro: formData["bairro"] || "",
+                    //         uf: formData["uf"] || "",
+                    //         uuidCliente: uuid
+                    //     }
+                    // });
                 }
             }
         };
@@ -147,34 +140,15 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
         onToggle();
     };
 
-    const handleInputBlur = () => {
-        if (isFormFilled()) {
-            setFilled(true);
-            setOpen(false);
-            onFilled();
-        }
-        setInputTouched(true);
-    };
+    // const handleInputBlur = () => {
+    //     if (isFormFilled()) {
+    //         setFilled(true);
+    //         setOpen(false);
+    //         onFilled();
+    //     }
+    //     setInputTouched(true);
+    // };
 
-    // interface Endereco {
-    //     uuidEndereco: string;
-    //     quantosEnderecosMorou: string;
-    //     cep: string;
-    //     rua: string;
-    //     numero: string;
-    //     complemento: string;
-    //     cidade: string;
-    //     bairro: string;
-    //     uf: string;
-    //   }
-      
-    //   interface FormData {
-    //     endereco: Endereco[] | string; // Endereco pode ser um array de objetos Endereco ou uma string
-    //     [key: string]: any; // Outras propriedades do formData
-    //   }
-      
-    //   const endereco: Endereco = Array.isArray(formData.endereco) && formData.endereco.length > 0 ? formData.endereco[0] : {} as Endereco;
-      
     return (
         <div>
             <Box sx={{ my: 2 }}>
