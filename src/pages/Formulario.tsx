@@ -148,14 +148,20 @@ export default function Formulario() {
     }));
   };
 
-  const handleInputBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+  const handleInputBlur = (tipo: string) => async (event: React.FocusEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     const updatedFormData = { ...formData, [name]: value };
     setFormData(updatedFormData);
 
     if (uuid) {
       localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
-      // Aqui você pode adicionar uma chamada para a função de salvar no banco de dados, se necessário.
+      await apiRequest({
+        tipo,
+        data: {
+          uuid,
+          ...updatedFormData,
+        },
+      });
     }
   };
 
@@ -204,7 +210,7 @@ export default function Formulario() {
               onToggle={() => handleAlternarVisibilidade('dadosPessoais')}
               onFilled={() => handleSecaoPreenchida('dadosPessoais')}
               handleInputChange={handleInputChange}
-              handleInputBlur={handleInputBlur} // Passando handleInputBlur como prop
+              handleInputBlur={handleInputBlur('dadosPessoais')} // Passando handleInputBlur como prop
               formData={formData}
               uuid={uuid}
             />

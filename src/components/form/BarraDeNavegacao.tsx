@@ -66,12 +66,12 @@ const BarraDeNavegacao: React.FC = () => {
             <Button
               color="inherit"
               startIcon={<AssignmentTurnedInIcon />}
-              sx={{ color: "black", marginBottom: { xs: "8px", md: 0 } }}
+              sx={{ color: "black", marginBottom: { xs: "8px", md: 0 }, visibility: 'hidden' }}
             >
               Serviços
             </Button>
           </a>
-          <Button color="inherit" startIcon={<HomeIcon />} sx={{ color: "black" }}>
+          <Button color="inherit" startIcon={<HomeIcon />} sx={{ color: "black", visibility: 'hidden' }}>
             Página Inicial
           </Button>
         </Box>

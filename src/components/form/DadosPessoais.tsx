@@ -9,7 +9,6 @@ import SectionHeader from "./Cabecalho";
 import IconButton from "@mui/material/IconButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { apiRequest } from "../services/apiService";
 
 const FormGrid = styled(Grid)(() => ({
   display: "flex",
@@ -43,19 +42,6 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
     return true;
   };
 
-  const saveFormData = async (data: any) => {
-    try {
-      const response = await apiRequest({
-        tipo: "dadosPessoais",
-        ...data,
-      });
-    } catch (error) {
-      console.error('Erro ao salvar dados:', error);
-    } finally {
-      setDirty(false); // Reset dirty state after saving
-    }
-  };
-
   useEffect(() => {
     if (isFormFilled() && !filled) {
       setFilled(true);
@@ -70,19 +56,6 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
           if (open) {
             setOpen(false); // Colapsar a seção quando clicado fora, se preenchido
           }
-          saveFormData({
-            tipo: "dadosPessoais",
-            data: {
-              uuid: uuid,
-              nomeCompleto: formData["nomeCompleto"] || "",
-              cpf: formData["cpf"] || "",
-              rg: formData["rg"] || "",
-              nacionalidade: formData["nacionalidade"] || "",
-              dataNascimento: formData["dataNascimento"] || "",
-              nomeMae: formData["nomeMae"] || "",
-              nomePai: formData["nomePai"] || ""
-            }
-          });
         }
       }
     };
@@ -96,7 +69,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     handleInputChange(event);
-    setDirty(true); // Set dirty state on change
+    setDirty(true);
   };
 
   const handleToggle = () => {
@@ -129,7 +102,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
       <Collapse in={open}>
         <Grid container spacing={3} marginTop={"5px"} id="dados-pessoais-form" ref={formRef}>
           <FormGrid item xs={12}>
-            <FormLabel htmlFor="first-name" required>
+            <FormLabel htmlFor="nomeCompleto" required>
               Nome completo
             </FormLabel>
             <OutlinedInput
