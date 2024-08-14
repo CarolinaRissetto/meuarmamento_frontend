@@ -32,8 +32,16 @@ export default function Formulario() {
     endereco: true,
     documentosParaAssinar: true,
   });
-  
-  const atualizaUrlELocalStorage = useCallback((uuid : string) => {
+
+  const limparLocalStorage = useCallback(() => {
+    for (const key in localStorage) {
+      if (key.startsWith('form-data-')) {
+        localStorage.removeItem(key);
+      }
+    }
+  }, []);
+
+  const atualizaUrlELocalStorage = useCallback((uuid: string) => {
     localStorage.setItem('user-uuid', uuid);
     const urlParams = new URLSearchParams(location.search);
     if (!urlParams.has('uuid') || urlParams.get('uuid') !== uuid) {
@@ -43,29 +51,47 @@ export default function Formulario() {
   }, [navigate, location]);
 
   const buscarDados = useCallback(async (uuid: string) => {
-    const data = await apiRequest('GET', { tipo: 'buscaDados', uuid });
-    if (data) {
-      setFormData(data);
-      localStorage.setItem(`form-data-${uuid}`, JSON.stringify(data));
+    const response = await apiRequest({
+      tipo: "buscaDados",
+      data: {
+        uuid
+      }
+    });
+    if (response) {
+      const parsedData = typeof response === 'string' ? JSON.parse(response) : response;
+      console.log(parsedData);
+      setFormData(parsedData);
+      localStorage.setItem(`form-data-${uuid}`, JSON.stringify(parsedData));
     }
   }, []);
 
   useEffect(() => {
+    const limparDadosAntigos = (uuidAtual: string) => { // Adicione o argumento uuidAtual
+      for (const key in localStorage) {
+        if (key.startsWith('form-data-') && key !== `form-data-${uuidAtual}`) {
+          localStorage.removeItem(key);
+        }
+      }
+    };
+
     const buscarDadosEAtualizarEstado = async () => {
       const urlParams = new URLSearchParams(location.search);
       const urlUuid = urlParams.get('uuid');
       const storedUuid = localStorage.getItem('user-uuid');
 
-      if (urlUuid) {
+      if (urlUuid && urlUuid !== storedUuid) {
+        limparDadosAntigos(urlUuid);
         setUuid(urlUuid);
         await buscarDados(urlUuid);
         atualizaUrlELocalStorage(urlUuid);
       } else if (storedUuid) {
+        limparDadosAntigos(storedUuid);
         setUuid(storedUuid);
         await buscarDados(storedUuid);
         atualizaUrlELocalStorage(storedUuid);
       } else {
         const newUuid = nanoid(6);
+        limparDadosAntigos(newUuid);
         setUuid(newUuid);
         await buscarDados(newUuid);
         atualizaUrlELocalStorage(newUuid);
@@ -73,27 +99,30 @@ export default function Formulario() {
     };
 
     buscarDadosEAtualizarEstado();
-  }, [location, buscarDados, atualizaUrlELocalStorage]);
+  }, [location.search, buscarDados, atualizaUrlELocalStorage]);
+
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     const updatedFormData = { ...formData, [name]: value };
     setFormData(updatedFormData);
     if (uuid) {
-      localStorage.setItem(`form-data-${uuid}`, JSON.stringify(updatedFormData));
+      localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
     }
   };
 
   const handleNovoCadastro = () => {
+    limparLocalStorage();
     const newUuid = nanoid(6);
     localStorage.setItem('user-uuid', newUuid);
     setUuid(newUuid);
     setFormData({});
-    localStorage.removeItem(`form-data-${uuid}`);
+    localStorage.setItem(`form-data-${newUuid}`, JSON.stringify({ uuid: newUuid, ...formData }));
 
     urlParams.set('uuid', newUuid);
     navigate(`?${urlParams.toString()}`, { replace: true });
   };
+
 
   const handleButtonComoFunciona = async () => {
     try {
@@ -117,6 +146,17 @@ export default function Formulario() {
       ...prev,
       [section]: !prev[section as keyof typeof prev],
     }));
+  };
+
+  const handleInputBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    const updatedFormData = { ...formData, [name]: value };
+    setFormData(updatedFormData);
+
+    if (uuid) {
+      localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
+      // Aqui você pode adicionar uma chamada para a função de salvar no banco de dados, se necessário.
+    }
   };
 
   const [mode,] = React.useState<PaletteMode>('light');
@@ -164,6 +204,7 @@ export default function Formulario() {
               onToggle={() => handleAlternarVisibilidade('dadosPessoais')}
               onFilled={() => handleSecaoPreenchida('dadosPessoais')}
               handleInputChange={handleInputChange}
+              handleInputBlur={handleInputBlur} // Passando handleInputBlur como prop
               formData={formData}
               uuid={uuid}
             />
