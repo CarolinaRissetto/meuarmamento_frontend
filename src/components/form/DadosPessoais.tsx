@@ -28,7 +28,6 @@ interface DadosPessoaisProps {
 const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFilled, handleInputChange, formData, uuid, handleInputBlur }) => {
   const [filled, setFilled] = useState(false);
   const [open, setOpen] = useState(isVisible);
-  const [, setInputTouched] = useState(false);
   const [dirty, setDirty] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
 
@@ -65,6 +64,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filled, dirty, formData, uuid]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

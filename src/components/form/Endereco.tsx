@@ -49,7 +49,6 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
     const [sameAddress, setSameAddress] = useState('yes');
     const [dirty, setDirty] = useState(false); // Definição do estado dirty
     const formRef = useRef<HTMLDivElement>(null);
-    const [, setInputTouched] = useState(false);
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
     const [files, setFiles] = useState<{ [key: number]: File | null }>({});
@@ -92,6 +91,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filled, dirty, formData, uuid]);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
