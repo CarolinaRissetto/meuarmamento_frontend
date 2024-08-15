@@ -1,12 +1,8 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  AppBar,
-  Toolbar,
-  Typography,
   Button,
   Box,
-  Avatar,
   CssBaseline,
   Grid,
   ThemeProvider,
@@ -14,73 +10,122 @@ import {
   PaletteMode
 } from "@mui/material";
 import { nanoid } from 'nanoid';
-import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
-import HomeIcon from "@mui/icons-material/Home";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 
-import logo from "./logo-libera-defesa.png"
-import IconeCac from "./icone-cac.png";
 import DadosPessoais from "../components/form/DadosPessoais"
 import Endereco from "../components/form/Endereco"
 import DocumentosParaAssinar from "../components/form/DocumentosParaAssinar"
 import axios from 'axios';
+import BarraDeNavegacao from '../components/form/BarraDeNavegacao';
+import BarraLateral from '../components/form/BarraLateral';
+import { apiRequest } from '../components/services/apiService';
 
-export default function Checkout() {
+export default function Formulario() {
 
   const [uuid, setUuid] = useState<string | null>(null);
-  const [documentos, setDocumentos] = useState<number>(0);
-  const [formData, setFormData] = useState<{ [key: string]: string }>({});
+  const [documentosCriados, setDocumentosCriados] = useState<number>(0);
+  const [formData, setFormData] = useState<{ [key: string]: any }>({});
+
   const navigate = useNavigate();
   const location = useLocation();
   const urlParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const [sectionVisibility, setSectionVisibility] = React.useState({
+    dadosPessoais: true,
+    endereco: true,
+    documentosParaAssinar: true,
+  });
 
-  useEffect(() => {
-    // Verifica se já existe um UUID curto no localStorage
-    const storedUuid = localStorage.getItem('user-uuid');
+  const limparLocalStorage = useCallback(() => {
+    for (const key in localStorage) {
+      if (key.startsWith('form-data-')) {
+        localStorage.removeItem(key);
+      }
+    }
+  }, []);
 
-    if (storedUuid) {
-      setUuid(storedUuid);
-      const storedFormData = localStorage.getItem(`form-data-${storedUuid}`);
-      if (storedFormData) {
-        setFormData(JSON.parse(storedFormData));
-      }
-      if (!urlParams.has('uuid')) {
-        urlParams.set('uuid', storedUuid);
-        navigate(`?${urlParams.toString()}`, { replace: true });
-      }
-    } else {
-      // Se não houver UUID, gera um novo curto e armazena
-      const newUuid = nanoid(6); // Gera um ID curto com 10 caracteres
-      localStorage.setItem('user-uuid', newUuid);
-      setUuid(newUuid);
-      urlParams.set('uuid', newUuid);
+  const atualizaUrlELocalStorage = useCallback((uuid: string) => {
+    localStorage.setItem('user-uuid', uuid);
+    const urlParams = new URLSearchParams(location.search);
+    if (!urlParams.has('uuid') || urlParams.get('uuid') !== uuid) {
+      urlParams.set('uuid', uuid);
       navigate(`?${urlParams.toString()}`, { replace: true });
     }
-  }, [location, navigate, urlParams]);
+  }, [navigate, location]);
+
+  const buscarDados = useCallback(async (uuid: string) => {
+    const response = await apiRequest({
+      tipo: "buscaDados",
+      data: {
+        uuid
+      }
+    });
+    if (response) {
+      const parsedData = typeof response === 'string' ? JSON.parse(response) : response;
+      console.log(parsedData);
+      setFormData(parsedData);
+      localStorage.setItem(`form-data-${uuid}`, JSON.stringify(parsedData));
+    }
+  }, []);
+
+  useEffect(() => {
+    const limparDadosAntigos = (uuidAtual: string) => {
+      for (const key in localStorage) {
+        if (key.startsWith('form-data-') && key !== `form-data-${uuidAtual}`) {
+          localStorage.removeItem(key);
+        }
+      }
+    };
+
+    const buscarDadosEAtualizarEstado = async () => {
+      const urlParams = new URLSearchParams(location.search);
+      const urlUuid = urlParams.get('uuid');
+      const storedUuid = localStorage.getItem('user-uuid');
+
+      if (urlUuid && urlUuid !== storedUuid) {
+        limparDadosAntigos(urlUuid);
+        setUuid(urlUuid);
+        await buscarDados(urlUuid);
+        atualizaUrlELocalStorage(urlUuid);
+      } else if (storedUuid) {
+        limparDadosAntigos(storedUuid);
+        setUuid(storedUuid);
+        await buscarDados(storedUuid);
+        atualizaUrlELocalStorage(storedUuid);
+      } else {
+        const newUuid = nanoid(6);
+        limparDadosAntigos(newUuid);
+        setUuid(newUuid);
+        await buscarDados(newUuid);
+        atualizaUrlELocalStorage(newUuid);
+      }
+    };
+
+    buscarDadosEAtualizarEstado();
+  }, [location.search, buscarDados, atualizaUrlELocalStorage]);
+
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     const updatedFormData = { ...formData, [name]: value };
     setFormData(updatedFormData);
     if (uuid) {
-      localStorage.setItem(`form-data-${uuid}`, JSON.stringify(updatedFormData));
+      localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
     }
   };
 
-  const handleNewRegistration = () => {
-    // Gera um novo UUID e limpa os dados do formulário
+  const handleNovoCadastro = () => {
+    limparLocalStorage();
     const newUuid = nanoid(6);
     localStorage.setItem('user-uuid', newUuid);
     setUuid(newUuid);
     setFormData({});
-    localStorage.removeItem(`form-data-${uuid}`);
+    localStorage.setItem(`form-data-${newUuid}`, JSON.stringify({ uuid: newUuid, ...formData }));
 
     urlParams.set('uuid', newUuid);
     navigate(`?${urlParams.toString()}`, { replace: true });
   };
 
-  const handleButtonComoFuncionaClick = async () => {
+
+  const handleButtonComoFunciona = async () => {
     try {
       const response = await axios.get('https://jd5ueykib6.execute-api.us-east-1.amazonaws.com/default/testeFunction');
       console.log(response.data);
@@ -90,35 +135,34 @@ export default function Checkout() {
     }
   };
 
-  const [sectionVisibility, setSectionVisibility] = React.useState({
-    dadosPessoais: true,
-    endereco: true,
-    documentosParaAssinar: true,
-  });
-
-  const handleSectionFilled = (section: string) => {
+  const handleSecaoPreenchida = (section: string) => {
     setSectionVisibility((prev) => ({
       ...prev,
       [section]: false,
-      [getNextSection(section)]: true,
     }));
   };
 
-  const handleToggle = (section: string) => {
+  const handleAlternarVisibilidade = (section: string) => {
     setSectionVisibility((prev) => ({
       ...prev,
       [section]: !prev[section as keyof typeof prev],
     }));
   };
 
-  const getNextSection = (currentSection: string) => {
-    switch (currentSection) {
-      case "dadosPessoais":
-        return "endereco";
-      case "endereco":
-        return "documentosParaAssinar";
-      default:
-        return "";
+  const handleInputBlur = (tipo: string) => async (event: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    const updatedFormData = { ...formData, [name]: value };
+    setFormData(updatedFormData);
+
+    if (uuid) {
+      localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
+      await apiRequest({
+        tipo,
+        data: {
+          uuid,
+          ...updatedFormData,
+        },
+      });
     }
   };
 
@@ -127,199 +171,15 @@ export default function Checkout() {
 
   return (
     <ThemeProvider theme={defaultTheme}>
-      <AppBar className="mui-fixed" position="fixed">
-        <Toolbar
-          sx={{
-            flexDirection: { xs: "column", md: "row" },
-            alignItems: "center",
-            justifyContent: "space-between",
-            minHeight: "200px",
-            height: "auto",
-            backgroundColor: "#F3F0EE",
-            position: "relative",
-            padding: { xs: 1, md: '25px' },
-            borderBottom: "1px solid #cccccc",
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              left: 0,
-              bottom: 0,
-              width: "100%",
-              height: "1px",
-              backgroundColor: "#cccccc",
-              display: { xs: 'none', md: 'none', lg: 'none' }
-            },
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-            }}
-          />
-          <Avatar
-            alt="Logo"
-            src={logo}
-            sx={{
-              width: "80px",
-              height: "80px",
-              objectFit: "contain",
-            }}
-          />
 
-          {/* Título Centralizado */}
-          <Box sx={{ flexGrow: 1, textAlign: "center" }}>
-            <Typography
-              margin={"30px"}
-              variant="h4"
-              component="div"
-              sx={{
-                fontFamily: "Raleway, sans-serif",
-                color: "black",
-                fontSize: { xs: "1.2rem", md: "1.5rem" },
-              }}
-            >
-              Autorização de Aquisição de Armas de Fogo - PF
-            </Typography>
-          </Box>
-          <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: "center" }}>
-            <a href="https://liberadefesa-com-br.webflow.io/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-              <Button
-                color="inherit"
-                startIcon={<AssignmentTurnedInIcon />}
-                sx={{ color: "black", marginBottom: { xs: "8px", md: 0 } }}
-              >
-                Serviços
-              </Button>
-            </a>
-            <Button color="inherit" startIcon={<HomeIcon />} sx={{ color: "black" }}>
-              Página Inicial
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
+      <BarraDeNavegacao />
 
       <CssBaseline />
 
       <Grid container sx={{ height: "100vh", overflow: "hidden", paddingTop: { xs: '300px', sm: '270px', md: '145px' } }}>
-        <Grid
-          item
-          xs={12}
-          sm={5}
-          lg={4}
-          sx={{
-            display: { xs: "none", md: "flex" },
-            flexDirection: "column",
-            backgroundColor: "#E3DFDC",
-            borderRight: { sm: "none", md: "1px solid" },
-            borderColor: { sm: "none", md: "divider" },
-            alignItems: "start",
-            pt: 4,
-            px: 10,
-            gap: 4,
-            position: "sticky",
-            top: '0',
-            maxHeight: '100%',
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              marginBottom: "20px",
-              marginTop: "20px",
-              position: 'sticky'
-            }}
-          >
-            <Avatar
-              alt="IconeCac"
-              src={IconeCac}
-              sx={{
-                width: "70px",
-                height: "70px",
-                marginRight: "10px",
-              }}
-            />
-            <Typography
-              variant="h5"
-              sx={{
-                fontFamily: "Montserrat, sans-serif", // Fonte Montserrat
-                color: "black",
-                textAlign: "center",
-              }}
-            >
-              Seu Processo CAC Simplificado
-            </Typography>
-          </Box>
-          <Typography variant="body1" sx={{ marginBottom: "10px" }}>
-            Número de documentos que serão gerados automaticamente com esses
-            dados:
-          </Typography>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              width: "100%",
-              marginBottom: "10px",
-            }}
-          >
-            <Typography
-              variant="h4"
-              sx={{ color: "#4caf50", textAlign: "center" }}
-            >
-              3
-            </Typography>
-          </Box>
-          <Typography variant="body1" sx={{ marginBottom: "10px" }}>
-            Documentos já concluídos:
-          </Typography>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              width: "100%",
-              marginBottom: "10px",
-            }}
-          >
-            <Typography
-              variant="h4"
-              sx={{ color: "#4caf50", textAlign: "center" }}
-            >
-              {documentos}
-            </Typography>
-          </Box>
-          <Typography
-            variant="body1"
-            sx={{
-              color: "#4caf50",
-              fontWeight: "bold",
-              fontSize: "1.2rem",
-              textAlign: "center",
-            }}
-          >
-            Custo:{" "}
-            <span style={{ color: "green", fontSize: "1.2rem" }}>
-              Gratuito!
-            </span>
-          </Typography>
-          <Box
-            sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}
-          >
-            <Button
-              onClick={handleButtonComoFuncionaClick}
-              variant="contained"
-              color="primary"
-              href="#"
-              startIcon={<PlayArrowIcon />}
-              sx={{ marginTop: "20px" }}
-            >
-              Como funciona
-            </Button>
-          </Box>
-          <div>
-            Seu ID: {uuid}
-          </div>
-        </Grid>
+
+        <BarraLateral documentos={documentosCriados} uuid={uuid} handleButtonComoFuncionaClick={handleButtonComoFunciona} />
+
         <Grid
           item
           sm={12}
@@ -348,24 +208,30 @@ export default function Checkout() {
           >
             <DadosPessoais
               isVisible={sectionVisibility.dadosPessoais}
-              onToggle={() => handleToggle('dadosPessoais')}
-              onFilled={() => handleSectionFilled('dadosPessoais')}
+              onToggle={() => handleAlternarVisibilidade('dadosPessoais')}
+              onFilled={() => handleSecaoPreenchida('dadosPessoais')}
               handleInputChange={handleInputChange}
+              handleInputBlur={handleInputBlur('dadosPessoais')}
               formData={formData}
               uuid={uuid}
             />
+
             <Endereco
               isVisible={sectionVisibility.endereco}
-              onToggle={() => handleToggle('dadosPessoais')}
-              onFilled={() => handleSectionFilled('dadosPessoais')}
+              onToggle={() => handleAlternarVisibilidade('endereco')}
+              onFilled={() => handleSecaoPreenchida('endereco')}
+              setFormData={setFormData}
+              formData={formData}
+              uuid={uuid}
             />
 
             <DocumentosParaAssinar />
+
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", width: "55%", marginBottom: "20px" }}
           >
             <Button
-              onClick={handleNewRegistration}
+              onClick={handleNovoCadastro}
               variant="contained"
               sx={{
                 width: { xs: "100%", sm: "fit-content" },

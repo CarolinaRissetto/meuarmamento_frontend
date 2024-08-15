@@ -8,24 +8,18 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import { styled } from "@mui/system";
 import SectionHeader from "./Cabecalho";
 import { Button } from "@mui/material";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import IconButton from "@mui/material/IconButton";
 import Collapse from "@mui/material/Collapse";
 import Box from '@mui/material/Box';
+import { apiRequest } from '../services/apiService';
 
 const FormGrid = styled(Grid)(() => ({
     display: "flex",
     flexDirection: "column",
 }));
-
-
-interface EnderecoProps {
-    isVisible: boolean;
-    onToggle: () => void;
-    onFilled: () => void;
-}
 
 const handleFileChange = (
     year: number,
@@ -40,25 +34,31 @@ const handleFileChange = (
     }
 };
 
-const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled }) => {
+interface EnderecoProps {
+    isVisible: boolean;
+    onToggle: () => void;
+    onFilled: () => void;
+    formData: { [key: string]: any };
+    setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
+    uuid: string | null;
+}
+
+const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, formData, uuid, setFormData }) => {
     const [filled, setFilled] = useState(false);
     const [open, setOpen] = useState(isVisible);
     const [sameAddress, setSameAddress] = useState('yes');
+    const [dirty, setDirty] = useState(false); // Definição do estado dirty
+    const formRef = useRef<HTMLDivElement>(null);
+    const [, setInputTouched] = useState(false);
+    const currentYear = new Date().getFullYear();
+    const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+    const [files, setFiles] = useState<{ [key: number]: File | null }>({});
 
     const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSameAddress((event.target as HTMLInputElement).value);
     };
 
-    useEffect(() => {
-        if (!filled && isFormFilled()) {
-            setFilled(true);
-            onFilled();
-            setOpen(false); // Colapsar a seção quando preenchida pela primeira vez
-        }
-    }, [filled, onFilled]);
-
     const isFormFilled = () => {
-        // Verifique se todos os campos obrigatórios estão preenchidos
         const inputs = document.querySelectorAll("#endereco-form input[required]");
         for (let i = 0; i < inputs.length; i++) {
             if (!(inputs[i] as HTMLInputElement).value) {
@@ -68,14 +68,80 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled }) =>
         return true;
     };
 
+    useEffect(() => {
+        if (isFormFilled() && !filled) {
+            setFilled(true);
+            onFilled();
+        }
+    }, [filled, onFilled, formData]);
+
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (formRef.current && !formRef.current.contains(event.target as Node)) {
+                if (filled && dirty) {
+                    if (open) {
+                        setOpen(false); // Colapsar a seção quando clicado fora, se preenchido
+                    }
+                }
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [filled, dirty, formData, uuid]);
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        handleInputChange(event);
+        setDirty(true);
+    };
+
     const handleToggle = () => {
         setOpen(!open);
         onToggle();
     };
 
-    const currentYear = new Date().getFullYear();
-    const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
-    const [files, setFiles] = useState<{ [key: number]: File | null }>({});
+    const handleInputBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
+        const updatedFormData = {
+            ...formData,
+            endereco: {
+                ...formData.endereco,
+                [name]: value,
+            }
+        };
+        setFormData(updatedFormData);
+
+        if (uuid) {
+            localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
+            apiRequest({
+                tipo: "endereco",
+                data: {
+                    uuid,
+                    endereco: updatedFormData.endereco,
+                },
+            }).catch(error => console.error(error));
+        }
+    };
+
+
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
+        const updatedFormData = {
+            ...formData,
+            endereco: {
+                ...formData.endereco,
+                [name]: value,
+            }
+        };
+        setFormData(updatedFormData);
+        if (uuid) {
+            localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
+        }
+    };
 
     return (
         <div>
@@ -98,7 +164,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled }) =>
                 </Grid>
             </Box>
             <Collapse in={open}>
-                <Grid container spacing={3} marginTop={"5px"} marginBottom={"70px"} id="endereco-form">
+                <Grid container spacing={3} marginTop={"5px"} id="endereco-form" marginBottom={"70px"} ref={formRef} >
                     <FormGrid item xs={12}>
                         <FormLabel component="legend">
                             Morou no mesmo endereço nos últimos 5 anos?
@@ -117,7 +183,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled }) =>
                     </FormGrid>
                     {sameAddress === 'no' && (
                         <FormGrid item xs={12} md={6}>
-                            <FormLabel htmlFor="num-addresses" required>
+                            <FormLabel htmlFor="num-addresses">
                                 Quantos endereços diferentes morou nos últimos 5 anos?
                             </FormLabel>
                             <OutlinedInput
@@ -125,7 +191,10 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled }) =>
                                 name="num-addresses"
                                 type="number"
                                 autoComplete="num-addresses"
-                                required
+                                // value={endereco.quantosEnderecosMorou || ""}
+                                value={(formData.endereco as unknown as { [key: string]: string })?.["quantosEnderecosMorou"] || ""}
+                                onChange={handleChange}
+                                onBlur={handleInputBlur}
                             />
                         </FormGrid>
                     )}
@@ -139,83 +208,103 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled }) =>
                             type="text"
                             autoComplete="cep"
                             required
+                            value={(formData.endereco as unknown as { [key: string]: string })?.["cep"] || ""}
+                            onChange={handleChange}
+                            onBlur={handleInputBlur}
                         />
                     </FormGrid>
                     <FormGrid item xs={12}>
-                        <FormLabel htmlFor="address" required>
+                        <FormLabel htmlFor="rua" required>
                             Rua
                         </FormLabel>
                         <OutlinedInput
-                            id="address"
-                            name="address"
+                            id="rua"
+                            name="rua"
                             type="text"
-                            autoComplete="address"
+                            autoComplete="rua"
                             required
+                            value={(formData.endereco as unknown as { [key: string]: string })?.["rua"] || ""}
+                            onChange={handleChange}
+                            onBlur={handleInputBlur}
                         />
                     </FormGrid>
                     <FormGrid item xs={12} md={2}>
-                        <FormLabel htmlFor="number" required>
+                        <FormLabel htmlFor="numero" required>
                             Nº
                         </FormLabel>
                         <OutlinedInput
-                            id="number"
-                            name="number"
+                            id="numero"
+                            name="numero"
                             type="text"
-                            autoComplete="number"
+                            autoComplete="numero"
                             required
+                            value={(formData.endereco as unknown as { [key: string]: string })?.["numero"] || ""}
+                            onChange={handleChange}
+                            onBlur={handleInputBlur}
                         />
                     </FormGrid>
                     <FormGrid item xs={12} md={4}>
-                        <FormLabel htmlFor="complement" required>
+                        <FormLabel htmlFor="complemento">
                             Complemento
                         </FormLabel>
                         <OutlinedInput
-                            id="complement"
-                            name="complement"
+                            id="complemento"
+                            name="complemento"
                             type="text"
-                            autoComplete="complement"
-                            required
+                            autoComplete="complemento"
+                            value={(formData.endereco as unknown as { [key: string]: string })?.["complemento"] || ""}
+                            onChange={handleChange}
+                            onBlur={handleInputBlur}
                         />
                     </FormGrid>
                     <FormGrid item xs={12} md={6}>
-                        <FormLabel htmlFor="city" required>
+                        <FormLabel htmlFor="cidade" required>
                             Cidade
                         </FormLabel>
                         <OutlinedInput
-                            id="city"
-                            name="city"
+                            id="cidade"
+                            name="cidade"
                             type="text"
-                            autoComplete="city"
+                            autoComplete="cidade"
                             required
+                            value={(formData.endereco as unknown as { [key: string]: string })?.["cidade"] || ""}
+                            onChange={handleChange}
+                            onBlur={handleInputBlur}
                         />
                     </FormGrid>
                     <FormGrid item xs={12} md={6}>
-                        <FormLabel htmlFor="neighborhood" required>
+                        <FormLabel htmlFor="bairro" required>
                             Bairro
                         </FormLabel>
                         <OutlinedInput
-                            id="neighborhood"
-                            name="neighborhood"
+                            id="bairro"
+                            name="bairro"
                             type="text"
-                            autoComplete="neighborhood"
+                            autoComplete="bairro"
                             required
+                            value={(formData.endereco as unknown as { [key: string]: string })?.["bairro"] || ""}
+                            onChange={handleChange}
+                            onBlur={handleInputBlur}
                         />
                     </FormGrid>
                     <FormGrid item xs={12} md={6}>
-                        <FormLabel htmlFor="state" required>
+                        <FormLabel htmlFor="uf" required>
                             UF
                         </FormLabel>
                         <OutlinedInput
-                            id="state"
-                            name="state"
+                            id="uf"
+                            name="uf"
                             type="text"
-                            autoComplete="state"
+                            autoComplete="uf"
                             required
+                            value={(formData.endereco as unknown as { [key: string]: string })?.["uf"] || ""}
+                            onChange={handleChange}
+                            onBlur={handleInputBlur}
                         />
                     </FormGrid>
                     {years.map((year) => (
                         <Grid item xs={12} md={6} key={year}>
-                            <FormLabel htmlFor={`comprovante-${year}`} required>
+                            <FormLabel htmlFor={`comprovante-${year}`}>
                                 {files[year] ? files[year]!.name : `Comprovante de Residência de ${year}`}
                             </FormLabel>
                             <Button
