@@ -22,7 +22,7 @@ import { apiRequest } from '../components/services/apiService';
 export default function Formulario() {
 
   const [uuid, setUuid] = useState<string | null>(null);
-  const [documentosCriados, _] = useState<number>(0);
+  const [documentosCriados] = useState<number>(0);
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
 
   const navigate = useNavigate();
