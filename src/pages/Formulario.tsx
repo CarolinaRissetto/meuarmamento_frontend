@@ -23,7 +23,8 @@ export default function Formulario() {
 
   const [uuid, setUuid] = useState<string | null>(null);
   const [documentosCriados, setDocumentosCriados] = useState<number>(0);
-  const [formData, setFormData] = useState<{ [key: string]: string }>({});
+  const [formData, setFormData] = useState<{ [key: string]: any }>({});
+
   const navigate = useNavigate();
   const location = useLocation();
   const urlParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
@@ -66,7 +67,7 @@ export default function Formulario() {
   }, []);
 
   useEffect(() => {
-    const limparDadosAntigos = (uuidAtual: string) => { // Adicione o argumento uuidAtual
+    const limparDadosAntigos = (uuidAtual: string) => {
       for (const key in localStorage) {
         if (key.startsWith('form-data-') && key !== `form-data-${uuidAtual}`) {
           localStorage.removeItem(key);
@@ -210,7 +211,7 @@ export default function Formulario() {
               onToggle={() => handleAlternarVisibilidade('dadosPessoais')}
               onFilled={() => handleSecaoPreenchida('dadosPessoais')}
               handleInputChange={handleInputChange}
-              handleInputBlur={handleInputBlur('dadosPessoais')} // Passando handleInputBlur como prop
+              handleInputBlur={handleInputBlur('dadosPessoais')}
               formData={formData}
               uuid={uuid}
             />
@@ -219,9 +220,7 @@ export default function Formulario() {
               isVisible={sectionVisibility.endereco}
               onToggle={() => handleAlternarVisibilidade('endereco')}
               onFilled={() => handleSecaoPreenchida('endereco')}
-              handleInputChange={handleInputChange}
-              handleInputBlur={handleInputBlur('endereco')} // Passando handleInputBlur como prop
-
+              setFormData={setFormData}
               formData={formData}
               uuid={uuid}
             />

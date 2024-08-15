@@ -14,6 +14,7 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import IconButton from "@mui/material/IconButton";
 import Collapse from "@mui/material/Collapse";
 import Box from '@mui/material/Box';
+import { apiRequest } from '../services/apiService';
 
 const FormGrid = styled(Grid)(() => ({
     display: "flex",
@@ -37,13 +38,12 @@ interface EnderecoProps {
     isVisible: boolean;
     onToggle: () => void;
     onFilled: () => void;
-    handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    handleInputBlur: (event: React.FocusEvent<HTMLInputElement>) => void;
-    formData: { [key: string]: string };
+    formData: { [key: string]: any };
+    setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
     uuid: string | null;
 }
 
-const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, handleInputChange, formData, uuid, handleInputBlur }) => {
+const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, formData, uuid, setFormData }) => {
     const [filled, setFilled] = useState(false);
     const [open, setOpen] = useState(isVisible);
     const [sameAddress, setSameAddress] = useState('yes');
@@ -75,28 +75,6 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
         }
     }, [filled, onFilled, formData]);
 
-    // const saveFormData = async (data: any) => {
-    //     try {
-    //         console.log('Dados a serem enviados:', data); // Log dos dados
-    //         const response = await fetch('http://localhost:3010/processos/endereco', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify(data),
-    //         });
-
-    //         if (!response.ok) {
-    //             throw new Error('Erro ao salvar dados.');
-    //         }
-
-    //         console.log('Dados salvos com sucesso!');
-    //     } catch (error) {
-    //         console.error('Erro ao salvar dados:', error);
-    //     } finally {
-    //         setDirty(false); // Reset dirty state after saving
-    //     }
-    // };
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -105,20 +83,6 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                     if (open) {
                         setOpen(false); // Colapsar a seção quando clicado fora, se preenchido
                     }
-                    // saveFormData({
-                    //     tipo: "endereco",
-                    //     data: {
-                    //         quantosEnderecosMorou: formData["num-addresses"] || "",
-                    //         cep: formData["cep"] || "",
-                    //         rua: formData["rua"] || "",
-                    //         numero: formData["number"] || "",
-                    //         complemento: formData["complement"] || "",
-                    //         cidade: formData["cidade"] || "",
-                    //         bairro: formData["bairro"] || "",
-                    //         uf: formData["uf"] || "",
-                    //         uuidCliente: uuid
-                    //     }
-                    // });
                 }
             }
         };
@@ -132,7 +96,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         handleInputChange(event);
-        setDirty(true); // Set dirty state on change
+        setDirty(true);
     };
 
     const handleToggle = () => {
@@ -140,14 +104,44 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
         onToggle();
     };
 
-    // const handleInputBlur = () => {
-    //     if (isFormFilled()) {
-    //         setFilled(true);
-    //         setOpen(false);
-    //         onFilled();
-    //     }
-    //     setInputTouched(true);
-    // };
+    const handleInputBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
+        const updatedFormData = {
+            ...formData,
+            endereco: {
+                ...formData.endereco,
+                [name]: value,
+            }
+        };
+        setFormData(updatedFormData);
+
+        if (uuid) {
+            localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
+            apiRequest({
+                tipo: "endereco",
+                data: {
+                    uuid,
+                    endereco: updatedFormData.endereco,
+                },
+            }).catch(error => console.error(error));
+        }
+    };
+
+
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
+        const updatedFormData = {
+            ...formData,
+            endereco: {
+                ...formData.endereco,
+                [name]: value,
+            }
+        };
+        setFormData(updatedFormData);
+        if (uuid) {
+            localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
+        }
+    };
 
     return (
         <div>
@@ -198,6 +192,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                                 type="number"
                                 autoComplete="num-addresses"
                                 // value={endereco.quantosEnderecosMorou || ""}
+                                value={(formData.endereco as unknown as { [key: string]: string })?.["quantosEnderecosMorou"] || ""}
                                 onChange={handleChange}
                                 onBlur={handleInputBlur}
                             />
@@ -213,7 +208,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                             type="text"
                             autoComplete="cep"
                             required
-                            // value={endereco.cep || ""}
+                            value={(formData.endereco as unknown as { [key: string]: string })?.["cep"] || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
@@ -228,36 +223,36 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                             type="text"
                             autoComplete="rua"
                             required
-                            // value={endereco.rua || ""}
+                            value={(formData.endereco as unknown as { [key: string]: string })?.["rua"] || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
                     </FormGrid>
                     <FormGrid item xs={12} md={2}>
-                        <FormLabel htmlFor="number" required>
+                        <FormLabel htmlFor="numero" required>
                             Nº
                         </FormLabel>
                         <OutlinedInput
-                            id="number"
-                            name="number"
+                            id="numero"
+                            name="numero"
                             type="text"
-                            autoComplete="number"
+                            autoComplete="numero"
                             required
-                            // value={endereco.numero || ""}
+                            value={(formData.endereco as unknown as { [key: string]: string })?.["numero"] || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
                     </FormGrid>
                     <FormGrid item xs={12} md={4}>
-                        <FormLabel htmlFor="complement">
+                        <FormLabel htmlFor="complemento">
                             Complemento
                         </FormLabel>
                         <OutlinedInput
-                            id="complement"
-                            name="complement"
+                            id="complemento"
+                            name="complemento"
                             type="text"
-                            autoComplete="complement"
-                            // value={endereco.complemento || ""}
+                            autoComplete="complemento"
+                            value={(formData.endereco as unknown as { [key: string]: string })?.["complemento"] || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
@@ -272,7 +267,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                             type="text"
                             autoComplete="cidade"
                             required
-                            // value={endereco.cidade || ""}
+                            value={(formData.endereco as unknown as { [key: string]: string })?.["cidade"] || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
@@ -287,7 +282,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                             type="text"
                             autoComplete="bairro"
                             required
-                            // value={endereco.bairro|| ""}
+                            value={(formData.endereco as unknown as { [key: string]: string })?.["bairro"] || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
@@ -302,7 +297,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, hand
                             type="text"
                             autoComplete="uf"
                             required
-                            // value={endereco.uf   || ""}
+                            value={(formData.endereco as unknown as { [key: string]: string })?.["uf"] || ""}
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
