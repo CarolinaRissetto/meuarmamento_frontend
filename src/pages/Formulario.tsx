@@ -18,6 +18,7 @@ import axios from 'axios';
 import BarraDeNavegacao from '../components/form/BarraDeNavegacao';
 import BarraLateral from '../components/form/BarraLateral';
 import { apiRequest } from '../components/services/apiService';
+import { gerarPdf } from '../components/form/gerarPDF';
 
 export default function Formulario() {
 
@@ -33,6 +34,7 @@ export default function Formulario() {
     endereco: true,
     documentosParaAssinar: true,
   });
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   const limparLocalStorage = useCallback(() => {
     for (const key in localStorage) {
@@ -109,6 +111,7 @@ export default function Formulario() {
     setFormData(updatedFormData);
     if (uuid) {
       localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
+      gerarPdf(updatedFormData, uuid);
     }
   };
 
@@ -135,7 +138,7 @@ export default function Formulario() {
     }
   };
 
-  const handleSecaoPreenchida = (section: string) => {
+  const handleSecaoPreenchida = async (section: string) => {
     setSectionVisibility((prev) => ({
       ...prev,
       [section]: false,
@@ -163,6 +166,9 @@ export default function Formulario() {
           ...updatedFormData,
         },
       });
+
+      await gerarPdf(updatedFormData, uuid);
+
     }
   };
 
@@ -225,7 +231,7 @@ export default function Formulario() {
               uuid={uuid}
             />
 
-            <DocumentosParaAssinar />
+            <DocumentosParaAssinar url = { pdfUrl }/>
 
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", width: "55%", marginBottom: "20px" }}

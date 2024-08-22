@@ -15,6 +15,7 @@ import IconButton from "@mui/material/IconButton";
 import Collapse from "@mui/material/Collapse";
 import Box from '@mui/material/Box';
 import { apiRequest } from '../services/apiService';
+import { gerarPdf } from './gerarPDF';
 
 const FormGrid = styled(Grid)(() => ({
     display: "flex",
@@ -121,9 +122,11 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                 tipo: "endereco",
                 data: {
                     uuid,
-                    endereco: updatedFormData.endereco,
+                    ...updatedFormData,
                 },
             }).catch(error => console.error(error));
+            
+            gerarPdf(updatedFormData, uuid);  // Chama a função para gerar o PDF
         }
     };
 
@@ -140,6 +143,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
         setFormData(updatedFormData);
         if (uuid) {
             localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
+            gerarPdf(updatedFormData, uuid);
         }
     };
 
