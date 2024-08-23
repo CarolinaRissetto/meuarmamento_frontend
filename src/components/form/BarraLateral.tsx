@@ -11,12 +11,12 @@ import IconeCac from "../../assets/images/icone-cac.png";
 import axios from 'axios';
 
 interface BarraLateralProps {
-  documentos: number;
   uuid: string | null;
   handleButtonComoFuncionaClick: () => void;
+  pdfUrls: { [key: string]: string | null }; 
 }
 
-const BarraLateral: React.FC<BarraLateralProps> = ({ documentos, uuid }) => {
+const BarraLateral: React.FC<BarraLateralProps> = ({ uuid, pdfUrls }) => {
 
   const handleButtonComoFunciona = async () => {
     try {
@@ -27,6 +27,8 @@ const BarraLateral: React.FC<BarraLateralProps> = ({ documentos, uuid }) => {
       console.error("There was an error!", error);
     }
   };
+
+  const documentosGerados = Object.values(pdfUrls).filter((url) => url !== null).length;
 
   return (
     <Grid
@@ -112,7 +114,7 @@ const BarraLateral: React.FC<BarraLateralProps> = ({ documentos, uuid }) => {
           variant="h4"
           sx={{ color: "#4caf50", textAlign: "center" }}
         >
-          {documentos}
+          {documentosGerados}
         </Typography>
       </Box>
       <Typography

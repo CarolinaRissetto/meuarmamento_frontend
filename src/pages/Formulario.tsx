@@ -111,7 +111,7 @@ export default function Formulario() {
     setFormData(updatedFormData);
     if (uuid) {
       localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
-      gerarPdf(updatedFormData, uuid, setPdfUrls);
+      // gerarPdf(updatedFormData, uuid, setPdfUrls);
     }
   };
 
@@ -167,7 +167,7 @@ export default function Formulario() {
         },
       });
 
-      await gerarPdf(updatedFormData, uuid, setPdfUrls);
+      // await gerarPdf(updatedFormData, uuid, setPdfUrls);
 
     }
   };
@@ -184,7 +184,7 @@ export default function Formulario() {
 
       <Grid container sx={{ height: "100vh", overflow: "hidden", paddingTop: { xs: '300px', sm: '270px', md: '145px' } }}>
 
-        <BarraLateral documentos={documentosCriados} uuid={uuid} handleButtonComoFuncionaClick={handleButtonComoFunciona} />
+        <BarraLateral uuid={uuid} handleButtonComoFuncionaClick={handleButtonComoFunciona} pdfUrls={pdfUrls} />
 
         <Grid
           item
@@ -219,6 +219,7 @@ export default function Formulario() {
               handleInputChange={handleInputChange}
               handleInputBlur={handleInputBlur('dadosPessoais')}
               formData={formData}
+              setPdfUrls={setPdfUrls}
               uuid={uuid}
             />
 

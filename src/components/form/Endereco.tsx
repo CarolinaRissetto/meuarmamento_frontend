@@ -84,6 +84,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                 if (filled && dirty) {
                     if (open) {
                         setOpen(false); // Colapsar a seção quando clicado fora, se preenchido
+                        gerarPdf(formData, uuid, setPdfUrls);  // Chama a função para gerar o PDF
                     }
                 }
             }
@@ -127,8 +128,6 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                     ...updatedFormData,
                 },
             }).catch(error => console.error(error));
-
-            gerarPdf(updatedFormData, uuid, setPdfUrls);  // Chama a função para gerar o PDF
         }
     };
 
@@ -145,7 +144,6 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
         setFormData(updatedFormData);
         if (uuid) {
             localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
-            gerarPdf(updatedFormData, uuid, setPdfUrls);
         }
     };
 
