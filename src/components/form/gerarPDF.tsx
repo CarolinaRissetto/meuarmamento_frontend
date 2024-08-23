@@ -1,3 +1,4 @@
+import { Console } from 'console';
 import { apiRequest } from '../services/apiService';
 import DocumentosParaAssinar from './DocumentosParaAssinar';
 
@@ -23,7 +24,8 @@ const verificarCamposPreenchidos = (formData: { [key: string]: any }): boolean =
     });
 };
 
-export const gerarPdf = async (formData: { [key: string]: any }, uuid: string | null) => {
+export const gerarPdf = async (formData: { [key: string]: any }, uuid: string | null, setPdfUrl: (url: string | null) => void
+) => {
 
     // Desestruture o objeto 'endereco' do formData
     const { endereco = {}, ...outrosDados } = formData;
@@ -59,6 +61,12 @@ export const gerarPdf = async (formData: { [key: string]: any }, uuid: string | 
             tipo: "gerarPDF",
             data: formDataComData,
         });
+
+        let apiResponse = JSON.parse(response)
+
+        if (response && apiResponse.url) {
+            setPdfUrl(apiResponse.url);  // Atualize o pdfUrl aqui
+        }
 
     } catch (error) {
         console.error("Erro ao chamar a API de geração de PDF:", error);

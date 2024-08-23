@@ -111,7 +111,7 @@ export default function Formulario() {
     setFormData(updatedFormData);
     if (uuid) {
       localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
-      gerarPdf(updatedFormData, uuid);
+      gerarPdf(updatedFormData, uuid, setPdfUrl);
     }
   };
 
@@ -167,7 +167,7 @@ export default function Formulario() {
         },
       });
 
-      await gerarPdf(updatedFormData, uuid);
+      await gerarPdf(updatedFormData, uuid, setPdfUrl);
 
     }
   };
@@ -227,6 +227,7 @@ export default function Formulario() {
               onToggle={() => handleAlternarVisibilidade('endereco')}
               onFilled={() => handleSecaoPreenchida('endereco')}
               setFormData={setFormData}
+              setPdfUrl={setPdfUrl}
               formData={formData}
               uuid={uuid}
             />
