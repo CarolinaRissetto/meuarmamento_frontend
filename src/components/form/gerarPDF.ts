@@ -1,6 +1,4 @@
-import { Console } from 'console';
 import { apiRequest } from '../services/apiService';
-import DocumentosParaAssinar from './DocumentosParaAssinar';
 
 // Lista de campos necessários, incluindo o uuid
 const camposNecessarios = [
@@ -19,13 +17,28 @@ const camposNecessarios = [
 
 const verificarCamposPreenchidos = (formData: { [key: string]: any }): boolean => {
     return camposNecessarios.every(campo => {
-        const valor = formData[campo];
-        return valor !== undefined && valor !== null && valor !== '';
+        let valor;
+
+        if (campo in formData) {
+            valor = formData[campo];
+        } else if (campo in (formData.endereco || {})) {
+            valor = formData.endereco[campo];
+        }
+
+        return valor !== undefined && valor !== null && valor !== ''; // Verifica se o valor não é undefined, null, ou string vazia
     });
 };
 
-export const gerarPdf = async (formData: { [key: string]: any }, uuid: string | null, setPdfUrl: (url: string | null) => void
+export const gerarPdf = async (
+    formData: { [key: string]: any }, 
+    uuid: string | null, 
+    setPdfUrls: (urls: { [key: string]: string | null }) => void // Agora recebemos um objeto com URLs
 ) => {
+
+    if (!verificarCamposPreenchidos(formData)) {
+        console.log("Campos obrigatórios não preenchidos.");
+        return; // Se faltar algum campo, a função é encerrada
+    }
 
     // Desestruture o objeto 'endereco' do formData
     const { endereco = {}, ...outrosDados } = formData;
@@ -39,8 +52,6 @@ export const gerarPdf = async (formData: { [key: string]: any }, uuid: string | 
     console.log(Object.keys(formDataCombinado));  // Liste todas as chaves em formDataCombinado
 
     console.log("GERANDO PDF");
-    if (!uuid || !verificarCamposPreenchidos(formDataCombinado)) return;
-    console.log(uuid);
 
     try {
         // Obter a data atual e formatar como desejado
@@ -56,17 +67,21 @@ export const gerarPdf = async (formData: { [key: string]: any }, uuid: string | 
             local_data: dataAtual
         };
 
-        // Supondo que você tenha uma função no backend que gera o PDF a partir dos dados do formulário
+        // Chama a API para gerar os PDFs e receber as URLs
         const response = await apiRequest({
             tipo: "gerarPDF",
             data: formDataComData,
         });
 
-        let apiResponse = JSON.parse(response)
+        const parsedResponse = JSON.parse(response);
 
-        if (response && apiResponse.url) {
-            setPdfUrl(apiResponse.url);  // Atualize o pdfUrl aqui
-        }
+        // Verifica e atualiza as URLs no estado
+        const urls = {
+            segurancaAcervo: parsedResponse.urls?.segurancaAcervo || null,
+            declaracaoIdoneidade: parsedResponse.urls?.declaracaoIdoneidade || null,
+        };
+
+        setPdfUrls(urls);  // Atualiza o estado com as URLs dos PDFs gerados
 
     } catch (error) {
         console.error("Erro ao chamar a API de geração de PDF:", error);

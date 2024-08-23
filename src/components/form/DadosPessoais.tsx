@@ -9,6 +9,7 @@ import SectionHeader from "./Cabecalho";
 import IconButton from "@mui/material/IconButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import { gerarPdf } from "./gerarPDF";
 
 const FormGrid = styled(Grid)(() => ({
   display: "flex",
@@ -22,10 +23,11 @@ interface DadosPessoaisProps {
   handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleInputBlur: (event: React.FocusEvent<HTMLInputElement>) => void;
   formData: { [key: string]: string };
+  setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>;
   uuid: string | null;
 }
 
-const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFilled, handleInputChange, formData, uuid, handleInputBlur }) => {
+const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFilled, handleInputChange, formData, uuid, handleInputBlur, setPdfUrls }) => {
   const [filled, setFilled] = useState(false);
   const [open, setOpen] = useState(isVisible);
   const [dirty, setDirty] = useState(false);
@@ -54,6 +56,8 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
         if (filled && dirty) {
           if (open) {
             setOpen(false); // Colapsar a seção quando clicado fora, se preenchido
+            gerarPdf(formData, uuid, setPdfUrls);
+
           }
         }
       }

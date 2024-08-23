@@ -41,12 +41,12 @@ interface EnderecoProps {
     onFilled: () => void;
     formData: { [key: string]: any };
     setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
-    setPdfUrl: React.Dispatch<React.SetStateAction<string | null>>;
+    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>;
 
     uuid: string | null;
 }
 
-const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, formData, uuid, setFormData, setPdfUrl }) => {
+const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, formData, uuid, setFormData, setPdfUrls }) => {
     const [filled, setFilled] = useState(false);
     const [open, setOpen] = useState(isVisible);
     const [sameAddress, setSameAddress] = useState('yes');
@@ -84,6 +84,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                 if (filled && dirty) {
                     if (open) {
                         setOpen(false); // Colapsar a seção quando clicado fora, se preenchido
+                        gerarPdf(formData, uuid, setPdfUrls);  // Chama a função para gerar o PDF
                     }
                 }
             }
@@ -127,8 +128,6 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                     ...updatedFormData,
                 },
             }).catch(error => console.error(error));
-
-            gerarPdf(updatedFormData, uuid, setPdfUrl);  // Chama a função para gerar o PDF
         }
     };
 
@@ -145,7 +144,6 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
         setFormData(updatedFormData);
         if (uuid) {
             localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
-            gerarPdf(updatedFormData, uuid, setPdfUrl);
         }
     };
 
