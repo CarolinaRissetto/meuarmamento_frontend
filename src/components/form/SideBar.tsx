@@ -16,22 +16,7 @@ import StepContent from '@mui/material/StepContent';
 import Paper from '@mui/material/Paper';
 
 const steps = [
-  {
-    label: 'Dados pessoais',
-    description: `Primeira etapa necessária para geração de diversos documentos`,    
-  },
-  {
-    label: 'Endereço',
-    description:
-      'Dados referente ao seu endereço',
-  },
-  {
-    label: 'Documentos já concluídos (0)',
-    description: `Try out different ad text to see what brings in the most customers,
-              and learn how to enhance your ads using features like ad extensions.
-              If you run into any problems with your ads, find out how to tell if
-              they're running and how to resolve approval issues.`,
-  },
+  
 ];
 
 interface SideBarProps {
@@ -53,7 +38,7 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
 
   const documentosGerados = Object.values(pdfUrls).filter((url) => url !== null).length;
 
-  const [activeStep, setActiveStep] = React.useState(3);
+  const [activeStep, setActiveStep] = React.useState(1);
 
   return (    
     <Grid
@@ -107,19 +92,37 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
       </Box>
       
       <Box sx={{ maxWidth: 400 }}>
-      <Stepper activeStep={activeStep} orientation="vertical">
-        {steps.map((step) => (
-          <Step key={step.label}>
-            <StepLabel>
-              {step.label}
-            </StepLabel>
-            <StepContent>
-              <Typography>{step.description}</Typography>
-            </StepContent>
-          </Step>
-        ))}
+      <Stepper activeStep={activeStep} orientation="vertical">      
+
+        <Step>
+          <StepLabel>
+            Dados pessoais
+          </StepLabel>
+          <StepContent>
+            <Typography>Primeira etapa necessária para geração de diversos documentos</Typography>
+          </StepContent>
+        </Step>
+
+        <Step>
+          <StepLabel>
+          Endereço
+          </StepLabel>
+          <StepContent>
+            <Typography>Dados referente ao seu endereço</Typography>
+          </StepContent>
+        </Step>
+
+        <Step>
+          <StepLabel>
+            Documentos já concluídos {documentosGerados}
+          </StepLabel>
+          <StepContent>
+            <Typography>{documentosGerados}</Typography>
+          </StepContent>
+        </Step>
+        
       </Stepper>
-      {activeStep === steps.length && (
+      {activeStep === 2 && (
         <Paper square elevation={0} sx={{ p: 3 }}>
           <Typography>All steps completed - you&apos;re finished</Typography>
         </Paper>

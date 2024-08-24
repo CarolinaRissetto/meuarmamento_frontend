@@ -10,35 +10,20 @@ export default function DocumentosParaAssinar({ urls }: { urls: { [key: string]:
         <Grid item xs={12}>
             <SectionHeader title="Documentos Aguardando Assinatura" />
 
-            {urls.segurancaAcervo && (
-                <Grid container alignItems="center" sx={{ mt: 2 }}>
+            {Object.keys(urls).map((urlArquivo, index) => (
+                    <Grid container alignItems="center" sx={{ mt: 2 }}>
                     <Grid item>
-                        <Link href={urls.segurancaAcervo} target="_blank" rel="noopener noreferrer" underline="hover">
+                        <Link href={urlArquivo} target="_blank" rel="noopener noreferrer" underline="hover">
                             Segurança do Acervo
                         </Link>
                     </Grid>
                     <Grid item>
-                        <IconButton href={urls.segurancaAcervo} target="_blank" rel="noopener noreferrer" download>
+                        <IconButton href={urlArquivo} target="_blank" rel="noopener noreferrer" download>
                             <DownloadIcon />
                         </IconButton>
                     </Grid>
                 </Grid>
-            )}
-
-            {urls.declaracaoIdoneidade && (
-                <Grid container alignItems="center" sx={{ mt: 2 }}>
-                    <Grid item>
-                        <Link href={urls.declaracaoIdoneidade} target="_blank" rel="noopener noreferrer" underline="hover">
-                            Declaração de Idoneidade
-                        </Link>
-                    </Grid>
-                    <Grid item>
-                        <IconButton href={urls.declaracaoIdoneidade} target="_blank" rel="noopener noreferrer" download>
-                            <DownloadIcon />
-                        </IconButton>
-                    </Grid>
-                </Grid>
-            )}
+            ))}
         </Grid>
     );
 }
