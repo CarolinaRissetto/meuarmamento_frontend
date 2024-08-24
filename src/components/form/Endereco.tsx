@@ -14,8 +14,8 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import IconButton from "@mui/material/IconButton";
 import Collapse from "@mui/material/Collapse";
 import Box from '@mui/material/Box';
-import { apiRequest } from '../services/apiService';
-import { gerarPdf } from './gerarPDF';
+import { apiRequest } from '../services/apiRequestService';
+import { gerarPdf } from "../services/gerarPDFService";
 
 const FormGrid = styled(Grid)(() => ({
     display: "flex",

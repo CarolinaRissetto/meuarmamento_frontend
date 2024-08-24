@@ -2,12 +2,8 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Button,
-  Box,
-  CssBaseline,
-  Grid,
-  ThemeProvider,
-  createTheme,
-  PaletteMode
+  Box,  
+  Grid
 } from "@mui/material";
 import { nanoid } from 'nanoid';
 
@@ -15,9 +11,8 @@ import DadosPessoais from "../components/form/DadosPessoais"
 import Endereco from "../components/form/Endereco"
 import DocumentosParaAssinar from "../components/form/DocumentosParaAssinar"
 import axios from 'axios';
-import Header from '../components/form/Header';
-import BarraLateral from '../components/form/BarraLateral';
-import { apiRequest } from '../components/services/apiService';
+import SideBar from '../components/form/SideBar';
+import { apiRequest } from '../components/services/apiRequestService';
 
 export default function Formulario() {
 
@@ -166,85 +161,74 @@ export default function Formulario() {
     }
   };
 
-  const [mode,] = React.useState<PaletteMode>('light');
-  const defaultTheme = createTheme({ palette: { mode } });
-
   return (
-    <ThemeProvider theme={defaultTheme}>
+    <Grid container sx={{ height: "100vh", overflow: "hidden", paddingTop: { xs: '300px', sm: '270px', md: '145px' } }}>
+      <SideBar uuid={uuid} handleButtonComoFuncionaClick={handleButtonComoFunciona} pdfUrls={pdfUrls} />
 
-      <Header />
-
-      <CssBaseline />
-
-      <Grid container sx={{ height: "100vh", overflow: "hidden", paddingTop: { xs: '300px', sm: '270px', md: '145px' } }}>
-
-        <BarraLateral uuid={uuid} handleButtonComoFuncionaClick={handleButtonComoFunciona} pdfUrls={pdfUrls} />
-
-        <Grid
-          item
-          sm={12}
-          md={7}
-          lg={8}
+      <Grid
+        item
+        sm={12}
+        md={7}
+        lg={8}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          maxWidth: "auto",
+          width: "100%",
+          maxHeight: "85vh",
+          backgroundColor: "#F3F0EE",
+          overflowY: "scroll",
+          alignItems: "start",
+          pt: { xs: 2, sm: 4 },
+          px: { xs: 2, sm: 10 },
+          gap: { xs: 4, md: 8 },
+        }}
+      >
+        <Box
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            maxWidth: "auto",
+            flexGrow: 1,
             width: "100%",
-            maxHeight: "85vh",
-            backgroundColor: "#F3F0EE",
-            overflowY: "scroll",
-            alignItems: "start",
-            pt: { xs: 2, sm: 4 },
-            px: { xs: 2, sm: 10 },
-            gap: { xs: 4, md: 8 },
+            maxWidth: { sm: "100%", md: 600 },
           }}
         >
-          <Box
+          <DadosPessoais
+            isVisible={sectionVisibility.dadosPessoais}
+            onToggle={() => handleAlternarVisibilidade('dadosPessoais')}
+            onFilled={() => handleSecaoPreenchida('dadosPessoais')}
+            handleInputChange={handleInputChange}
+            handleInputBlur={handleInputBlur('dadosPessoais')}
+            formData={formData}
+            setPdfUrls={setPdfUrls}
+            uuid={uuid}
+          />
+
+          <Endereco
+            isVisible={sectionVisibility.endereco}
+            onToggle={() => handleAlternarVisibilidade('endereco')}
+            onFilled={() => handleSecaoPreenchida('endereco')}
+            setFormData={setFormData}
+            setPdfUrls={setPdfUrls}
+            formData={formData}
+            uuid={uuid}
+          />
+
+          <DocumentosParaAssinar urls = { pdfUrls }/>
+
+        </Box>
+        <Box sx={{ display: "flex", justifyContent: "space-between", width: "55%", marginBottom: "20px" }}
+        >
+          <Button
+            onClick={handleNovoCadastro}
+            variant="contained"
             sx={{
-              flexGrow: 1,
-              width: "100%",
-              maxWidth: { sm: "100%", md: 600 },
+              width: { xs: "100%", sm: "fit-content" },
+              mt: 2,
             }}
           >
-            <DadosPessoais
-              isVisible={sectionVisibility.dadosPessoais}
-              onToggle={() => handleAlternarVisibilidade('dadosPessoais')}
-              onFilled={() => handleSecaoPreenchida('dadosPessoais')}
-              handleInputChange={handleInputChange}
-              handleInputBlur={handleInputBlur('dadosPessoais')}
-              formData={formData}
-              setPdfUrls={setPdfUrls}
-              uuid={uuid}
-            />
-
-            <Endereco
-              isVisible={sectionVisibility.endereco}
-              onToggle={() => handleAlternarVisibilidade('endereco')}
-              onFilled={() => handleSecaoPreenchida('endereco')}
-              setFormData={setFormData}
-              setPdfUrls={setPdfUrls}
-              formData={formData}
-              uuid={uuid}
-            />
-
-            <DocumentosParaAssinar urls = { pdfUrls }/>
-
-          </Box>
-          <Box sx={{ display: "flex", justifyContent: "space-between", width: "55%", marginBottom: "20px" }}
-          >
-            <Button
-              onClick={handleNovoCadastro}
-              variant="contained"
-              sx={{
-                width: { xs: "100%", sm: "fit-content" },
-                mt: 2,
-              }}
-            >
-              Novo Cadastro
-            </Button>
-          </Box>
-        </Grid>
+            Novo Cadastro
+          </Button>
+        </Box>
       </Grid>
-    </ThemeProvider >
+    </Grid>
   );
 }
