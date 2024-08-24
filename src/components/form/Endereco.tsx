@@ -50,7 +50,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
     const [filled, setFilled] = useState(false);
     const [open, setOpen] = useState(isVisible);
     const [sameAddress, setSameAddress] = useState('yes');
-    const [dirty, setDirty] = useState(false); // Definição do estado dirty
+    const [dirty, setDirty] = useState(false);
     const formRef = useRef<HTMLDivElement>(null);
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
@@ -195,7 +195,6 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                                 name="num-addresses"
                                 type="number"
                                 autoComplete="num-addresses"
-                                // value={endereco.quantosEnderecosMorou || ""}
                                 value={(formData.endereco as unknown as { [key: string]: string })?.["quantosEnderecosMorou"] || ""}
                                 onChange={handleChange}
                                 onBlur={handleInputBlur}

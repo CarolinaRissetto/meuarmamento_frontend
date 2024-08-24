@@ -15,15 +15,13 @@ import DadosPessoais from "../components/form/DadosPessoais"
 import Endereco from "../components/form/Endereco"
 import DocumentosParaAssinar from "../components/form/DocumentosParaAssinar"
 import axios from 'axios';
-import BarraDeNavegacao from '../components/form/BarraDeNavegacao';
+import Header from '../components/form/Header';
 import BarraLateral from '../components/form/BarraLateral';
 import { apiRequest } from '../components/services/apiService';
-import { gerarPdf } from '../components/form/gerarPDF';
 
 export default function Formulario() {
 
   const [uuid, setUuid] = useState<string | null>(null);
-  const [documentosCriados] = useState<number>(0);
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
 
   const navigate = useNavigate();
@@ -111,7 +109,6 @@ export default function Formulario() {
     setFormData(updatedFormData);
     if (uuid) {
       localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
-      // gerarPdf(updatedFormData, uuid, setPdfUrls);
     }
   };
 
@@ -166,9 +163,6 @@ export default function Formulario() {
           ...updatedFormData,
         },
       });
-
-      // await gerarPdf(updatedFormData, uuid, setPdfUrls);
-
     }
   };
 
@@ -178,7 +172,7 @@ export default function Formulario() {
   return (
     <ThemeProvider theme={defaultTheme}>
 
-      <BarraDeNavegacao />
+      <Header />
 
       <CssBaseline />
 

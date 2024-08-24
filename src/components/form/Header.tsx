@@ -11,7 +11,7 @@ import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import HomeIcon from "@mui/icons-material/Home";
 import logo from "../../assets/images/logo-libera-defesa.png";
 
-const BarraDeNavegacao: React.FC = () => {
+const Header: React.FC = () => {
   return (
     <AppBar className="mui-fixed" position="fixed">
       <Toolbar
@@ -80,4 +80,4 @@ const BarraDeNavegacao: React.FC = () => {
   );
 };
 
-export default BarraDeNavegacao;
+export default Header;

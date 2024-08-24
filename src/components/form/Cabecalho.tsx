@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Typography } from '@mui/material';
+import { Typography, TypographyProps } from '@mui/material';
 import { styled } from '@mui/system';
 
 const CustomDivider = styled('div')({
@@ -11,7 +11,7 @@ const CustomDivider = styled('div')({
   '&::before, &::after': {
     content: '""',
     flex: 1,
-    borderBottom: '1px solid #A8A8A8', // Ajuste a cor e espessura conforme necessário
+    borderBottom: '1px solid #A8A8A8',
   },
   '&::before': {
     marginRight: '0.25em',

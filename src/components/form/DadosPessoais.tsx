@@ -55,9 +55,8 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
       if (formRef.current && !formRef.current.contains(event.target as Node)) {
         if (filled && dirty) {
           if (open) {
-            setOpen(false); // Colapsar a seção quando clicado fora, se preenchido
+            setOpen(false);
             gerarPdf(formData, uuid, setPdfUrls);
-
           }
         }
       }

@@ -1,6 +1,5 @@
 import { apiRequest } from '../services/apiService';
 
-// Lista de campos necessários, incluindo o uuid
 const camposNecessarios = [
     'nomeCompleto',
     'dataNascimento',
@@ -12,7 +11,7 @@ const camposNecessarios = [
     'cidade',
     'bairro',
     'uf',
-    'uuid'  // Verificação adicional para garantir que o UUID está presente
+    'uuid'
 ];
 
 const verificarCamposPreenchidos = (formData: { [key: string]: any }): boolean => {
