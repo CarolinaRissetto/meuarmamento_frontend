@@ -7,7 +7,7 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { styled } from "@mui/system";
 import SectionHeader from "./Cabecalho";
-import { Button } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { useState, useEffect, useRef } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -304,27 +304,23 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
-                    </FormGrid>
-                    {years.map((year) => (
-                        <Grid item xs={12} md={6} key={year}>
-                            <FormLabel htmlFor={`comprovante-${year}`}>
-                                {files[year] ? files[year]!.name : `Comprovante de Residência de ${year}`}
-                            </FormLabel>
+                    </FormGrid>                                        
+                    <Grid item xs={12}>
+                        <Typography sx={{ color: 'text.secondary', mt: 0.5 }}>
+                            Caso queira que preparemos o documento
+                            <Typography variant="overline" sx={{ pl: 1, color: 'text.primary', fontWeight: "bold" }}>
+                                "1. Comprovante de residência fixa referente aos locais de domicílio dos últimos cinco anos"
+                            </Typography>                            
+                            , faça o upload de imagem ou pdf para cada um dos anos abaixo. Com isso, conseguiremos gerar um documento a mais para você, de forma unificada e comprimida para caber no tamanho máximo permitido pelo SisGCorp!
+                        </Typography>
+                        <br />
+                        {years.map((year) => (
                             <Button
                                 variant="contained"
                                 component="label"
-                                style={{
-                                    width: '100%',
-                                    height: 'auto',
-                                    display: 'block',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'normal',
-                                    lineHeight: '1.2em',
-                                    maxHeight: '3.2em',
-                                }}
+                                sx={{ mr: 1}}
                             >
-                                Comprovante de Residência de {year}
+                                {year}
                                 <input
                                     type="file"
                                     id={`comprovante-${year}`}
@@ -333,8 +329,8 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                                     hidden
                                 />
                             </Button>
-                        </Grid>
-                    ))}
+                        ))}
+                    </Grid>                    
                 </Grid>
             </Collapse>
         </div>

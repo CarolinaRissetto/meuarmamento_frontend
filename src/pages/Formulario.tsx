@@ -1,27 +1,36 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useEffect, useState, useMemo, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Button,
-  Box,  
-  Grid
+  Box,
+  Grid,
+  Typography,
+  Link,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
-import { nanoid } from 'nanoid';
-
-import DadosPessoais from "../components/form/DadosPessoais"
-import Endereco from "../components/form/Endereco"
-import DocumentosParaAssinar from "../components/form/DocumentosParaAssinar"
-import axios from 'axios';
-import SideBar from '../components/form/SideBar';
-import { apiRequest } from '../components/services/apiRequestService';
+import { nanoid } from "nanoid";
+import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
+import DadosPessoais from "../components/form/DadosPessoais";
+import Endereco from "../components/form/Endereco";
+import DocumentosParaAssinar from "../components/form/DocumentosParaAssinar";
+import axios from "axios";
+import SideBar from "../components/form/SideBar";
+import { apiRequest } from "../components/services/apiRequestService";
+import SectionHeader from "../components/form/Cabecalho";
 
 export default function Formulario() {
-
   const [uuid, setUuid] = useState<string | null>(null);
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
 
   const navigate = useNavigate();
   const location = useLocation();
-  const urlParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const urlParams = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search]
+  );
   const [sectionVisibility, setSectionVisibility] = React.useState({
     dadosPessoais: true,
     endereco: true,
@@ -31,32 +40,37 @@ export default function Formulario() {
 
   const limparLocalStorage = useCallback(() => {
     for (const key in localStorage) {
-      if (key.startsWith('form-data-')) {
+      if (key.startsWith("form-data-")) {
         localStorage.removeItem(key);
       }
     }
   }, []);
 
-  const atualizaUrlELocalStorage = useCallback((uuid: string) => {
-    localStorage.setItem('user-uuid', uuid);
-    const urlParams = new URLSearchParams(location.search);
-    if (!urlParams.has('uuid') || urlParams.get('uuid') !== uuid) {
-      urlParams.set('uuid', uuid);
-      navigate(`?${urlParams.toString()}`, { replace: true });
-    }
-  }, [navigate, location]);
+  const atualizaUrlELocalStorage = useCallback(
+    (uuid: string) => {
+      localStorage.setItem("user-uuid", uuid);
+      const urlParams = new URLSearchParams(location.search);
+      if (!urlParams.has("uuid") || urlParams.get("uuid") !== uuid) {
+        urlParams.set("uuid", uuid);
+        navigate(`?${urlParams.toString()}`, { replace: true });
+      }
+    },
+    [navigate, location]
+  );
 
   const buscarDados = useCallback(async (uuid: string) => {
     const response = await apiRequest({
       tipo: "buscaDados",
       data: {
-        uuid
-      }
+        uuid,
+      },
     });
     if (response) {
-      const parsedData = typeof response === 'string' ? JSON.parse(response) : response;
+      const parsedData =
+        typeof response === "string" ? JSON.parse(response) : response;
       console.log(parsedData);
       setFormData(parsedData);
+      setPdfUrls(parsedData.documentos);
       localStorage.setItem(`form-data-${uuid}`, JSON.stringify(parsedData));
     }
   }, []);
@@ -64,7 +78,7 @@ export default function Formulario() {
   useEffect(() => {
     const limparDadosAntigos = (uuidAtual: string) => {
       for (const key in localStorage) {
-        if (key.startsWith('form-data-') && key !== `form-data-${uuidAtual}`) {
+        if (key.startsWith("form-data-") && key !== `form-data-${uuidAtual}`) {
           localStorage.removeItem(key);
         }
       }
@@ -72,8 +86,8 @@ export default function Formulario() {
 
     const buscarDadosEAtualizarEstado = async () => {
       const urlParams = new URLSearchParams(location.search);
-      const urlUuid = urlParams.get('uuid');
-      const storedUuid = localStorage.getItem('user-uuid');
+      const urlUuid = urlParams.get("uuid");
+      const storedUuid = localStorage.getItem("user-uuid");
 
       if (urlUuid && urlUuid !== storedUuid) {
         limparDadosAntigos(urlUuid);
@@ -97,32 +111,38 @@ export default function Formulario() {
     buscarDadosEAtualizarEstado();
   }, [location.search, buscarDados, atualizaUrlELocalStorage]);
 
-
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     const updatedFormData = { ...formData, [name]: value };
     setFormData(updatedFormData);
     if (uuid) {
-      localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
+      localStorage.setItem(
+        `form-data-${uuid}`,
+        JSON.stringify({ uuid, ...updatedFormData })
+      );
     }
   };
 
   const handleNovoCadastro = () => {
     limparLocalStorage();
     const newUuid = nanoid(6);
-    localStorage.setItem('user-uuid', newUuid);
+    localStorage.setItem("user-uuid", newUuid);
     setUuid(newUuid);
     setFormData({});
-    localStorage.setItem(`form-data-${newUuid}`, JSON.stringify({ uuid: newUuid, ...formData }));
+    localStorage.setItem(
+      `form-data-${newUuid}`,
+      JSON.stringify({ uuid: newUuid, ...formData })
+    );
 
-    urlParams.set('uuid', newUuid);
+    urlParams.set("uuid", newUuid);
     navigate(`?${urlParams.toString()}`, { replace: true });
   };
 
-
   const handleButtonComoFunciona = async () => {
     try {
-      const response = await axios.get('https://jd5ueykib6.execute-api.us-east-1.amazonaws.com/default/testeFunction');
+      const response = await axios.get(
+        "https://jd5ueykib6.execute-api.us-east-1.amazonaws.com/default/testeFunction"
+      );
       console.log(response.data);
       alert(response.data.message);
     } catch (error) {
@@ -137,6 +157,14 @@ export default function Formulario() {
     }));
   };
 
+  function generate(element: React.ReactElement) {
+    return [0, 1, 2].map((value) =>
+      React.cloneElement(element, {
+        key: value,
+      })
+    );
+  }
+
   const handleAlternarVisibilidade = (section: string) => {
     setSectionVisibility((prev) => ({
       ...prev,
@@ -144,26 +172,41 @@ export default function Formulario() {
     }));
   };
 
-  const handleInputBlur = (tipo: string) => async (event: React.FocusEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    const updatedFormData = { ...formData, [name]: value };
-    setFormData(updatedFormData);
+  const handleInputBlur =
+    (tipo: string) => async (event: React.FocusEvent<HTMLInputElement>) => {
+      const { name, value } = event.target;
+      const updatedFormData = { ...formData, [name]: value };
+      setFormData(updatedFormData);
 
-    if (uuid) {
-      localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
-      await apiRequest({
-        tipo,
-        data: {
-          uuid,
-          ...updatedFormData,
-        },
-      });
-    }
-  };
+      if (uuid) {
+        localStorage.setItem(
+          `form-data-${uuid}`,
+          JSON.stringify({ uuid, ...updatedFormData })
+        );
+        await apiRequest({
+          tipo,
+          data: {
+            uuid,
+            ...updatedFormData,
+          },
+        });
+      }
+    };
 
   return (
-    <Grid container sx={{ height: "100vh", overflow: "hidden", paddingTop: { xs: '300px', sm: '270px', md: '145px' } }}>
-      <SideBar uuid={uuid} handleButtonComoFuncionaClick={handleButtonComoFunciona} pdfUrls={pdfUrls} />
+    <Grid
+      container
+      sx={{
+        height: "100vh",
+        overflow: "hidden",
+        paddingTop: { xs: "300px", sm: "270px", md: "145px" },
+      }}
+    >
+      <SideBar
+        uuid={uuid}
+        handleButtonComoFuncionaClick={handleButtonComoFunciona}
+        pdfUrls={pdfUrls}
+      />
 
       <Grid
         item
@@ -193,10 +236,10 @@ export default function Formulario() {
         >
           <DadosPessoais
             isVisible={sectionVisibility.dadosPessoais}
-            onToggle={() => handleAlternarVisibilidade('dadosPessoais')}
-            onFilled={() => handleSecaoPreenchida('dadosPessoais')}
+            onToggle={() => handleAlternarVisibilidade("dadosPessoais")}
+            onFilled={() => handleSecaoPreenchida("dadosPessoais")}
             handleInputChange={handleInputChange}
-            handleInputBlur={handleInputBlur('dadosPessoais')}
+            handleInputBlur={handleInputBlur("dadosPessoais")}
             formData={formData}
             setPdfUrls={setPdfUrls}
             uuid={uuid}
@@ -204,18 +247,29 @@ export default function Formulario() {
 
           <Endereco
             isVisible={sectionVisibility.endereco}
-            onToggle={() => handleAlternarVisibilidade('endereco')}
-            onFilled={() => handleSecaoPreenchida('endereco')}
+            onToggle={() => handleAlternarVisibilidade("endereco")}
+            onFilled={() => handleSecaoPreenchida("endereco")}
             setFormData={setFormData}
             setPdfUrls={setPdfUrls}
             formData={formData}
             uuid={uuid}
           />
 
-          <DocumentosParaAssinar urls = { pdfUrls }/>
+          <Grid item xs={12}>
+            <SectionHeader title="Documentos gerados" />
 
+            <DocumentosParaAssinar urls={pdfUrls} />
+                        
+          </Grid>
         </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between", width: "55%", marginBottom: "20px" }}
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            width: "55%",
+            marginBottom: "20px",
+          }}
         >
           <Button
             onClick={handleNovoCadastro}

@@ -1,29 +1,149 @@
-import React from 'react';
-import Grid from "@mui/material/Grid";
-import SectionHeader from "./Cabecalho";
+import React from "react";
 import Link from "@mui/material/Link";
-import IconButton from "@mui/material/IconButton";
 import DownloadIcon from "@mui/icons-material/Download";
+import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
+import {
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+} from "@mui/material";
 
-export default function DocumentosParaAssinar({ urls }: { urls: { [key: string]: string | null } }) {
-    return (
-        <Grid item xs={12}>
-            <SectionHeader title="Documentos Aguardando Assinatura" />
+const translations: { [key: string]: string } = {
+  declaracaoIdoneidade: "8. Declaração não estar RESP INQ POL ou PROC CRIMINAL",
+  segurancaAcervo: "12. Declaração de Segurança do Acervo",
+};
 
-            {Object.keys(urls).map((urlArquivo, index) => (
-                    <Grid container alignItems="center" sx={{ mt: 2 }}>
-                    <Grid item>
-                        <Link href={urlArquivo} target="_blank" rel="noopener noreferrer" underline="hover">
-                            Segurança do Acervo
-                        </Link>
-                    </Grid>
-                    <Grid item>
-                        <IconButton href={urlArquivo} target="_blank" rel="noopener noreferrer" download>
-                            <DownloadIcon />
-                        </IconButton>
-                    </Grid>
-                </Grid>
+function translateFileNames(arquivo: string): string {
+  return translations[arquivo] || arquivo;
+}
+export default function DocumentosParaAssinar({
+  urls,
+  fullView = true,
+}: {
+  urls: { [key: string]: string | null };
+  fullView?: boolean;
+}) {
+  const missingFiles = Object.keys(translations).filter((key) => !urls[key]);
+  const hasFiles = Object.keys(urls).length > 0;
+
+  return (
+    <div>
+      {fullView && (
+        <div>
+          {missingFiles.length > 0 && (
+            <Typography sx={{ mt: 3, mb: 2 }} paragraph>
+              Documentos que poderão ser gerados após a conclusão do
+              preenchimento dos formulários acima:
+            </Typography>
+          )}
+
+          <List>
+            {missingFiles.map((arquivo) => (
+              <ListItem
+                key={arquivo + "empty"}
+                sx={{ pt: 0, pb: 0, pl: fullView ? 2 : 0 }}
+              >
+                {fullView && (
+                  <ListItemIcon sx={{ minWidth: 30 }}>
+                    <HourglassBottomIcon />
+                  </ListItemIcon>
+                )}
+                <ListItemText>
+                  <Typography sx={{ fontSize: fullView ? "1rem" : "0.9rem" }}>
+                    {translateFileNames(arquivo)}
+                  </Typography>
+                </ListItemText>
+              </ListItem>
             ))}
-        </Grid>
-    );
+          </List>
+
+          {hasFiles && (
+            <Typography variant="h6" sx={{ mt: 3, mb: 0 }} paragraph>
+              Documentos prontos:
+            </Typography>
+          )}
+        </div>
+      )}
+      <List>
+        {Object.keys(urls)
+          .reverse()
+          .map((arquivo, index) => {
+            return (
+              <ListItem
+                sx={{ pt: 0, pb: 0, pl: fullView ? 2 : 0 }}
+                key={urls[arquivo]!}
+              >
+                {fullView && (
+                  <ListItemIcon sx={{ minWidth: 30 }}>
+                    <DownloadIcon />
+                  </ListItemIcon>
+                )}
+                <Link href={urls[arquivo]!} target="_blank" underline="hover">
+                  <ListItemText>
+                    <Typography sx={{ fontSize: fullView ? "1rem" : "0.85rem" }}>
+                      {translateFileNames(arquivo)}
+                    </Typography>
+                  </ListItemText>
+                </Link>
+              </ListItem>
+            );
+          })}
+      </List>
+
+      {fullView && hasFiles && (
+        <div>
+          <Typography sx={{ mb: 5 }} paragraph>
+            Após baixar, acesse o 
+            <Link
+                href="https://www.gov.br/pt-br/servicos/assinatura-eletronica"
+                sx={{ pl: 0.5, pr: 0.5 }}
+              >
+                GOV.BR
+              </Link>
+            para realizar a assinatura digital!
+          </Typography>
+
+          <Typography variant="h6" sx={{ mb: 0 }} paragraph>
+            No futuro, pretendemos oferecer outros arquivos de forma
+            automatizada:
+          </Typography>
+
+          <List sx={{ color: "text.secondary" }}>
+            <ListItem sx={{ pt: 0, pb: 0}}>
+              <ListItemIcon sx={{ minWidth: 30 }}>
+                <HourglassBottomIcon />
+              </ListItemIcon>
+              <ListItemText primary="[Em breve] 2. Certidão de antecedente Criminal Justiça Federal" />
+            </ListItem>
+            <ListItem sx={{ pt: 0, pb: 0 }}>
+              <ListItemIcon sx={{ minWidth: 30 }}>
+                <HourglassBottomIcon />
+              </ListItemIcon>
+              <ListItemText primary="[Em breve] 4. Certidão de antecedente Criminal Justiça Federal 5 anos" />
+            </ListItem>
+            <ListItem sx={{ pt: 0, pb: 0 }}>
+              <ListItemIcon sx={{ minWidth: 30 }}>
+                <HourglassBottomIcon />
+              </ListItemIcon>
+              <ListItemText primary="[Em breve] 5. Certidão de antecedente Criminal Justiça Estadual 5 anos" />
+            </ListItem>
+            <ListItem sx={{ pt: 0, pb: 0 }}>
+              <ListItemIcon sx={{ minWidth: 30 }}>
+                <HourglassBottomIcon />
+              </ListItemIcon>
+              <ListItemText primary="[Em breve] 6. Certidão de antecedente Criminal Justiça Militar" />
+            </ListItem>
+            <ListItem sx={{ pt: 0, pb: 0 }}>
+              <ListItemIcon sx={{ minWidth: 30 }}>
+                <HourglassBottomIcon />
+              </ListItemIcon>
+              <ListItemText primary="[Em breve] 7. Certidão de antecedente Criminal Justiça Eleitoral" />
+            </ListItem>
+          </List>
+        </div>
+      )}
+    </div>
+  );
 }

@@ -14,6 +14,7 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import StepContent from '@mui/material/StepContent';
 import Paper from '@mui/material/Paper';
+import DocumentosParaAssinar from './DocumentosParaAssinar';
 
 const steps = [
   
@@ -38,7 +39,7 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
 
   const documentosGerados = Object.values(pdfUrls).filter((url) => url !== null).length;
 
-  const [activeStep, setActiveStep] = React.useState(1);
+  const [activeStep, setActiveStep] = React.useState(2);
 
   return (    
     <Grid
@@ -91,76 +92,46 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
         </Typography>
       </Box>
       
-      <Box sx={{ maxWidth: 400 }}>
-      <Stepper activeStep={activeStep} orientation="vertical">      
+      <Box>
+        <Stepper activeStep={activeStep} orientation="vertical">      
 
-        <Step>
-          <StepLabel>
-            Dados pessoais
-          </StepLabel>
-          <StepContent>
-            <Typography>Primeira etapa necessária para geração de diversos documentos</Typography>
-          </StepContent>
-        </Step>
+          <Step>
+            <StepLabel>
+              Dados pessoais
+            </StepLabel>
+            <StepContent>
+              <Typography>Primeira etapa necessária para geração de diversos documentos</Typography>
+            </StepContent>
+          </Step>
 
-        <Step>
-          <StepLabel>
-          Endereço
-          </StepLabel>
-          <StepContent>
-            <Typography>Dados referente ao seu endereço</Typography>
-          </StepContent>
-        </Step>
+          <Step>
+            <StepLabel>
+            Endereço
+            </StepLabel>
+            <StepContent>
+              <Typography>Dados referente ao seu endereço</Typography>
+            </StepContent>
+          </Step>
 
-        <Step>
-          <StepLabel>
-            Documentos já concluídos {documentosGerados}
-          </StepLabel>
-          <StepContent>
-            <Typography>{documentosGerados}</Typography>
-          </StepContent>
-        </Step>
-        
-      </Stepper>
-      {activeStep === 2 && (
-        <Paper square elevation={0} sx={{ p: 3 }}>
-          <Typography>All steps completed - you&apos;re finished</Typography>
-        </Paper>
-      )}
-    </Box>
-
-      <Typography variant="body1" sx={{ marginBottom: "10px" }}>
-        Documentos já concluídos:
-      </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          width: "100%",
-          marginBottom: "10px",
-        }}
-      >
-        <Typography
-          variant="h4"
-          sx={{ color: "#4caf50", textAlign: "center" }}
-        >
-          {documentosGerados}
-        </Typography>
+          <Step>
+            <StepLabel>
+              Documentos já concluídos ({documentosGerados})
+            </StepLabel>
+            <StepContent>
+              <DocumentosParaAssinar urls={pdfUrls} fullView={false} />            
+            </StepContent>
+          </Step>
+          
+        </Stepper>
       </Box>
-      <Typography
-        variant="body1"
-        sx={{
-          color: "#4caf50",
-          fontWeight: "bold",
-          fontSize: "1.2rem",
-          textAlign: "center",
-        }}
-      >
-        Custo:{" "}
-        <span style={{ color: "green", fontSize: "1.2rem" }}>
-          Gratuito!
-        </span>
-      </Typography>
+
+      <Typography variant="overline" sx={{ color: 'text.secondary', mt: 0.5 }}>
+        {`Custo para geração desses documentos: `}
+        <Box component="strong" sx={{ color: 'text.primary', textDecoration: 'line-through' }}>
+          R$ 0,00
+        </Box>
+      </Typography>  
+      
       <Box
         sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}
       >
@@ -178,6 +149,7 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
       <div>
         Seu ID: {uuid}
       </div>
+      
     </Grid>
   );
 };
