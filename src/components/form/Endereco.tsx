@@ -12,10 +12,32 @@ import { useState, useEffect, useRef } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import IconButton from "@mui/material/IconButton";
+import RefreshIcon from '@mui/icons-material/Refresh';
 import Collapse from "@mui/material/Collapse";
 import Box from '@mui/material/Box';
 import { apiRequest } from '../services/apiRequestService';
 import { gerarPdf } from "../services/gerarPDFService";
+import axios from "axios";
+import { keyframes } from '@mui/system';
+
+const spin = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`;
+
+const findCep = async(cep: String) => {
+    try {
+        const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
+        return response.data;
+    } catch (error) {
+        console.error("Erro ao buscar o CEP:", error);
+        return null;
+    }
+};
 
 const FormGrid = styled(Grid)(() => ({
     display: "flex",
@@ -42,7 +64,6 @@ interface EnderecoProps {
     formData: { [key: string]: any };
     setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
     setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>;
-
     uuid: string | null;
 }
 
@@ -55,6 +76,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
     const [files, setFiles] = useState<{ [key: number]: File | null }>({});
+    const [loading, setLoading] = useState(false);
 
     const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSameAddress((event.target as HTMLInputElement).value);
@@ -108,15 +130,35 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
         onToggle();
     };
 
-    const handleInputBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+    const handleInputBlur = async (event: React.FocusEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
-        const updatedFormData = {
+        let updatedFormData = {
             ...formData,
             endereco: {
                 ...formData.endereco,
                 [name]: value,
             }
         };
+                
+        if (name === "cep" && value.replace("-", "").length === 8) {
+            setLoading(true);
+            const endereco = await findCep(value);
+            setLoading(false);
+            if (endereco) {
+                updatedFormData = {
+                    ...updatedFormData,
+                    endereco: {
+                        ...updatedFormData.endereco,
+                        rua: endereco.logradouro || "",
+                        bairro: endereco.bairro || "",
+                        cidade: endereco.localidade || "",
+                        uf: endereco.uf || "",
+                        cep: endereco.cep || value,
+                    }
+                };
+            }
+        }
+        
         setFormData(updatedFormData);
 
         if (uuid) {
@@ -146,7 +188,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
             localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
         }
     };
-
+    
     return (
         <div>
             <Box sx={{ my: 2 }}>
@@ -205,16 +247,20 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                         <FormLabel htmlFor="cep" required style={{ marginTop: "22px" }}>
                             CEP
                         </FormLabel>
-                        <OutlinedInput
-                            id="cep"
-                            name="cep"
-                            type="text"
-                            autoComplete="cep"
-                            required
-                            value={(formData.endereco as unknown as { [key: string]: string })?.["cep"] || ""}
-                            onChange={handleChange}
-                            onBlur={handleInputBlur}
-                        />
+                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                            <OutlinedInput
+                                id="cep"
+                                name="cep"
+                                type="text"
+                                autoComplete="cep"
+                                required
+                                value={(formData.endereco as unknown as { [key: string]: string })?.["cep"] || ""}
+                                onChange={handleChange}
+                                onBlur={handleInputBlur}
+                                sx={{ flexGrow: 1, mr: 1 }}
+                            />
+                            <RefreshIcon sx={{ visibility: loading ? 'visible' : 'hidden', animation: `${spin} 0.8s linear infinite`}} />
+                        </Box>
                     </FormGrid>
                     <FormGrid item xs={12}>
                         <FormLabel htmlFor="rua" required>
