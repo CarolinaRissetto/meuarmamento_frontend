@@ -5,14 +5,10 @@ import {
   Box,
   Grid,
   Typography,
-  Link,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
+  IconButton
+
 } from "@mui/material";
 import { nanoid } from "nanoid";
-import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import DadosPessoais from "../components/form/DadosPessoais";
 import Endereco from "../components/form/Endereco";
 import DocumentosParaAssinar from "../components/form/DocumentosParaAssinar";
@@ -20,6 +16,11 @@ import axios from "axios";
 import SideBar from "../components/form/SideBar";
 import { apiRequest } from "../components/services/apiRequestService";
 import SectionHeader from "../components/form/Cabecalho";
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import copieId from '../assets/images/copieId.png'
+import copieSeuId from '../assets/images/copieSeuId.png'
 
 export default function Formulario() {
   const [uuid, setUuid] = useState<string | null>(null);
@@ -37,6 +38,7 @@ export default function Formulario() {
     documentosParaAssinar: true,
   });
   const [pdfUrls, setPdfUrls] = useState<{ [key: string]: string | null }>({});
+  const [buttonText, setButtonText] = useState("Clique para copiar");
 
   const limparLocalStorage = useCallback(() => {
     for (const key in localStorage) {
@@ -193,12 +195,25 @@ export default function Formulario() {
       }
     };
 
+  const handleCopyClick = () => {
+    const id = uuid as string;
+    navigator.clipboard.writeText(id).then(() => {
+      setButtonText("ID copiado!");
+      setTimeout(() => {
+        setButtonText("Clique para copiar");
+      }, 3000); // Volta ao texto original após 3 segundos
+    }).catch(err => {
+      console.error("Erro ao copiar ID: ", err);
+    });
+  };
+
+
   return (
     <Grid
       container
       sx={{
         height: "100vh",
-        overflow: "hidden",
+        // overflow: "hidden",
         paddingTop: { xs: "300px", sm: "270px", md: "145px" },
       }}
     >
@@ -255,11 +270,11 @@ export default function Formulario() {
             uuid={uuid}
           />
 
-          <Grid item xs={12}>
+          <Grid item xs={12} sx={{ padding: '10px' }}>
             <SectionHeader title="Documentos gerados" />
 
             <DocumentosParaAssinar urls={pdfUrls} />
-                        
+
           </Grid>
         </Box>
 
@@ -275,6 +290,7 @@ export default function Formulario() {
             onClick={handleNovoCadastro}
             variant="contained"
             sx={{
+              marginBottom: '40px',
               width: { xs: "100%", sm: "fit-content" },
               mt: 2,
             }}
@@ -282,6 +298,35 @@ export default function Formulario() {
             Novo Cadastro
           </Button>
         </Box>
+
+        <Box
+          sx={{
+            width: "275px",
+            position: "fixed",
+            top: "20%",
+            right: "2%",
+
+          }}
+        >
+          <Card sx={{ minWidth: 275 }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                <Typography padding={2}> 
+                  Salve seu formulário
+                </Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary">
+                Copie deu ID para retornar ao seu cadastro quando quiser.
+              </Typography>
+            </CardContent>
+            <CardActions sx={{ justifyContent: "center" }}>
+              <Button size="small" onClick={handleCopyClick}>{buttonText}</Button>
+            </CardActions>
+          </Card>
+
+        </Box>
+
+
       </Grid>
     </Grid>
   );

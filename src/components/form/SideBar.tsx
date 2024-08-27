@@ -13,17 +13,17 @@ import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import StepContent from '@mui/material/StepContent';
-import Paper from '@mui/material/Paper';
 import DocumentosParaAssinar from './DocumentosParaAssinar';
+import StepConnector from '@mui/material/StepConnector';
 
 const steps = [
-  
+
 ];
 
 interface SideBarProps {
   uuid: string | null;
   handleButtonComoFuncionaClick: () => void;
-  pdfUrls: { [key: string]: string | null }; 
+  pdfUrls: { [key: string]: string | null };
 }
 
 const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
@@ -41,7 +41,28 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
 
   const [activeStep, setActiveStep] = React.useState(2);
 
-  return (    
+  const stepLabelStyles = {
+    '& .MuiStepLabel-label': {
+      fontSize: '1.2rem',
+      paddingBottom: '16px' // Aumenta o espaço entre os labels
+    },
+    '& .MuiStepIcon-root': {
+      fontSize: '2rem',
+      color: '#549F5E', // Define a cor verde para os ícones dos steps
+      '&.Mui-completed': {
+        color: '#549F5E', // Mantém a cor verde quando o step estiver completo
+      },
+      '&.Mui-active': {
+        color: '#549F5E', // Mantém a cor verde quando o step estiver ativo
+      }
+    }
+  };
+
+  const stepContentStyles = {
+    '& .MuiTypography-root': { fontSize: '1rem' },
+  };
+
+  return (
     <Grid
       item
       xs={12}
@@ -53,6 +74,7 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
         backgroundColor: "#E3DFDC",
         borderRight: { sm: "none", md: "1px solid" },
         borderColor: { sm: "none", md: "divider" },
+        justifyContent: "center",  // Centraliza horizontalmente
         alignItems: "start",
         pt: 4,
         px: 10,
@@ -62,7 +84,7 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
         maxHeight: '100%',
       }}
     >
-      <Box
+      {/* <Box
         sx={{
           display: "flex",
           alignItems: "center",
@@ -90,48 +112,62 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
         >
           Processo de Aquisição de Arma de Fogo
         </Typography>
-      </Box>
-      
-      <Box>
-        <Stepper activeStep={activeStep} orientation="vertical">      
+      </Box> */}
 
+      <Box>
+        <Stepper
+          activeStep={activeStep}
+          orientation="vertical"
+          connector={
+            <StepConnector
+              sx={{
+                '& .MuiStepConnector-line': {
+                  borderColor: '#549F5E',  // Cor do conector
+                  borderWidth: '2px',    // Espessura do conector
+                  minHeight: '40px',     // Altura mínima do conector
+                  height: '100%'         // Faz com que o conector ocupe toda a altura disponível
+                },
+              }}
+            />
+          }
+        >
           <Step>
-            <StepLabel>
+            <StepLabel sx={stepLabelStyles}>
               Dados pessoais
             </StepLabel>
-            <StepContent>
+            <StepContent sx={stepContentStyles}>
               <Typography>Primeira etapa necessária para geração de diversos documentos</Typography>
             </StepContent>
           </Step>
 
           <Step>
-            <StepLabel>
-            Endereço
+            <StepLabel sx={stepLabelStyles}>
+              Endereço
             </StepLabel>
-            <StepContent>
+            <StepContent sx={stepContentStyles}>
               <Typography>Dados referente ao seu endereço</Typography>
             </StepContent>
           </Step>
 
           <Step>
-            <StepLabel>
+            <StepLabel sx={stepLabelStyles}>
               Documentos já concluídos ({documentosGerados})
             </StepLabel>
-            <StepContent>
-              <DocumentosParaAssinar urls={pdfUrls} fullView={false} />            
+            <StepContent sx={stepContentStyles}>
+              <DocumentosParaAssinar urls={pdfUrls} fullView={false} />
             </StepContent>
           </Step>
-          
+
         </Stepper>
       </Box>
 
-      <Typography variant="overline" sx={{ color: 'text.secondary', mt: 0.5 }}>
+      <Typography variant="overline" sx={stepContentStyles} >
         {`Custo para geração desses documentos: `}
         <Box component="strong" sx={{ color: 'text.primary', textDecoration: 'line-through' }}>
           R$ 0,00
         </Box>
-      </Typography>  
-      
+      </Typography>
+
       <Box
         sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}
       >
@@ -146,10 +182,6 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
           Como funciona
         </Button>
       </Box>
-      <div>
-        Seu ID: {uuid}
-      </div>
-      
     </Grid>
   );
 };

@@ -27,8 +27,8 @@ interface SectionHeaderProps {
 
 const SectionHeader: React.FC<SectionHeaderProps> = ({ title }) => (
   <div>
-    <Typography variant="h5" component="h2">
-      <CustomDivider>{title}</CustomDivider>
+    <Typography variant="h5" component="h2" color={"#1465C0"} align='center' >
+      {title}
     </Typography>
   </div>
 );

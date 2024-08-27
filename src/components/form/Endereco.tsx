@@ -196,8 +196,11 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                     sx={{
                         borderColor: 'primary.light',
                         '&:hover': { background: '#E3DFDC' },
-                        borderRadius: "5px"
+                        borderRadius: "5px",
+                        padding: '10px', // Adiciona padding para melhorar a aparência
                     }}
+                    onClick={handleToggle}
+
                 >
                     <Grid item xs={11}>
                         <SectionHeader title="Endereço" />
@@ -350,13 +353,13 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                             onChange={handleChange}
                             onBlur={handleInputBlur}
                         />
-                    </FormGrid>                                        
+                    </FormGrid>
                     <Grid item xs={12}>
                         <Typography sx={{ color: 'text.secondary', mt: 0.5 }}>
                             Caso queira que preparemos o documento
                             <Typography variant="overline" sx={{ pl: 1, color: 'text.primary', fontWeight: "bold" }}>
                                 "1. Comprovante de residência fixa referente aos locais de domicílio dos últimos cinco anos"
-                            </Typography>                            
+                            </Typography>
                             , faça o upload de imagem ou pdf para cada um dos anos abaixo. Com isso, conseguiremos gerar um documento a mais para você, de forma unificada e comprimida para caber no tamanho máximo permitido pelo SisGCorp!
                         </Typography>
                         <br />
@@ -364,7 +367,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                             <Button
                                 variant="contained"
                                 component="label"
-                                sx={{ mr: 1}}
+                                sx={{ mr: 1 }}
                             >
                                 {year}
                                 <input
@@ -376,7 +379,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                                 />
                             </Button>
                         ))}
-                    </Grid>                    
+                    </Grid>
                 </Grid>
             </Collapse>
         </div>

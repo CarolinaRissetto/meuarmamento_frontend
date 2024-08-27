@@ -13,7 +13,8 @@ import logo from "../../assets/images/logo-libera-defesa.png";
 
 const Header: React.FC = () => {
   return (
-    <AppBar className="mui-fixed" position="fixed">
+    <AppBar className="mui-fixed" position="fixed" elevation={0} sx={{ borderBottom: "0.4px solid #E3DFDC" }}
+    >
       <Toolbar
         sx={{
           flexDirection: { xs: "column", md: "row" },
@@ -23,8 +24,8 @@ const Header: React.FC = () => {
           height: "auto",
           backgroundColor: "#F3F0EE",
           position: "relative",
-          padding: { xs: 1, md: '25px' },
-          borderBottom: "1px solid #cccccc",
+          padding: { xs: 1, md: '27px' },
+          marginBottom: 0,  // Adicione essa linha para garantir que não haja margem inferior
           "&::after": {
             content: '""',
             position: "absolute",
@@ -32,12 +33,11 @@ const Header: React.FC = () => {
             bottom: 0,
             width: "100%",
             height: "1px",
-            backgroundColor: "#cccccc",
             display: { xs: 'none', md: 'none', lg: 'none' }
           },
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center" }} />
+        <Box sx={{ display: "flex", alignItems: "center", margin:"35px" }} />
         <Avatar
           alt="Logo"
           src={logo}
@@ -56,9 +56,10 @@ const Header: React.FC = () => {
               fontFamily: "Raleway, sans-serif",
               color: "black",
               fontSize: { xs: "1.2rem", md: "1.5rem" },
+              fontWeight:"bold"
             }}
           >
-            Autorização de Aquisição de Armas de Fogo - PF
+            Processo de Aquisição de Arma de Fogo
           </Typography>
         </Box>
         <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: "center" }}>
@@ -66,12 +67,12 @@ const Header: React.FC = () => {
             <Button
               color="inherit"
               startIcon={<AssignmentTurnedInIcon />}
-              sx={{ color: "black", marginBottom: { xs: "8px", md: 0 }, visibility: 'hidden' }}
+              sx={{ color: "black",  marginRight:"35px", marginBottom: { xs: "8px", md: 0 } }}
             >
               Serviços
             </Button>
           </a>
-          <Button color="inherit" startIcon={<HomeIcon />} sx={{ color: "black", visibility: 'hidden' }}>
+          <Button color="inherit" startIcon={<HomeIcon />} sx={{ color: "black", marginRight:"40px" }}>
             Página Inicial
           </Button>
         </Box>

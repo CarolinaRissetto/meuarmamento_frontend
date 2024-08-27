@@ -90,6 +90,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
           '&:hover': { background: '#E3DFDC' },
           borderRadius: "5px",
           cursor: 'pointer',
+          padding: '10px', // Adiciona padding para melhorar a aparência
         }}
         onClick={handleToggle}
       >
@@ -111,12 +112,15 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
             <OutlinedInput
               id="nomeCompleto"
               name="nomeCompleto"
+              placeholder="Seu nome completo"
               type="text"
               autoComplete="nomeCompleto"
               required
               value={formData["nomeCompleto"] || ""}
               onChange={handleChange}
               onBlur={handleInputBlur}
+              sx={{ backgroundColor: 'white' }} // Fundo branco
+
             />
           </FormGrid>
           <FormGrid item xs={12} md={6}>

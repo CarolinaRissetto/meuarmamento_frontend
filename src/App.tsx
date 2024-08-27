@@ -10,8 +10,19 @@ import {
 } from "@mui/material";
 
 function App() {
-  const [mode,] = React.useState<PaletteMode>('light');  
-  const defaultTheme = createTheme({ palette: { mode } });
+  const [mode,] = React.useState<PaletteMode>('light');
+  const defaultTheme = createTheme({
+    palette: { mode },
+    components: {
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            backgroundColor: 'white', // Altera o fundo para branco em todos os OutlinedInputs
+          },
+        },
+      },
+    },
+  });
 
   return (
     <div className="App" style={{ overflow: 'none' }}>
