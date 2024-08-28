@@ -25,9 +25,10 @@ interface DadosPessoaisProps {
   formData: { [key: string]: string };
   setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>;
   uuid: string | null;
+  setActiveStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFilled, handleInputChange, formData, uuid, handleInputBlur, setPdfUrls }) => {
+const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFilled, handleInputChange, formData, uuid, handleInputBlur, setPdfUrls, setActiveStep }) => {
   const [filled, setFilled] = useState(false);
   const [open, setOpen] = useState(isVisible);
   const [dirty, setDirty] = useState(false);
@@ -51,12 +52,16 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
   }, [filled, onFilled, formData]);
 
   useEffect(() => {
+    const hasNoDocuments = formData.documentos && Object.keys(formData.documentos).length === 0;
+
     const handleClickOutside = (event: MouseEvent) => {
       if (formRef.current && !formRef.current.contains(event.target as Node)) {
         if (filled && dirty) {
           if (open) {
             setOpen(false);
-            gerarPdf(formData, uuid, setPdfUrls);
+            if (hasNoDocuments) {
+              setActiveStep(1);
+            } gerarPdf(formData, uuid, setPdfUrls);
           }
         }
       }

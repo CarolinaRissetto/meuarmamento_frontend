@@ -65,9 +65,10 @@ interface EnderecoProps {
     setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
     setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>;
     uuid: string | null;
+    setActiveStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, formData, uuid, setFormData, setPdfUrls }) => {
+const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, formData, uuid, setFormData, setPdfUrls, setActiveStep }) => {
     const [filled, setFilled] = useState(false);
     const [open, setOpen] = useState(isVisible);
     const [sameAddress, setSameAddress] = useState('yes');
@@ -105,8 +106,9 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
             if (formRef.current && !formRef.current.contains(event.target as Node)) {
                 if (filled && dirty) {
                     if (open) {
-                        setOpen(false); // Colapsar a seção quando clicado fora, se preenchido
-                        gerarPdf(formData, uuid, setPdfUrls);  // Chama a função para gerar o PDF
+                        setOpen(false); 
+                        setActiveStep(2);
+                        gerarPdf(formData, uuid, setPdfUrls); 
                     }
                 }
             }

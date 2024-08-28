@@ -92,20 +92,22 @@ export default function DocumentosParaAssinar({
           })}
       </List>
 
-      {fullView && hasFiles && (
-        <div>
-          <Typography sx={{ mb: 5 }} paragraph>
-            Após baixar, acesse o
-            <Link
-              href="https://www.gov.br/pt-br/servicos/assinatura-eletronica"
-              sx={{ pl: 0.5, pr: 0.5 }}
-            >
-              GOV.BR
-            </Link>
-            para realizar a assinatura digital!
-          </Typography>
-        </div>
-      )}
-    </div>
+      {
+        fullView && hasFiles && (
+          <div>
+            <Typography sx={{ mb: 5 }} paragraph>
+              Após baixar, acesse o
+              <Link
+                href="https://www.gov.br/pt-br/servicos/assinatura-eletronica"
+                sx={{ pl: 0.5, pr: 0.5 }}
+              >
+                GOV.BR
+              </Link>
+              para realizar a assinatura digital!
+            </Typography>
+          </div>
+        )
+      }
+    </div >
   );
 }

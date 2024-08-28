@@ -18,9 +18,10 @@ interface SideBarProps {
   uuid: string | null;
   handleButtonComoFuncionaClick: () => void;
   pdfUrls: { [key: string]: string | null };
+  activeStep: number;
 }
 
-const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
+const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls, activeStep }) => {
   const handleButtonComoFunciona = async () => {
     try {
       const response = await axios.get('https://jd5ueykib6.execute-api.us-east-1.amazonaws.com/default/testeFunction');
@@ -30,19 +31,17 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
       console.error("There was an error!", error);
     }
   };
+//step de acoro com preenchimento do form
 
   const documentosGerados = pdfUrls ? Object.values(pdfUrls).filter((url) => url !== null).length : 0;
-
-  const [activeStep, ] = React.useState(2);
 
   const stepLabelStyles = {
     '& .MuiStepLabel-label': {
       fontSize: '1.2rem',
-      paddingBottom: '16px' // Aumenta o espaço entre os labels
     },
     '& .MuiStepIcon-root': {
       fontSize: '2rem',
-      color: '#549F5E', // Define a cor verde para os ícones dos steps
+      // color: '#549F5E', // Define a cor verde para os ícones dos steps
       '&.Mui-completed': {
         color: '#549F5E', // Mantém a cor verde quando o step estiver completo
       },
@@ -53,7 +52,7 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
   };
 
   const stepContentStyles = {
-    '& .MuiTypography-root': { fontSize: '1rem' },
+    '& .MuiTypography-root': { fontSize: '0.9rem' },
   };
 
   return (
@@ -68,7 +67,7 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
         backgroundColor: "#E3DFDC",
         borderRight: { sm: "none", md: "1px solid" },
         borderColor: { sm: "none", md: "divider" },
-        justifyContent: "center",  // Centraliza horizontalmente
+        justifyContent: "center",
         alignItems: "start",
         pt: 4,
         px: 10,
@@ -86,10 +85,9 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
             <StepConnector
               sx={{
                 '& .MuiStepConnector-line': {
-                  borderColor: '#549F5E',  // Cor do conector
-                  borderWidth: '2px',    // Espessura do conector
-                  minHeight: '40px',     // Altura mínima do conector
-                  height: '100%'         // Faz com que o conector ocupe toda a altura disponível
+                  color: '#549F5E',
+                  // borderColor: '#549F5E',
+                  height: '100%'         
                 },
               }}
             />

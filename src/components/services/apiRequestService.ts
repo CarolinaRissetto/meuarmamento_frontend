@@ -4,7 +4,7 @@ export const apiRequest = async (data?: any) => {
     try {
         const response = await axios({
             method: 'POST',
-            url: 'http://localhost:3001/processos/',
+            url: 'http://localhost:3001/https://fv3af26004.execute-api.us-east-1.amazonaws.com/Prod/processos/',
             headers: {
                 'Content-Type': 'application/json',
             },

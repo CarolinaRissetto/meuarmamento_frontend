@@ -35,8 +35,14 @@ export default function Formulario() {
   });
   const [pdfUrls, setPdfUrls] = useState<{ [key: string]: string | null }>({});
   const [buttonText, setButtonText] = useState("Clique para copiar");
+  const [activeStep, setActiveStep] = React.useState<number>(0);
 
-  const limparLocalStorage = useCallback((newUuid : string) => {
+  useEffect(() => {
+    const initialActiveStep = formData.documentos && Object.keys(formData.documentos).length > 0 ? 2 : 0;
+    setActiveStep(initialActiveStep);
+  }, [formData]);
+
+  const limparLocalStorage = useCallback((newUuid: string) => {
     for (const key in localStorage) {
       if (key.startsWith("form-data-") && key !== `form-data-${newUuid}`) {
         localStorage.removeItem(key);
@@ -127,7 +133,7 @@ export default function Formulario() {
     localStorage.setItem("user-uuid", newUuid);
     setUuid(newUuid);
     setFormData({});
-    setPdfUrls({}); 
+    setPdfUrls({});
     localStorage.setItem(
       `form-data-${newUuid}`,
       JSON.stringify({ uuid: newUuid, ...formData })
@@ -209,6 +215,7 @@ export default function Formulario() {
         uuid={uuid}
         handleButtonComoFuncionaClick={handleButtonComoFunciona}
         pdfUrls={pdfUrls}
+        activeStep={activeStep}
       />
 
       <Grid
@@ -246,6 +253,7 @@ export default function Formulario() {
             formData={formData}
             setPdfUrls={setPdfUrls}
             uuid={uuid}
+            setActiveStep={setActiveStep}
           />
 
           <Endereco
@@ -256,6 +264,7 @@ export default function Formulario() {
             setPdfUrls={setPdfUrls}
             formData={formData}
             uuid={uuid}
+            setActiveStep={setActiveStep}
           />
 
           <Grid item xs={12} sx={{ padding: '10px' }}>
@@ -298,8 +307,8 @@ export default function Formulario() {
         >
           <Card sx={{ minWidth: 275 }}>
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                <Typography padding={2}> 
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <Typography padding={2}>
                   Salve seu formulário
                 </Typography>
               </Box>
