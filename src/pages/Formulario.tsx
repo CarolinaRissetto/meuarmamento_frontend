@@ -156,14 +156,6 @@ export default function Formulario() {
     }));
   };
 
-  function generate(element: React.ReactElement) {
-    return [0, 1, 2].map((value) =>
-      React.cloneElement(element, {
-        key: value,
-      })
-    );
-  }
-
   const handleAlternarVisibilidade = (section: string) => {
     setSectionVisibility((prev) => ({
       ...prev,
@@ -210,7 +202,6 @@ export default function Formulario() {
       container
       sx={{
         height: "100vh",
-        // overflow: "hidden",
         paddingTop: { xs: "300px", sm: "270px", md: "145px" },
       }}
     >

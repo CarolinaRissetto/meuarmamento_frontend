@@ -75,7 +75,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
     const formRef = useRef<HTMLDivElement>(null);
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
-    const [files, setFiles] = useState<{ [key: number]: File | null }>({});
+    const [ , setFiles] = useState<{ [key: number]: File | null }>({});
     const [loading, setLoading] = useState(false);
 
     const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {

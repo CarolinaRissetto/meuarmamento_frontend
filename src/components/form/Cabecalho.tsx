@@ -1,25 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Typography, TypographyProps } from '@mui/material';
-import { styled } from '@mui/system';
-
-const CustomDivider = styled('div')({
-  display: 'flex',
-  alignItems: 'center',
-  textAlign: 'center',
-  margin: '10px 0',
-  '&::before, &::after': {
-    content: '""',
-    flex: 1,
-    borderBottom: '1px solid #A8A8A8',
-  },
-  '&::before': {
-    marginRight: '0.25em',
-  },
-  '&::after': {
-    marginLeft: '0.25em',
-  },
-});
+import { Typography } from '@mui/material';
 
 interface SectionHeaderProps {
   title: string;

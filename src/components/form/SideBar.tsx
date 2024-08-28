@@ -14,10 +14,6 @@ import StepContent from '@mui/material/StepContent';
 import DocumentosParaAssinar from './DocumentosParaAssinar';
 import StepConnector from '@mui/material/StepConnector';
 
-const steps = [
-
-];
-
 interface SideBarProps {
   uuid: string | null;
   handleButtonComoFuncionaClick: () => void;
@@ -37,7 +33,7 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
 
   const documentosGerados = pdfUrls ? Object.values(pdfUrls).filter((url) => url !== null).length : 0;
 
-  const [activeStep, setActiveStep] = React.useState(2);
+  const [activeStep, ] = React.useState(2);
 
   const stepLabelStyles = {
     '& .MuiStepLabel-label': {
