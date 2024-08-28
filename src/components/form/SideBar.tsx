@@ -2,12 +2,10 @@ import React from 'react';
 import {
   Grid,
   Box,
-  Avatar,
   Typography,
   Button
 } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import IconeCac from "../../assets/images/icone-cac.png";
 import axios from 'axios';
 import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
@@ -37,7 +35,7 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
     }
   };
 
-  const documentosGerados = Object.values(pdfUrls).filter((url) => url !== null).length;
+  const documentosGerados = pdfUrls ? Object.values(pdfUrls).filter((url) => url !== null).length : 0;
 
   const [activeStep, setActiveStep] = React.useState(2);
 
@@ -84,36 +82,6 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls }) => {
         maxHeight: '100%',
       }}
     >
-      {/* <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          marginBottom: "20px",
-          marginTop: "20px",
-          position: 'sticky'
-        }}
-      >
-        <Avatar
-          alt="IconeCac"
-          src={IconeCac}
-          sx={{
-            width: "70px",
-            height: "70px",
-            marginRight: "10px",
-          }}
-        />
-        <Typography
-          variant="h5"
-          sx={{
-            fontFamily: "Montserrat, sans-serif",
-            color: "black",
-            textAlign: "center",
-          }}
-        >
-          Processo de Aquisição de Arma de Fogo
-        </Typography>
-      </Box> */}
-
       <Box>
         <Stepper
           activeStep={activeStep}

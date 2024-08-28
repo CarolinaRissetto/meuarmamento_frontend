@@ -5,8 +5,6 @@ import {
   Box,
   Grid,
   Typography,
-  IconButton
-
 } from "@mui/material";
 import { nanoid } from "nanoid";
 import DadosPessoais from "../components/form/DadosPessoais";
@@ -19,8 +17,6 @@ import SectionHeader from "../components/form/Cabecalho";
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
-import copieId from '../assets/images/copieId.png'
-import copieSeuId from '../assets/images/copieSeuId.png'
 
 export default function Formulario() {
   const [uuid, setUuid] = useState<string | null>(null);
@@ -40,9 +36,9 @@ export default function Formulario() {
   const [pdfUrls, setPdfUrls] = useState<{ [key: string]: string | null }>({});
   const [buttonText, setButtonText] = useState("Clique para copiar");
 
-  const limparLocalStorage = useCallback(() => {
+  const limparLocalStorage = useCallback((newUuid : string) => {
     for (const key in localStorage) {
-      if (key.startsWith("form-data-")) {
+      if (key.startsWith("form-data-") && key !== `form-data-${newUuid}`) {
         localStorage.removeItem(key);
       }
     }
@@ -126,11 +122,12 @@ export default function Formulario() {
   };
 
   const handleNovoCadastro = () => {
-    limparLocalStorage();
     const newUuid = nanoid(6);
+    limparLocalStorage(newUuid);
     localStorage.setItem("user-uuid", newUuid);
     setUuid(newUuid);
     setFormData({});
+    setPdfUrls({}); 
     localStorage.setItem(
       `form-data-${newUuid}`,
       JSON.stringify({ uuid: newUuid, ...formData })
@@ -196,12 +193,12 @@ export default function Formulario() {
     };
 
   const handleCopyClick = () => {
-    const id = uuid as string;
-    navigator.clipboard.writeText(id).then(() => {
-      setButtonText("ID copiado!");
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+      setButtonText("Url copiada!");
       setTimeout(() => {
         setButtonText("Clique para copiar");
-      }, 3000); // Volta ao texto original após 3 segundos
+      }, 3000);
     }).catch(err => {
       console.error("Erro ao copiar ID: ", err);
     });
@@ -316,7 +313,7 @@ export default function Formulario() {
                 </Typography>
               </Box>
               <Typography variant="body2" color="text.secondary">
-                Copie deu ID para retornar ao seu cadastro quando quiser.
+                Copie sua url para retornar ao seu cadastro quando quiser.
               </Typography>
             </CardContent>
             <CardActions sx={{ justifyContent: "center" }}>

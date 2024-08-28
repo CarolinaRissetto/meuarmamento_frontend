@@ -19,7 +19,7 @@ function translateFileNames(arquivo: string): string {
   return translations[arquivo] || arquivo;
 }
 export default function DocumentosParaAssinar({
-  urls,
+  urls = {},
   fullView = true,
 }: {
   urls: { [key: string]: string | null };
@@ -95,53 +95,15 @@ export default function DocumentosParaAssinar({
       {fullView && hasFiles && (
         <div>
           <Typography sx={{ mb: 5 }} paragraph>
-            Após baixar, acesse o 
+            Após baixar, acesse o
             <Link
-                href="https://www.gov.br/pt-br/servicos/assinatura-eletronica"
-                sx={{ pl: 0.5, pr: 0.5 }}
-              >
-                GOV.BR
-              </Link>
+              href="https://www.gov.br/pt-br/servicos/assinatura-eletronica"
+              sx={{ pl: 0.5, pr: 0.5 }}
+            >
+              GOV.BR
+            </Link>
             para realizar a assinatura digital!
           </Typography>
-
-          <Typography variant="h6" sx={{ mb: 0 }} paragraph>
-            No futuro, pretendemos oferecer outros arquivos de forma
-            automatizada:
-          </Typography>
-
-          <List sx={{ color: "text.secondary" }}>
-            <ListItem sx={{ pt: 0, pb: 0}}>
-              <ListItemIcon sx={{ minWidth: 30 }}>
-                <HourglassBottomIcon />
-              </ListItemIcon>
-              <ListItemText primary="[Em breve] 2. Certidão de antecedente Criminal Justiça Federal" />
-            </ListItem>
-            <ListItem sx={{ pt: 0, pb: 0 }}>
-              <ListItemIcon sx={{ minWidth: 30 }}>
-                <HourglassBottomIcon />
-              </ListItemIcon>
-              <ListItemText primary="[Em breve] 4. Certidão de antecedente Criminal Justiça Federal 5 anos" />
-            </ListItem>
-            <ListItem sx={{ pt: 0, pb: 0 }}>
-              <ListItemIcon sx={{ minWidth: 30 }}>
-                <HourglassBottomIcon />
-              </ListItemIcon>
-              <ListItemText primary="[Em breve] 5. Certidão de antecedente Criminal Justiça Estadual 5 anos" />
-            </ListItem>
-            <ListItem sx={{ pt: 0, pb: 0 }}>
-              <ListItemIcon sx={{ minWidth: 30 }}>
-                <HourglassBottomIcon />
-              </ListItemIcon>
-              <ListItemText primary="[Em breve] 6. Certidão de antecedente Criminal Justiça Militar" />
-            </ListItem>
-            <ListItem sx={{ pt: 0, pb: 0 }}>
-              <ListItemIcon sx={{ minWidth: 30 }}>
-                <HourglassBottomIcon />
-              </ListItemIcon>
-              <ListItemText primary="[Em breve] 7. Certidão de antecedente Criminal Justiça Eleitoral" />
-            </ListItem>
-          </List>
         </div>
       )}
     </div>

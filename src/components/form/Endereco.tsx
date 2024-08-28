@@ -197,6 +197,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                         borderColor: 'primary.light',
                         '&:hover': { background: '#E3DFDC' },
                         borderRadius: "5px",
+                        cursor: 'pointer',
                         padding: '10px', // Adiciona padding para melhorar a aparência
                     }}
                     onClick={handleToggle}

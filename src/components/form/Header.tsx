@@ -42,8 +42,8 @@ const Header: React.FC = () => {
           alt="Logo"
           src={logo}
           sx={{
-            width: "80px",
-            height: "80px",
+            width: "90px",
+            height: "90px",
             objectFit: "contain",
           }}
         />
