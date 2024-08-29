@@ -52,7 +52,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
   }, [filled, onFilled, formData]);
 
   useEffect(() => {
-    const hasNoDocuments = formData.documentos && Object.keys(formData.documentos).length === 0;
+    const hasNoDocuments = !formData.documentos || Object.keys(formData.documentos).length === 0;
 
     const handleClickOutside = (event: MouseEvent) => {
       if (formRef.current && !formRef.current.contains(event.target as Node)) {

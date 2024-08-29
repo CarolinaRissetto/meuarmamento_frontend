@@ -44,7 +44,8 @@ export default function Formulario() {
   useEffect(() => {
     const initialActiveStep = formData.documentos && Object.keys(formData.documentos).length > 0 ? 2 : 0;
     setActiveStep(initialActiveStep);
-  }, [formData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const limparLocalStorage = useCallback((newUuid: string) => {
     for (const key in localStorage) {
@@ -260,12 +261,12 @@ export default function Formulario() {
               sx={{
                 paddingBottom: 2,
                 pt: { xs: '30px', sm: '20px' },
-                width: '100%', 
-                position: 'sticky', 
-                top: '0', 
-                zIndex: 1000, 
-                backgroundColor: '#F3F0EE', 
-                paddingLeft: { xs: 1, sm: 1 }, 
+                width: '100%',
+                position: 'sticky',
+                top: '0',
+                zIndex: 1000,
+                backgroundColor: '#F3F0EE',
+                paddingLeft: { xs: 1, sm: 1 },
                 paddingRight: { xs: 1, sm: 1 },
               }}
             >
@@ -278,7 +279,7 @@ export default function Formulario() {
               </Stepper>
             </Grid>
           )}
-          
+
           <DadosPessoais
             isVisible={sectionVisibility.dadosPessoais}
             onToggle={() => handleAlternarVisibilidade("dadosPessoais")}
@@ -302,7 +303,7 @@ export default function Formulario() {
             setActiveStep={setActiveStep}
           />
 
-          <Grid item xs={12} sx={{ padding: '10px', paddingBottom:0 }}>
+          <Grid item xs={12} sx={{ padding: '10px', paddingBottom: 0 }}>
             <SectionHeader title="Documentos gerados" />
 
             <DocumentosParaAssinar urls={pdfUrls} />
@@ -337,8 +338,8 @@ export default function Formulario() {
             position: "fixed",
             top: "20%",
             right: "2%",
-            zIndex: 2000, 
-            paddingTop: { xs: "90px", sm: "55px", md: "0%", lg: "0%" }, 
+            zIndex: 2000,
+            paddingTop: { xs: "90px", sm: "55px", md: "0%", lg: "0%" },
 
 
           }}
@@ -348,7 +349,7 @@ export default function Formulario() {
             <Button size="small" onClick={handleCopyClick} sx={{
               backgroundColor: 'white',
               marginLeft: 'auto',
-              display: 'block', 
+              display: 'block',
               width: '120px',
             }}>{buttonText}</Button>
 
