@@ -17,7 +17,22 @@ function App() {
       MuiOutlinedInput: {
         styleOverrides: {
           root: {
-            backgroundColor: 'white', // Altera o fundo para branco em todos os OutlinedInputs
+            backgroundColor: 'white',
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              borderColor: '#ced4da',
+            },
+            '&.Mui-focused': {
+              backgroundColor: 'white',
+              '& .MuiOutlinedInput-notchedOutline': {
+              },
+            },
+          },
+          input: {
+            backgroundColor: 'white',
+            '&:-webkit-autofill': {
+              WebkitBoxShadow: '0 0 0 1000px white inset',
+              WebkitTextFillColor: 'inherit',
+            },
           },
         },
       },

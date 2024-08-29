@@ -253,7 +253,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                         <FormLabel htmlFor="cep" required style={{ marginTop: "22px" }}>
                             CEP
                         </FormLabel>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <OutlinedInput
                                 id="cep"
                                 name="cep"
@@ -263,7 +263,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                                 value={(formData.endereco as unknown as { [key: string]: string })?.["cep"] || ""}
                                 onChange={handleChange}
                                 onBlur={handleInputBlur}
-                                sx={{ flexGrow: 1, mr: 1 }}
+                                sx={{ flexGrow: 1 }}
                             />
                             <RefreshIcon sx={{ visibility: loading ? 'visible' : 'hidden', animation: `${spin} 0.8s linear infinite`}} />
                         </Box>
