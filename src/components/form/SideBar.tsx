@@ -22,6 +22,7 @@ interface SideBarProps {
 }
 
 const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls, activeStep }) => {
+
   const handleButtonComoFunciona = async () => {
     try {
       const response = await axios.get('https://jd5ueykib6.execute-api.us-east-1.amazonaws.com/default/testeFunction');
@@ -31,7 +32,6 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls, activeStep }) => {
       console.error("There was an error!", error);
     }
   };
-//step de acoro com preenchimento do form
 
   const documentosGerados = pdfUrls ? Object.values(pdfUrls).filter((url) => url !== null).length : 0;
 
@@ -41,7 +41,7 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls, activeStep }) => {
     },
     '& .MuiStepIcon-root': {
       fontSize: '2rem',
-      // color: '#549F5E', // Define a cor verde para os ícones dos steps
+
       '&.Mui-completed': {
         color: '#549F5E', // Mantém a cor verde quando o step estiver completo
       },
@@ -86,8 +86,7 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls, activeStep }) => {
               sx={{
                 '& .MuiStepConnector-line': {
                   color: '#549F5E',
-                  // borderColor: '#549F5E',
-                  height: '100%'         
+                  height: '100%'
                 },
               }}
             />

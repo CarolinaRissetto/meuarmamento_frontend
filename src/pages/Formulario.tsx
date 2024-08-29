@@ -17,6 +17,10 @@ import SectionHeader from "../components/form/Cabecalho";
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
+import { useMediaQuery } from '@mui/material';
+import Stepper from '@mui/material/Stepper';
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
 
 export default function Formulario() {
   const [uuid, setUuid] = useState<string | null>(null);
@@ -34,7 +38,7 @@ export default function Formulario() {
     documentosParaAssinar: true,
   });
   const [pdfUrls, setPdfUrls] = useState<{ [key: string]: string | null }>({});
-  const [buttonText, setButtonText] = useState("Clique para copiar");
+  const [buttonText, setButtonText] = useState("Clique para copiar sua url");
   const [activeStep, setActiveStep] = React.useState<number>(0);
 
   useEffect(() => {
@@ -195,22 +199,26 @@ export default function Formulario() {
     navigator.clipboard.writeText(url).then(() => {
       setButtonText("Url copiada!");
       setTimeout(() => {
-        setButtonText("Clique para copiar");
+        setButtonText("Clique para copiar sua url");
       }, 3000);
     }).catch(err => {
       console.error("Erro ao copiar ID: ", err);
     });
   };
 
+  const isScreenSmall = useMediaQuery('(max-width:1500px)');
+  const isExtraSmallScreen = useMediaQuery('(max-width:900px)');
+  const steps = ['Dados pessoais', 'Endereço', 'Documentos já concluídos'];
 
   return (
     <Grid
       container
       sx={{
         height: "100vh",
-        paddingTop: { xs: "300px", sm: "270px", md: "145px" },
+        paddingTop: { xs: "340px", sm: "330px", md: "145px" },
       }}
     >
+
       <SideBar
         uuid={uuid}
         handleButtonComoFuncionaClick={handleButtonComoFunciona}
@@ -228,11 +236,11 @@ export default function Formulario() {
           flexDirection: "column",
           maxWidth: "auto",
           width: "100%",
-          maxHeight: "85vh",
+          maxHeight: { xs: "65vh", md: "85vh" },
           backgroundColor: "#F3F0EE",
           overflowY: "scroll",
           alignItems: "start",
-          pt: { xs: 2, sm: 4 },
+          pt: { xs: 2, sm: 2 },
           px: { xs: 2, sm: 10 },
           gap: { xs: 4, md: 8 },
         }}
@@ -244,6 +252,33 @@ export default function Formulario() {
             maxWidth: { sm: "100%", md: 600 },
           }}
         >
+
+          {isExtraSmallScreen && (
+            <Grid
+              item
+              xs={12}
+              sx={{
+                paddingBottom: 2,
+                pt: { xs: '30px', sm: '20px' },
+                width: '100%', 
+                position: 'sticky', 
+                top: '0', 
+                zIndex: 1000, 
+                backgroundColor: '#F3F0EE', 
+                paddingLeft: { xs: 1, sm: 1 }, 
+                paddingRight: { xs: 1, sm: 1 },
+              }}
+            >
+              <Stepper activeStep={activeStep} alternativeLabel>
+                {steps.map((label, index) => (
+                  <Step key={index}>
+                    <StepLabel>{label}</StepLabel>
+                  </Step>
+                ))}
+              </Stepper>
+            </Grid>
+          )}
+          
           <DadosPessoais
             isVisible={sectionVisibility.dadosPessoais}
             onToggle={() => handleAlternarVisibilidade("dadosPessoais")}
@@ -267,7 +302,7 @@ export default function Formulario() {
             setActiveStep={setActiveStep}
           />
 
-          <Grid item xs={12} sx={{ padding: '10px' }}>
+          <Grid item xs={12} sx={{ padding: '10px', paddingBottom:0 }}>
             <SectionHeader title="Documentos gerados" />
 
             <DocumentosParaAssinar urls={pdfUrls} />
@@ -302,29 +337,41 @@ export default function Formulario() {
             position: "fixed",
             top: "20%",
             right: "2%",
+            zIndex: 2000, 
+            paddingTop: { xs: "90px", sm: "55px", md: "0%", lg: "0%" }, 
+
 
           }}
         >
-          <Card sx={{ minWidth: 275 }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <Typography padding={2}>
-                  Salve seu formulário
-                </Typography>
-              </Box>
-              <Typography variant="body2" color="text.secondary">
-                Copie sua url para retornar ao seu cadastro quando quiser.
-              </Typography>
-            </CardContent>
-            <CardActions sx={{ justifyContent: "center" }}>
-              <Button size="small" onClick={handleCopyClick}>{buttonText}</Button>
-            </CardActions>
-          </Card>
 
+          {isScreenSmall ? (
+            <Button size="small" onClick={handleCopyClick} sx={{
+              backgroundColor: 'white',
+              marginLeft: 'auto',
+              display: 'block', 
+              width: '120px',
+            }}>{buttonText}</Button>
+
+          ) : (
+            < Card sx={{ minWidth: 275 }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <Typography padding={2}>
+                    Salve seu formulário
+                  </Typography>
+                </Box>
+                <Typography variant="body2" color="text.secondary">
+                  Copie sua url para retornar ao seu cadastro quando quiser.
+                </Typography>
+              </CardContent>
+              <CardActions sx={{ justifyContent: "center" }}>
+                <Button size="small" onClick={handleCopyClick}>{buttonText}</Button>
+              </CardActions>
+            </Card>
+          )}
         </Box>
 
-
       </Grid>
-    </Grid>
+    </Grid >
   );
 }
