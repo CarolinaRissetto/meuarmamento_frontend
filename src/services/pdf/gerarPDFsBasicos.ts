@@ -1,4 +1,4 @@
-import { apiRequest } from './apiRequestService';
+import { apiRequest } from '../api/apiRequestService';
 
 const camposNecessarios = [
     'nomeCompleto',

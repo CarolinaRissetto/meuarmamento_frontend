@@ -61,11 +61,3 @@ Para detalhes específicos sobre cada etapa, consulte a documentação da AWS.
 * [AWS CloudFront](https://aws.amazon.com/cloudfront/) - Rede de distribuição de conteúdo
 * [AWS API Gateway](https://aws.amazon.com/api-gateway/) - Serviço para criar, publicar, manter, monitorar e proteger APIs
 * [AWS Lambda](https://aws.amazon.com/lambda/) - Serviço de computação serverless
-
-
-
-
-
-
-
-
