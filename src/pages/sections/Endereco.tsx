@@ -204,13 +204,10 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                     onClick={handleToggle}
 
                 >
-                    {/* <Grid item xs={11}>
-                        <SectionHeader title="Endereço" />
-                    </Grid> */}
 
                     <Grid item xs={11}>
                         <Typography variant="h5" component="h2" color={"#1465C0"} align='center'>
-                            Dados Pessoais
+                            Endereço
                         </Typography>
                     </Grid>
                     <Grid item xs={1}>

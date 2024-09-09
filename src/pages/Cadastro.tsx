@@ -13,7 +13,6 @@ import DocumentosParaAssinar from "./sections/DocumentosParaAssinar";
 import axios from "axios";
 import SideBar from "../components/SideBar";
 import { apiRequest } from "../services/api/apiRequestService";
-import SectionHeader from "../components/Cabecalho";
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
@@ -327,7 +326,10 @@ export default function Formulario() {
           />
 
           <Grid item xs={12} sx={{ padding: '10px', paddingBottom: 0 }}>
-            <SectionHeader title="Documentos gerados" />
+            
+              <Typography variant="h5" component="h2" color={"#1465C0"} align='center'>
+                Documentos Gerados
+              </Typography>
 
             <DocumentosParaAssinar urls={pdfUrls} />
 
