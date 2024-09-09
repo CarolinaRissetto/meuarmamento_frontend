@@ -5,11 +5,11 @@ import Grid from "@mui/material/Grid";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import { styled } from "@mui/system";
 import Collapse from "@mui/material/Collapse";
-import SectionHeader from "../../components/Cabecalho";
 import IconButton from "@mui/material/IconButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { gerarPdf } from "../../services/pdf/gerarPDFsBasicos";
+import { Typography } from '@mui/material';
 
 const FormGrid = styled(Grid)(() => ({
   display: "flex",
@@ -95,12 +95,14 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
           '&:hover': { background: '#E3DFDC' },
           borderRadius: "5px",
           cursor: 'pointer',
-          padding: '10px', 
+          padding: '10px',
         }}
         onClick={handleToggle}
       >
         <Grid item xs={11}>
-          <SectionHeader title="Dados Pessoais" />
+          <Typography variant="h5" component="h2" color={"#1465C0"} align='center'>
+            Dados Pessoais
+          </Typography>
         </Grid>
         <Grid item xs={1}>
           <IconButton>

@@ -1,7 +1,7 @@
 import React from 'react';
 import Formulario from './pages/Cadastro'
 import "./syles.css";
-import Header from './components/Header';
+import Header from './components/HeaderDesktop';
 import {
   CssBaseline,
   createTheme,

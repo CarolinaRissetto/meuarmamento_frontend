@@ -6,7 +6,6 @@ import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { styled } from "@mui/system";
-import SectionHeader from "../../components/Cabecalho";
 import { Button, Typography } from "@mui/material";
 import { useState, useEffect, useRef } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -29,7 +28,7 @@ const spin = keyframes`
   }
 `;
 
-const findCep = async(cep: String) => {
+const findCep = async (cep: String) => {
     try {
         const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
         return response.data;
@@ -76,7 +75,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
     const formRef = useRef<HTMLDivElement>(null);
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
-    const [ , setFiles] = useState<{ [key: number]: File | null }>({});
+    const [, setFiles] = useState<{ [key: number]: File | null }>({});
     const [loading, setLoading] = useState(false);
 
     const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,9 +105,9 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
             if (formRef.current && !formRef.current.contains(event.target as Node)) {
                 if (filled && dirty) {
                     if (open) {
-                        setOpen(false); 
+                        setOpen(false);
                         setActiveStep(2);
-                        gerarPdf(formData, uuid, setPdfUrls); 
+                        gerarPdf(formData, uuid, setPdfUrls);
                     }
                 }
             }
@@ -141,7 +140,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                 [name]: value,
             }
         };
-                
+
         if (name === "cep" && value.replace("-", "").length === 8) {
             setLoading(true);
             const endereco = await findCep(value);
@@ -160,7 +159,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                 };
             }
         }
-        
+
         setFormData(updatedFormData);
 
         if (uuid) {
@@ -190,7 +189,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
             localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
         }
     };
-    
+
     return (
         <div>
             <Box sx={{ my: 2 }}>
@@ -205,8 +204,14 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                     onClick={handleToggle}
 
                 >
-                    <Grid item xs={11}>
+                    {/* <Grid item xs={11}>
                         <SectionHeader title="Endereço" />
+                    </Grid> */}
+
+                    <Grid item xs={11}>
+                        <Typography variant="h5" component="h2" color={"#1465C0"} align='center'>
+                            Dados Pessoais
+                        </Typography>
                     </Grid>
                     <Grid item xs={1}>
                         <IconButton onClick={handleToggle}>
@@ -265,7 +270,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                                 onBlur={handleInputBlur}
                                 sx={{ flexGrow: 1 }}
                             />
-                            <RefreshIcon sx={{ visibility: loading ? 'visible' : 'hidden', animation: `${spin} 0.8s linear infinite`}} />
+                            <RefreshIcon sx={{ visibility: loading ? 'visible' : 'hidden', animation: `${spin} 0.8s linear infinite` }} />
                         </Box>
                     </FormGrid>
                     <FormGrid item xs={12}>
@@ -370,7 +375,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                             <Button
                                 variant="contained"
                                 component="label"
-                            sx={{ mr: 1, marginTop:'5px'}}
+                                sx={{ mr: 1, marginTop: '5px' }}
                             >
                                 {year}
                                 <input
