@@ -8,14 +8,11 @@ import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import logo from "../assets/images/logo-libera-defesa.png";
 import HomeIcon from "@mui/icons-material/Home";
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
-
-const pages = ['Serviços', 'Página Inicial', 'Copiar Url'];
 
 function HeaderMobile() {
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
@@ -30,7 +27,7 @@ function HeaderMobile() {
 
     return (
         <AppBar position="static" sx={{
-            backgroundColor: "#F3F0EE", marginBottom: 0, // Certifique-se de que não há margem inferior
+            backgroundColor: "#F3F0EE",
         }}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
@@ -58,18 +55,6 @@ function HeaderMobile() {
                     >
                         Processo de Aquisição de Arma de Fogo
                     </Typography>
-
-                    <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-                        {pages.map((page) => (
-                            <Button
-                                key={page}
-                                onClick={handleCloseNavMenu}
-                                sx={{ my: 2, color: 'white', display: 'block' }}
-                            >
-                                {page}
-                            </Button>
-                        ))}
-                    </Box>
 
                     <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
                         <IconButton
@@ -101,18 +86,18 @@ function HeaderMobile() {
                         >
                             <a href="https://liberadefesa-com-br.webflow.io/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
                                 <MenuItem onClick={handleCloseNavMenu}>
-                                    <AssignmentTurnedInIcon sx={{ marginRight: 1, color: "black" }} /> {/* Ícone "Serviços" */}
+                                    <AssignmentTurnedInIcon sx={{ marginRight: 1, color: "black" }} /> 
                                     <Typography sx={{ textAlign: 'center', color: "black" }}>Serviços</Typography>
                                 </MenuItem>
                             </a>
-                            <MenuItem onClick={handleCloseNavMenu}>
-                                <HomeIcon sx={{ marginRight: 1, color: "black" }} /> {/* Ícone "Página Inicial" */}
 
+                            <MenuItem onClick={handleCloseNavMenu}>
+                                <HomeIcon sx={{ marginRight: 1, color: "black" }} /> 
                                 <Typography sx={{ textAlign: 'center' }}>Página Inicial</Typography>
                             </MenuItem>
 
                             <MenuItem onClick={handleCloseNavMenu} >
-                                <FileCopyIcon sx={{ marginRight: 1, color: "black" }} /> {/* Ícone "Copiar Url" */}
+                                <FileCopyIcon sx={{ marginRight: 1, color: "black" }} />
                                 <Typography sx={{ textAlign: 'center' }}>Copiar Url</Typography>
                             </MenuItem>
                         </Menu>

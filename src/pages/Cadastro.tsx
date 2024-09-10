@@ -11,15 +11,13 @@ import DadosPessoais from "./sections/DadosPessoais";
 import Endereco from "./sections/Endereco";
 import DocumentosParaAssinar from "./sections/DocumentosParaAssinar";
 import axios from "axios";
-import SideBar from "../components/SideBar";
+import SideBar from "../components/sideBar/SideBar";
 import { apiRequest } from "../services/api/apiRequestService";
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import { useMediaQuery } from '@mui/material';
-import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
+import StepperMobile from '../components/StepperMobile'
 
 export default function Formulario() {
   const [uuid, setUuid] = useState<string | null>(null);
@@ -81,7 +79,7 @@ export default function Formulario() {
 
       } catch (error) {
         console.error("Erro ao fazer o parse do JSON:", error);
-        return; // Se o parsing falhar, saia da função
+        return; 
       }
     }
   }, []);
@@ -121,7 +119,6 @@ export default function Formulario() {
 
     buscarDadosEAtualizarEstado();
   }, [location.search, buscarDados, atualizaUrlELocalStorage]);
-  //colocar pdfurl como dependencia?
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -269,38 +266,10 @@ export default function Formulario() {
         >
 
           {isExtraSmallScreen && (
-            <Grid
-              item
-              xs={12}
-              sx={{
-                paddingBottom: 1,
-                paddingTop: 2,
-                width: '100%',
-                position: 'sticky',
-                top: '0',
-                zIndex: 1000,
-                backgroundColor: '#F3F0EE',
-                paddingLeft: { xs: 1, sm: 1 },
-                paddingRight: { xs: 1, sm: 1 },
-              }}
-            >
-              <Stepper activeStep={activeStep} alternativeLabel>
-                {steps.map((label, index) => (
-                  <Step key={index}>
-                    <StepLabel
-                      sx={{
-                        '& .MuiStepLabel-label': {
-                          fontSize: '12px'
-                        },
-                      }}
-                    >{label}</StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
-            </Grid>
-          )}
 
-          {/* não parece ter o documentos para ssinar aqui */}
+            <StepperMobile activeStep={activeStep} />
+
+          )}
 
           <DadosPessoais
             isVisible={sectionVisibility.dadosPessoais}
@@ -326,10 +295,10 @@ export default function Formulario() {
           />
 
           <Grid item xs={12} sx={{ padding: '10px', paddingBottom: 0 }}>
-            
-              <Typography variant="h5" component="h2" color={"#1465C0"} align='center'>
-                Documentos Gerados
-              </Typography>
+
+            <Typography variant="h5" component="h2" color={"#1465C0"} align='center'>
+              Documentos Gerados
+            </Typography>
 
             <DocumentosParaAssinar urls={pdfUrls} />
 
