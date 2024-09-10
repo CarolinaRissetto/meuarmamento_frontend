@@ -4,20 +4,13 @@ import {
   Typography,
   Button,
   Box,
-  useMediaQuery,
   Avatar
 } from "@mui/material";
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import HomeIcon from "@mui/icons-material/Home";
 import logo from "../../assets/images/logo-libera-defesa.png";
-import HeaderMobile from "./HeaderMobile";
 
 const HeaderDesktop: React.FC = () => {
-  const isMobile = useMediaQuery('(max-width:899px)');
-
-  if (isMobile) {
-    return <HeaderMobile />;
-  }
 
   return (
     <AppBar className="mui-fixed" position="fixed" elevation={0} sx={{ borderBottom: "0.4px solid #E3DFDC" }}>
