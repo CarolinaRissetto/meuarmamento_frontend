@@ -12,7 +12,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import logo from "../assets/images/logo-libera-defesa.png";
 import HeaderMobile from "./HeaderMobile";
 
-const Header: React.FC = () => {
+const HeaderDesktop: React.FC = () => {
   const isMobile = useMediaQuery('(max-width:899px)');
 
   if (isMobile) {
@@ -20,8 +20,7 @@ const Header: React.FC = () => {
   }
 
   return (
-    <AppBar className="mui-fixed" position="fixed" elevation={0} sx={{ borderBottom: "0.4px solid #E3DFDC" }}
-    >
+    <AppBar className="mui-fixed" position="fixed" elevation={0} sx={{ borderBottom: "0.4px solid #E3DFDC" }}>
       <Toolbar
         sx={{
           flexDirection: { xs: "column", md: "row" },
@@ -89,4 +88,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header;
+export default HeaderDesktop;
