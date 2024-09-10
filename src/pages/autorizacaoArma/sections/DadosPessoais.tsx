@@ -8,7 +8,7 @@ import Collapse from "@mui/material/Collapse";
 import IconButton from "@mui/material/IconButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { gerarPdf } from "../../services/pdf/gerarPDFsBasicos";
+import { gerarPdf } from "../../../services/pdf/gerarPDFsBasicos";
 import { Typography } from '@mui/material';
 
 const FormGrid = styled(Grid)(() => ({

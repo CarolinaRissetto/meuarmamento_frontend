@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import HomeIcon from "@mui/icons-material/Home";
-import logo from "../assets/images/logo-libera-defesa.png";
+import logo from "../../assets/images/logo-libera-defesa.png";
 import HeaderMobile from "./HeaderMobile";
 
 const HeaderDesktop: React.FC = () => {

@@ -11,13 +11,13 @@ import DadosPessoais from "./sections/DadosPessoais";
 import Endereco from "./sections/Endereco";
 import DocumentosParaAssinar from "./sections/DocumentosParaAssinar";
 import axios from "axios";
-import SideBar from "../components/sideBar/SideBar";
-import { apiRequest } from "../services/api/apiRequestService";
+import SideBar from "../../components/sideBar/SideBar";
+import { apiRequest } from "../../services/api/apiRequestService";
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import { useMediaQuery } from '@mui/material';
-import StepperMobile from '../components/StepperMobile'
+import StepperMobile from '../../components/stepper/StepperMobile'
 
 export default function Cadastro() {
   const [uuid, setUuid] = useState<string | null>(null);

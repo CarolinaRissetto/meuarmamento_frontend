@@ -1,7 +1,7 @@
 import React from 'react';
-import Cadastro from './pages/Cadastro'
+import Cadastro from './pages/autorizacaoArma'
 import "./styles/styles.css";
-import HeaderDesktop from './components/HeaderDesktop';
+import HeaderDesktop from './components/header/HeaderDesktop';
 import {
   CssBaseline,
   ThemeProvider,

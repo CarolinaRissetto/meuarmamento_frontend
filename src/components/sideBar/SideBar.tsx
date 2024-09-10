@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import axios from 'axios';
-import StepperDesktop from './StepperDesktop'
+import StepperDesktop from '../stepper/StepperDesktop'
 
 interface SideBarProps {
   uuid: string | null;

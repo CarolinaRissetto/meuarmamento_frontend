@@ -7,8 +7,7 @@ import {
     Typography,
 } from '@mui/material';
 import StepConnector from '@mui/material/StepConnector';
-import DocumentosParaAssinar from '../../pages/sections/DocumentosParaAssinar';
-
+import DocumentosParaAssinar from '../../pages/autorizacaoArma/sections/DocumentosParaAssinar';
 
 interface StepperDesktopProps {
     activeStep: number;

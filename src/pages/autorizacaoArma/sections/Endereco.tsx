@@ -14,8 +14,8 @@ import IconButton from "@mui/material/IconButton";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import Collapse from "@mui/material/Collapse";
 import Box from '@mui/material/Box';
-import { apiRequest } from '../../services/api/apiRequestService';
-import { gerarPdf } from "../../services/pdf/gerarPDFsBasicos";
+import { apiRequest } from '../../../services/api/apiRequestService';
+import { gerarPdf } from "../../../services/pdf/gerarPDFsBasicos";
 import axios from "axios";
 import { keyframes } from '@mui/system';
 
