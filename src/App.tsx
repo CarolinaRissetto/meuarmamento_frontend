@@ -1,18 +1,18 @@
 import React from 'react';
-import Cadastro from './pages/Cadastro'
+import Cadastro from './pages/autorizacaoArma'
 import "./styles/styles.css";
-import HeaderDesktop from './components/HeaderDesktop';
 import {
   CssBaseline,
   ThemeProvider,
 } from "@mui/material";
 import defaultTheme from './styles/theme'
+import Header from './components/header/Header';
 
 function App() {
   return (
     <div className="App" style={{ overflow: 'none' }}>
       <ThemeProvider theme={defaultTheme}>
-        <HeaderDesktop />
+        <Header />
         <CssBaseline />
         <Cadastro />
       </ThemeProvider>

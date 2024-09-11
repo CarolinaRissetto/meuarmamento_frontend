@@ -9,7 +9,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
 import MenuItem from '@mui/material/MenuItem';
-import logo from "../assets/images/logo-libera-defesa.png";
+import logo from "../../assets/images/logo-libera-defesa.png";
 import HomeIcon from "@mui/icons-material/Home";
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import FileCopyIcon from '@mui/icons-material/FileCopy';

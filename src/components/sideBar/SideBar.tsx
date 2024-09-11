@@ -7,17 +7,20 @@ import {
 } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import axios from 'axios';
-import StepperDesktop from './StepperDesktop'
+import StepperDesktop from '../stepper/StepperDesktop'
 
-interface SideBarProps {
-  uuid: string | null;
-  handleButtonComoFuncionaClick: () => void;
-  onClick: () => void;
-  pdfUrls: { [key: string]: string | null };
-  activeStep: number;
+interface StepContentProps {
+  label: string;
+  description: string;
+  content?: React.ReactNode;
 }
 
-const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls, activeStep, onClick }) => {
+interface SideBarProps {
+  activeStep: number;
+  steps: StepContentProps[];
+}
+
+const SideBar: React.FC<SideBarProps> = ({ activeStep, steps }) => {
 
   const handleButtonComoFunciona = async () => {
     try {
@@ -53,7 +56,7 @@ const SideBar: React.FC<SideBarProps> = ({ uuid, pdfUrls, activeStep, onClick })
     >
 
       <Box>
-        <StepperDesktop activeStep={activeStep} pdfUrls={pdfUrls} /> 
+        <StepperDesktop activeStep={activeStep} steps={steps} />
       </Box>
 
       <Typography variant="overline" sx={{ fontSize: '0.9rem' }} >
