@@ -79,7 +79,7 @@ export default function Cadastro() {
 
       } catch (error) {
         console.error("Erro ao fazer o parse do JSON:", error);
-        return; 
+        return;
       }
     }
   }, []);
@@ -213,8 +213,25 @@ export default function Cadastro() {
 
   const isScreenSmall = useMediaQuery('(max-width:1500px)');
   const isExtraSmallScreen = useMediaQuery('(max-width:899px)');
-  const steps = ['Dados pessoais', 'Endereço', 'Documentos já concluídos'];
   const buttonRef = useRef(null);
+
+  const steps = ['Dados pessoais', 'Endereço', 'Documentos já concluídos'];
+
+  const stepsWithContent = [
+    {
+      label: 'Dados pessoais',
+      description: 'Primeira etapa necessária para geração de diversos documentos',
+    },
+    {
+      label: 'Endereço',
+      description: 'Dados referentes ao seu endereço',
+    },
+    {
+      label: 'Documentos já concluídos',
+      description: 'Veja os documentos que já foram gerados.',
+      content: <DocumentosParaAssinar urls={pdfUrls} fullView={false} />
+    }
+  ];
 
   return (
     <Grid
@@ -230,11 +247,8 @@ export default function Cadastro() {
     >
 
       <SideBar
-        uuid={uuid}
-        handleButtonComoFuncionaClick={handleButtonComoFunciona}
-        pdfUrls={pdfUrls}
         activeStep={activeStep}
-        onClick={handleCopyClick}
+        steps={stepsWithContent}
       />
 
       <Grid
@@ -267,7 +281,7 @@ export default function Cadastro() {
 
           {isExtraSmallScreen && (
 
-            <StepperMobile activeStep={activeStep} />
+            <StepperMobile activeStep={activeStep} steps={steps} />
 
           )}
 

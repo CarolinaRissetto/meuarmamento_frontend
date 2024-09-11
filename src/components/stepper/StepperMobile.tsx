@@ -1,9 +1,12 @@
 import React from 'react';
 import { Grid, Stepper, Step, StepLabel } from '@mui/material';
 
-const steps = ['Dados pessoais', 'Endereço', 'Documentos já concluídos'];
+interface StepperMobileProps {
+    activeStep: number;
+    steps: string[];
+}
 
-const StepperMobile = ({ activeStep } : {activeStep: number}) => {
+const StepperMobile: React.FC<StepperMobileProps> = ({ activeStep, steps }) => {
     return (
         <Grid
             item

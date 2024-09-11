@@ -7,15 +7,21 @@ import {
     Typography,
 } from '@mui/material';
 import StepConnector from '@mui/material/StepConnector';
-import DocumentosParaAssinar from '../../pages/autorizacaoArma/sections/DocumentosParaAssinar';
+
+
+interface StepContentProps {
+    label: string;
+    description: string;
+    content?: React.ReactNode;
+}
 
 interface StepperDesktopProps {
     activeStep: number;
-    pdfUrls: { [key: string]: string | null };
+    steps: StepContentProps[];
 }
 
-const StepperDesktop: React.FC<StepperDesktopProps> = ({ activeStep, pdfUrls }) => {
-    const documentosGerados = pdfUrls ? Object.values(pdfUrls).filter((url) => url !== null).length : 0;
+const StepperDesktop: React.FC<StepperDesktopProps> = ({ activeStep, steps }) => {
+
     const stepLabelStyles = {
         '& .MuiStepLabel-label': {
             fontSize: '1.2rem',
@@ -51,32 +57,17 @@ const StepperDesktop: React.FC<StepperDesktopProps> = ({ activeStep, pdfUrls }) 
                 />
             }
         >
-            <Step>
-                <StepLabel sx={stepLabelStyles}>
-                    Dados pessoais
-                </StepLabel>
-                <StepContent sx={stepContentStyles}>
-                    <Typography>Primeira etapa necessária para geração de diversos documentos</Typography>
-                </StepContent>
-            </Step>
-
-            <Step>
-                <StepLabel sx={stepLabelStyles}>
-                    Endereço
-                </StepLabel>
-                <StepContent sx={stepContentStyles}>
-                    <Typography>Dados referente ao seu endereço</Typography>
-                </StepContent>
-            </Step>
-
-            <Step>
-                <StepLabel sx={stepLabelStyles}>
-                    Documentos já concluídos ({documentosGerados})
-                </StepLabel>
-                <StepContent sx={stepContentStyles}>
-                    <DocumentosParaAssinar urls={pdfUrls} fullView={false} />
-                </StepContent>
-            </Step>
+            {steps.map((step, index) => (
+                <Step key={index}>
+                    <StepLabel sx={stepLabelStyles}>
+                        {step.label}
+                    </StepLabel>
+                    <StepContent sx={stepContentStyles}>
+                        <Typography>{step.description}</Typography>
+                        {step.content && <div>{step.content}</div>}
+                    </StepContent>
+                </Step>
+            ))}
         </Stepper>
     );
 };
