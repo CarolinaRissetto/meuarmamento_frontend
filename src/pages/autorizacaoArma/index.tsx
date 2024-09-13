@@ -5,19 +5,19 @@ import {
   Box,
   Grid,
   Typography,
+  Card,
+  CardActions,
+  CardContent,
+  useMediaQuery
 } from "@mui/material";
 import { nanoid } from "nanoid";
 import DadosPessoais from "./sections/DadosPessoais";
 import Endereco from "./sections/Endereco";
 import DocumentosParaAssinar from "./sections/DocumentosParaAssinar";
-import axios from "axios";
 import SideBar from "../../components/sideBar/SideBar";
 import { apiRequest } from "../../services/api/apiRequestService";
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import { useMediaQuery } from '@mui/material';
-import StepperMobile from '../../components/stepper/StepperMobile'
+import StepperMobile from '../../components/stepper/StepperMobile';
+import { copyUrl } from '../../utils/HandleClickUtils';
 
 export default function Cadastro() {
   const [uuid, setUuid] = useState<string | null>(null);
@@ -34,6 +34,7 @@ export default function Cadastro() {
     endereco: true,
     documentosParaAssinar: true,
   });
+
   const [pdfUrls, setPdfUrls] = useState<{ [key: string]: string | null }>({});
   const [buttonText, setButtonText] = useState("Clique para copiar sua url");
   const [activeStep, setActiveStep] = React.useState<number>(0);
@@ -152,18 +153,6 @@ export default function Cadastro() {
     navigate(`?${urlParams.toString()}`, { replace: true });
   };
 
-  const handleButtonComoFunciona = async () => {
-    try {
-      const response = await axios.get(
-        "https://jd5ueykib6.execute-api.us-east-1.amazonaws.com/default/testeFunction"
-      );
-      console.log(response.data);
-      alert(response.data.message);
-    } catch (error) {
-      console.error("There was an error!", error);
-    }
-  };
-
   const handleSecaoPreenchida = async (section: string) => {
     setSectionVisibility((prev) => ({
       ...prev,
@@ -199,25 +188,32 @@ export default function Cadastro() {
       }
     };
 
-  const handleCopyClick = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url).then(() => {
-      setButtonText("Url copiada!");
+  const handleCopyButton = useCallback(() => {
+    copyUrl(() => {
+      setButtonText("Url copiada!")
       setTimeout(() => {
         setButtonText("Clique para copiar sua url");
       }, 3000);
-    }).catch(err => {
-      console.error("Erro ao copiar ID: ", err);
     });
-  };
+  }, [])
+
+
+
+
+
+
+
+
+
+
+
+
 
   const isScreenSmall = useMediaQuery('(max-width:1500px)');
   const isExtraSmallScreen = useMediaQuery('(max-width:899px)');
   const buttonRef = useRef(null);
 
-  const steps = ['Dados pessoais', 'Endereço', 'Documentos já concluídos'];
-
-  const stepsWithContent = [
+  const steps = [
     {
       label: 'Dados pessoais',
       description: 'Primeira etapa necessária para geração de diversos documentos',
@@ -248,7 +244,7 @@ export default function Cadastro() {
 
       <SideBar
         activeStep={activeStep}
-        steps={stepsWithContent}
+        steps={steps}
       />
 
       <Grid
@@ -294,8 +290,7 @@ export default function Cadastro() {
             formData={formData}
             setPdfUrls={setPdfUrls}
             uuid={uuid}
-            setActiveStep={setActiveStep}
-          />
+            setActiveStep={setActiveStep} />
 
           <Endereco
             isVisible={sectionVisibility.endereco}
@@ -305,8 +300,7 @@ export default function Cadastro() {
             setPdfUrls={setPdfUrls}
             formData={formData}
             uuid={uuid}
-            setActiveStep={setActiveStep}
-          />
+            setActiveStep={setActiveStep} />
 
           <Grid item xs={12} sx={{ padding: '10px', paddingBottom: 0 }}>
 
@@ -361,7 +355,7 @@ export default function Cadastro() {
         >
 
           {isScreenSmall && !isExtraSmallScreen ? (
-            <Button size="small" onClick={handleCopyClick} sx={{
+            <Button size="small" onClick={handleCopyButton} sx={{
               backgroundColor: 'white',
               marginLeft: 'auto',
               display: 'block',
@@ -381,7 +375,7 @@ export default function Cadastro() {
                 </Typography>
               </CardContent>
               <CardActions sx={{ justifyContent: "center" }}>
-                <Button size="small" onClick={handleCopyClick}>{buttonText}</Button>
+                <Button size="small" onClick={handleCopyButton}>{buttonText}</Button>
               </CardActions>
             </Card>
           ) : null}

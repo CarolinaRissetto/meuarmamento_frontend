@@ -2,8 +2,7 @@ import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
+import { IconButton, Typography } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
@@ -13,6 +12,7 @@ import logo from "../../assets/images/logo-libera-defesa.png";
 import HomeIcon from "@mui/icons-material/Home";
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
+import { copyUrl } from '../../utils/HandleClickUtils';
 
 function HeaderMobile() {
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
@@ -23,6 +23,11 @@ function HeaderMobile() {
 
     const handleCloseNavMenu = () => {
         setAnchorElNav(null);
+    };
+
+    const handleMultipleActions = () => {
+        handleCloseNavMenu();
+        copyUrl();
     };
 
     return (
@@ -86,17 +91,17 @@ function HeaderMobile() {
                         >
                             <a href="https://liberadefesa-com-br.webflow.io/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
                                 <MenuItem onClick={handleCloseNavMenu}>
-                                    <AssignmentTurnedInIcon sx={{ marginRight: 1, color: "black" }} /> 
+                                    <AssignmentTurnedInIcon sx={{ marginRight: 1, color: "black" }} />
                                     <Typography sx={{ textAlign: 'center', color: "black" }}>Serviços</Typography>
                                 </MenuItem>
                             </a>
 
                             <MenuItem onClick={handleCloseNavMenu}>
-                                <HomeIcon sx={{ marginRight: 1, color: "black" }} /> 
+                                <HomeIcon sx={{ marginRight: 1, color: "black" }} />
                                 <Typography sx={{ textAlign: 'center' }}>Página Inicial</Typography>
                             </MenuItem>
 
-                            <MenuItem onClick={handleCloseNavMenu} >
+                            <MenuItem onClick={handleMultipleActions} >
                                 <FileCopyIcon sx={{ marginRight: 1, color: "black" }} />
                                 <Typography sx={{ textAlign: 'center' }}>Copiar Url</Typography>
                             </MenuItem>

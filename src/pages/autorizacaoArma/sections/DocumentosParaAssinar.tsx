@@ -1,14 +1,17 @@
 import React from "react";
-import Link from "@mui/material/Link";
-import DownloadIcon from "@mui/icons-material/Download";
-import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import {
+  Link,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Typography,
+  Typography
 } from "@mui/material";
+import {
+  Download as DownloadIcon,
+  HourglassBottom as HourglassBottomIcon
+} from "@mui/icons-material";
+
 
 const translations: { [key: string]: string } = {
   declaracaoIdoneidade: "8. Declaração não estar RESP INQ POL ou PROC CRIMINAL",

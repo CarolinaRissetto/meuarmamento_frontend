@@ -1,23 +1,27 @@
-import * as React from "react";
-import FormLabel from "@mui/material/FormLabel";
-import Grid from "@mui/material/Grid";
-import OutlinedInput from "@mui/material/OutlinedInput";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import { styled } from "@mui/system";
-import { Button, Typography } from "@mui/material";
-import { useState, useEffect, useRef } from "react";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import IconButton from "@mui/material/IconButton";
-import RefreshIcon from '@mui/icons-material/Refresh';
-import Collapse from "@mui/material/Collapse";
-import Box from '@mui/material/Box';
+import React, { useState, useEffect, useRef } from "react";
+import {
+    FormLabel,
+    Grid,
+    OutlinedInput,
+    Radio,
+    RadioGroup,
+    FormControlLabel,
+    Button,
+    Typography,
+    IconButton,
+    Collapse,
+    Box
+} from "@mui/material";
+import {
+    ExpandMore as ExpandMoreIcon,
+    ExpandLess as ExpandLessIcon,
+    Refresh as RefreshIcon
+} from "@mui/icons-material";
+import { styled, keyframes } from "@mui/system";
 import { apiRequest } from '../../../services/api/apiRequestService';
 import { gerarPdf } from "../../../services/pdf/gerarPDFsBasicos";
 import axios from "axios";
-import { keyframes } from '@mui/system';
+
 
 const spin = keyframes`
   from {

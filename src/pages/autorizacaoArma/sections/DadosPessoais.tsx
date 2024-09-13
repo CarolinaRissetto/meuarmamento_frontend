@@ -1,15 +1,15 @@
-import * as React from "react";
-import { useState, useEffect, useRef } from "react";
-import FormLabel from "@mui/material/FormLabel";
-import Grid from "@mui/material/Grid";
-import OutlinedInput from "@mui/material/OutlinedInput";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  FormLabel,
+  Grid,
+  OutlinedInput,
+  Collapse,
+  IconButton,
+  Typography
+} from "@mui/material";
 import { styled } from "@mui/system";
-import Collapse from "@mui/material/Collapse";
-import IconButton from "@mui/material/IconButton";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import { ExpandMore as ExpandMoreIcon, ExpandLess as ExpandLessIcon } from "@mui/icons-material";
 import { gerarPdf } from "../../../services/pdf/gerarPDFsBasicos";
-import { Typography } from '@mui/material';
 
 const FormGrid = styled(Grid)(() => ({
   display: "flex",

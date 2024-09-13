@@ -7,20 +7,9 @@ import {
     Typography,
 } from '@mui/material';
 import StepConnector from '@mui/material/StepConnector';
+import { StepperProps } from './StepperTypes'; 
 
-
-interface StepContentProps {
-    label: string;
-    description: string;
-    content?: React.ReactNode;
-}
-
-interface StepperDesktopProps {
-    activeStep: number;
-    steps: StepContentProps[];
-}
-
-const StepperDesktop: React.FC<StepperDesktopProps> = ({ activeStep, steps }) => {
+const StepperDesktop: React.FC<StepperProps> = ({ activeStep, steps }) => {
 
     const stepLabelStyles = {
         '& .MuiStepLabel-label': {

@@ -1,12 +1,8 @@
 import React from 'react';
 import { Grid, Stepper, Step, StepLabel } from '@mui/material';
+import { StepperProps } from './StepperTypes';
 
-interface StepperMobileProps {
-    activeStep: number;
-    steps: string[];
-}
-
-const StepperMobile: React.FC<StepperMobileProps> = ({ activeStep, steps }) => {
+const StepperMobile: React.FC<StepperProps> = ({ activeStep, steps }) => {
     return (
         <Grid
             item
@@ -24,7 +20,7 @@ const StepperMobile: React.FC<StepperMobileProps> = ({ activeStep, steps }) => {
             }}
         >
             <Stepper activeStep={activeStep} alternativeLabel>
-                {steps.map((label, index) => (
+                {steps.map((step, index) => (
                     <Step key={index}>
                         <StepLabel
                             sx={{
@@ -32,7 +28,7 @@ const StepperMobile: React.FC<StepperMobileProps> = ({ activeStep, steps }) => {
                                     fontSize: '12px'
                                 },
                             }}
-                        >{label}</StepLabel>
+                        >{step.label}</StepLabel>
                     </Step>
                 ))}
             </Stepper>
