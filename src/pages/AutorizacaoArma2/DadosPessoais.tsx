@@ -10,9 +10,21 @@ const FormGrid = styled(Grid)(() => ({
 export default function DadosPessoais() {
   const { register, handleSubmit } = useFormContext()
 
-  const handleSave = async (data: any) => {
+  const handleSave = async (formData: any) => {
     try {
-      const response = await apiRequest("5545");
+
+      const uuid = "5545";
+      const tipo = "dadosPessoais";
+
+      const data = {
+        tipo,
+        data: {
+          uuid,
+          ...formData,
+        },
+      };
+      const response = await apiRequest(data);
+      console.log('entrou')
       console.log("Dados salvos com sucesso:", response);
     } catch (error) {
       console.error("Erro ao salvar os dados:", error);
