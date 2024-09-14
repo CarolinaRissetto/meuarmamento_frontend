@@ -7,6 +7,7 @@ import {
 } from "@mui/material";
 import defaultTheme from './styles/theme'
 import Header from './components/Header';
+import AutorizacaoArma2 from './pages/AutorizacaoArma2';
 
 function App() {
   return (
@@ -14,7 +15,8 @@ function App() {
       <ThemeProvider theme={defaultTheme}>
         <Header />
         <CssBaseline />
-        <Cadastro />
+        {/* <Cadastro /> */}
+        <AutorizacaoArma2 />
       </ThemeProvider>
     </div>
   );
