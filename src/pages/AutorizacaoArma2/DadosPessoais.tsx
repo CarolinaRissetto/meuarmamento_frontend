@@ -24,7 +24,6 @@ export default function DadosPessoais() {
         },
       };
       const response = await apiRequest(data);
-      console.log('entrou')
       console.log("Dados salvos com sucesso:", response);
     } catch (error) {
       console.error("Erro ao salvar os dados:", error);
