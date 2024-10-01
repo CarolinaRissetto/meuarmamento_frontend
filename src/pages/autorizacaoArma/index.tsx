@@ -10,7 +10,6 @@ import { nanoid } from "nanoid";
 import DadosPessoais from "./sections/DadosPessoais";
 import Endereco from "./sections/Endereco";
 import DocumentosParaAssinar from "./sections/DocumentosParaAssinar";
-import axios from "axios";
 import SideBar from "../../components/sideBar/SideBar";
 import { apiRequest } from "../../services/api/apiRequestService";
 import Card from '@mui/material/Card';
@@ -46,7 +45,7 @@ export default function Cadastro() {
     }
   }, []);
 
-  const atualizaUrlELocalStorage = useCallback(
+  const atualizaUuidUrlELocalStorage = useCallback(
     (uuid: string) => {
       localStorage.setItem("user-uuid", uuid);
       const urlParams = new URLSearchParams(location.search);
@@ -84,14 +83,15 @@ export default function Cadastro() {
     }
   }, []);
 
-  useEffect(() => {
-    const limparDadosAntigos = (uuidAtual: string) => {
-      for (const key in localStorage) {
-        if (key.startsWith("form-data-") && key !== `form-data-${uuidAtual}`) {
-          localStorage.removeItem(key);
-        }
+  const limparDadosAntigos = (uuidAtual: string) => {
+    for (const key in localStorage) {
+      if (key.startsWith("form-data-") && key !== `form-data-${uuidAtual}`) {
+        localStorage.removeItem(key);
       }
-    };
+    }
+  };
+
+  useEffect(() => {
 
     const buscarDadosEAtualizarEstado = async () => {
       const urlParams = new URLSearchParams(location.search);
@@ -102,23 +102,23 @@ export default function Cadastro() {
         limparDadosAntigos(urlUuid);
         setUuid(urlUuid);
         await buscarDados(urlUuid);
-        atualizaUrlELocalStorage(urlUuid);
+        atualizaUuidUrlELocalStorage(urlUuid);
       } else if (storedUuid) {
         limparDadosAntigos(storedUuid);
         setUuid(storedUuid);
         await buscarDados(storedUuid);
-        atualizaUrlELocalStorage(storedUuid);
+        atualizaUuidUrlELocalStorage(storedUuid);
       } else {
         const newUuid = nanoid(6);
         limparDadosAntigos(newUuid);
         setUuid(newUuid);
         await buscarDados(newUuid);
-        atualizaUrlELocalStorage(newUuid);
+        atualizaUuidUrlELocalStorage(newUuid);
       }
     };
 
     buscarDadosEAtualizarEstado();
-  }, [location.search, buscarDados, atualizaUrlELocalStorage]);
+  }, [location.search, buscarDados, atualizaUuidUrlELocalStorage]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -152,18 +152,6 @@ export default function Cadastro() {
     navigate(`?${urlParams.toString()}`, { replace: true });
   };
 
-  const handleButtonComoFunciona = async () => {
-    try {
-      const response = await axios.get(
-        "https://jd5ueykib6.execute-api.us-east-1.amazonaws.com/default/testeFunction"
-      );
-      console.log(response.data);
-      alert(response.data.message);
-    } catch (error) {
-      console.error("There was an error!", error);
-    }
-  };
-
   const handleSecaoPreenchida = async (section: string) => {
     setSectionVisibility((prev) => ({
       ...prev,
@@ -178,26 +166,25 @@ export default function Cadastro() {
     }));
   };
 
-  const handleInputBlur =
-    (tipo: string) => async (event: React.FocusEvent<HTMLInputElement>) => {
-      const { name, value } = event.target;
-      const updatedFormData = { ...formData, [name]: value };
-      setFormData(updatedFormData);
+  const handleInputBlur = (tipo: string) => async (event: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    const updatedFormData = { ...formData, [name]: value };
+    setFormData(updatedFormData);
 
-      if (uuid) {
-        localStorage.setItem(
-          `form-data-${uuid}`,
-          JSON.stringify({ uuid, ...updatedFormData })
-        );
-        await apiRequest({
-          tipo,
-          data: {
-            uuid,
-            ...updatedFormData,
-          },
-        });
-      }
-    };
+    if (uuid) {
+      localStorage.setItem(
+        `form-data-${uuid}`,
+        JSON.stringify({ uuid, ...updatedFormData })
+      );
+      await apiRequest({
+        tipo,
+        data: {
+          uuid,
+          ...updatedFormData,
+        },
+      });
+    }
+  };
 
   const handleCopyClick = () => {
     const url = window.location.href;

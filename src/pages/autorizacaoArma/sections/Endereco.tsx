@@ -15,9 +15,10 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import Collapse from "@mui/material/Collapse";
 import Box from '@mui/material/Box';
 import { apiRequest } from '../../../services/api/apiRequestService';
-import { gerarPdf } from "../../../services/pdf/gerarPDFsBasicos";
+import { gerarPdfsTemplates } from "../../../services/pdf/gerarPDFsTemplates";
 import axios from "axios";
 import { keyframes } from '@mui/system';
+import { gerarCertidoes } from "./utils/gerarCertidoes";
 
 const spin = keyframes`
   from {
@@ -28,6 +29,11 @@ const spin = keyframes`
   }
 `;
 
+const FormGrid = styled(Grid)(() => ({
+    display: "flex",
+    flexDirection: "column",
+}));
+
 const findCep = async (cep: String) => {
     try {
         const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
@@ -37,11 +43,6 @@ const findCep = async (cep: String) => {
         return null;
     }
 };
-
-const FormGrid = styled(Grid)(() => ({
-    display: "flex",
-    flexDirection: "column",
-}));
 
 const handleFileChange = (
     year: number,
@@ -107,7 +108,8 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                     if (open) {
                         setOpen(false);
                         setActiveStep(2);
-                        gerarPdf(formData, uuid, setPdfUrls);
+                        gerarPdfsTemplates(formData, uuid, setPdfUrls);
+                        gerarCertidoes(formData, setPdfUrls, uuid);
                     }
                 }
             }

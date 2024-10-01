@@ -13,11 +13,15 @@ import {
 const translations: { [key: string]: string } = {
   declaracaoIdoneidade: "8. Declaração não estar RESP INQ POL ou PROC CRIMINAL",
   segurancaAcervo: "12. Declaração de Segurança do Acervo",
+  certidaoJusticaFederal: "2. Certidão de antecedente Criminal Justiça Federal",
+  certidaoJusticaEstadual: "5. Certidão de antecedente Criminal Justiça Estadual local domicílio últimos cinco anos",
+  certidaoJusticaMilitar: "6. Certidão de antecedente Criminal Justiça Militar"
 };
 
 function translateFileNames(arquivo: string): string {
   return translations[arquivo] || arquivo;
 }
+
 export default function DocumentosParaAssinar({
   urls = {},
   fullView = true,
