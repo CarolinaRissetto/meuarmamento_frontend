@@ -14,12 +14,16 @@ export const gerarCertidaoJusticaFederal = async (formData: { [key: string]: any
 
     console.log("Gerando certidão justiça federal");
 
+    const formDataCombinado = {
+        ...formData,
+        uuid
+    }
+
     try {
 
         const response = await apiRequest({
             tipo: "gerarCertidaoFederal",
-            data: formData,
-            uuid
+            data: formDataCombinado
         });
 
         const parsedResponse = JSON.parse(response);

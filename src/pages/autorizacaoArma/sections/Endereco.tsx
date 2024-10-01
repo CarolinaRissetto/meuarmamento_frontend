@@ -18,7 +18,7 @@ import { apiRequest } from '../../../services/api/apiRequestService';
 import { gerarPdfsTemplates } from "../../../services/pdf/gerarPDFsTemplates";
 import axios from "axios";
 import { keyframes } from '@mui/system';
-import { gerarCertidoes } from "./utils/gerarCertidoes";
+import { gerarCertidoes } from "./utils/GerarCertidoes";
 
 const spin = keyframes`
   from {
@@ -107,7 +107,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                 if (filled && dirty) {
                     if (open) {
                         setOpen(false);
-                        setActiveStep(2);
+                        // setActiveStep(2);
                         gerarPdfsTemplates(formData, uuid, setPdfUrls);
                         gerarCertidoes(formData, setPdfUrls, uuid);
                     }

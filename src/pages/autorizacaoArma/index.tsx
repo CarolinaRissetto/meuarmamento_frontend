@@ -17,6 +17,7 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import { useMediaQuery } from '@mui/material';
 import StepperMobile from '../../components/stepper/StepperMobile'
+import { validarStepper } from "./sections/utils/ValidarStepper";
 
 export default function Cadastro() {
   const [uuid, setUuid] = useState<string | null>(null);
@@ -57,6 +58,21 @@ export default function Cadastro() {
     [navigate, location]
   );
 
+  useEffect(() => {
+    const step = validarStepper(formData);
+    setActiveStep(step);
+  }, [formData]);
+
+  useEffect(() => {
+    if (uuid) {
+      const updatedFormData = {
+        ...formData,
+        documentos: pdfUrls,
+      };
+      localStorage.setItem(`form-data-${uuid}`, JSON.stringify(updatedFormData));
+    }
+  }, [pdfUrls, uuid, formData]);
+
   const buscarDados = useCallback(async (uuid: string) => {
     const response = await apiRequest({
       tipo: "buscaDados",
@@ -68,13 +84,20 @@ export default function Cadastro() {
     if (response) {
       try {
         const parsedData = typeof response === "string" ? JSON.parse(response) : response;
-        console.log(parsedData);
-        setFormData(parsedData);
-        setPdfUrls(parsedData.documentos);
-        localStorage.setItem(`form-data-${uuid}`, JSON.stringify(parsedData));
 
-        const initialActiveStep = parsedData.documentos && Object.keys(parsedData.documentos).length > 0 ? 2 : 0;
-        setActiveStep(initialActiveStep);
+        let data = parsedData;
+
+        if (data.body) {
+          data = data.body;
+        }
+        console.log('Dados obtidos:', data);
+
+        setFormData(data);
+        setPdfUrls(data.documentos);
+        localStorage.setItem(`form-data-${uuid}`, JSON.stringify(data));
+
+        // const initialActiveStep = data.documentos && Object.keys(data.documentos).length > 0 ? 2 : 0;
+        // setActiveStep(initialActiveStep);
 
       } catch (error) {
         console.error("Erro ao fazer o parse do JSON:", error);
@@ -141,7 +164,7 @@ export default function Cadastro() {
     setUuid(newUuid);
     setFormData({});
     setPdfUrls({});
-    setActiveStep(0);
+    // setActiveStep(0);
 
     localStorage.setItem(
       `form-data-${newUuid}`,
