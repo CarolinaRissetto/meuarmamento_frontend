@@ -59,7 +59,7 @@ const SideBar: React.FC<SideBarProps> = ({ activeStep, steps }) => {
         <StepperDesktop activeStep={activeStep} steps={steps} />
       </Box>
 
-      <Typography variant="overline" sx={{ fontSize: '0.9rem' }} >
+      <Typography variant="overline" sx={{ fontSize: '0.8rem' }} >
         {`Custo para geração desses documentos: `}
         <Box component="strong" sx={{ color: 'text.primary', textDecoration: 'line-through' }}>
           R$ 0,00

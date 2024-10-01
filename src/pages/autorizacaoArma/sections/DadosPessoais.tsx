@@ -8,8 +8,9 @@ import Collapse from "@mui/material/Collapse";
 import IconButton from "@mui/material/IconButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { gerarPdf } from "../../../services/pdf/gerarPDFsBasicos";
+import { gerarPdfsTemplates } from "../../../services/pdf/gerarPDFsTemplates";
 import { Typography } from '@mui/material';
+import { gerarCertidoes } from "./utils/GerarCertidoes";
 
 const FormGrid = styled(Grid)(() => ({
   display: "flex",
@@ -52,16 +53,18 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
   }, [filled, onFilled, formData]);
 
   useEffect(() => {
-    const hasNoDocuments = !formData.documentos || Object.keys(formData.documentos).length === 0;
+    // const hasNoDocuments = !formData.documentos || Object.keys(formData.documentos).length === 0;
 
     const handleClickOutside = (event: MouseEvent) => {
       if (formRef.current && !formRef.current.contains(event.target as Node)) {
         if (filled && dirty) {
           if (open) {
             setOpen(false);
-            if (hasNoDocuments) {
-              setActiveStep(1);
-            } gerarPdf(formData, uuid, setPdfUrls);
+            // if (hasNoDocuments) {
+            //   setActiveStep(1);
+            // } 
+            gerarPdfsTemplates(formData, uuid, setPdfUrls);
+            gerarCertidoes(formData, setPdfUrls, uuid);
           }
         }
       }

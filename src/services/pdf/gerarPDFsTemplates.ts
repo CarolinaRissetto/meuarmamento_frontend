@@ -1,4 +1,5 @@
 import { apiRequest } from '../api/apiRequestService';
+import { verificarCamposPreenchidos } from './utils/formValidator';
 
 const camposNecessarios = [
     'nomeCompleto',
@@ -11,32 +12,17 @@ const camposNecessarios = [
     'cidade',
     'bairro',
     'uf',
-    'uuid'
 ];
 
-const verificarCamposPreenchidos = (formData: { [key: string]: any }): boolean => {
-    return camposNecessarios.every(campo => {
-        let valor;
-
-        if (campo in formData) {
-            valor = formData[campo];
-        } else if (campo in (formData.endereco || {})) {
-            valor = formData.endereco[campo];
-        }
-
-        return valor !== undefined && valor !== null && valor !== ''; 
-    });
-};
-
-export const gerarPdf = async (
-    formData: { [key: string]: any }, 
-    uuid: string | null, 
+export const gerarPdfsTemplates = async (
+    formData: { [key: string]: any },
+    uuid: string | null,
     setPdfUrls: (urls: { [key: string]: string | null }) => void
 ) => {
 
-    if (!verificarCamposPreenchidos(formData)) {
+    if (!verificarCamposPreenchidos(formData, camposNecessarios)) {
         console.log("Campos obrigatórios não preenchidos.");
-        return; 
+        return;
     }
 
     // Desestruture o objeto 'endereco' do formData
@@ -46,9 +32,10 @@ export const gerarPdf = async (
     const formDataCombinado = {
         ...outrosDados,
         ...endereco,  // Aqui você espalha as chaves do endereço no nível superior
+        uuid
     };
-    
-    console.log("GERANDO PDF");
+
+    console.log("GERANDO PDFS BASICOS");
 
     try {
         const hoje = new Date();
@@ -56,14 +43,14 @@ export const gerarPdf = async (
         const mes = (hoje.getMonth() + 1).toString().padStart(2, '0'); // Meses são indexados de 0 a 11
         const ano = hoje.getFullYear();
         const dataAtual = `${formDataCombinado.cidade}, ${dia} de ${mes} de ${ano}`;
-
+        
         const formDataComData = {
             ...formDataCombinado,
             local_data: dataAtual
         };
 
         const response = await apiRequest({
-            tipo: "gerarPDF",
+            tipo: "gerarPdfsBasicos",
             data: formDataComData,
         });
 
@@ -74,7 +61,7 @@ export const gerarPdf = async (
             declaracaoIdoneidade: parsedResponse.urls?.declaracaoIdoneidade || null,
         };
 
-        setPdfUrls(urls); 
+        setPdfUrls(urls);
 
     } catch (error) {
         console.error("Erro ao chamar a API de geração de PDF:", error);
