@@ -36,21 +36,13 @@ Inicie o servidor de desenvolvimento:
 npm start
 ```
 
-## 📦 Implantação
+Percisa ser criado o arquivo .env para testar localmente.
 
-Adicione notas adicionais sobre como implantar isso em um sistema ativo
+## 📦 Implantação
 
 O projeto front-end está configurado para ser implantado na AWS utilizando S3 e CloudFront.
 
-Para implantar o projeto, siga os passos abaixo:
-
-1. Faça o build do projeto:
-```sh
-npm run build
-```
-2. Faça upload dos arquivos do build para o S3.
-
-Para detalhes específicos sobre cada etapa, consulte a documentação da AWS.
+A implantação do projeto acontece automaticamente após passar no build, (verifique os erros do eslint antes de fazer merge).
 
 ## 🛠️ Construído com
 
