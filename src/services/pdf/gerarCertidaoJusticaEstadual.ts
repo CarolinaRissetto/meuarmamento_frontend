@@ -3,7 +3,7 @@ import { formatarDataParaBrasileiro } from './utils/formUtils';
 import { verificarCamposPreenchidos } from './utils/formValidator';
 
 const camposNecessarios = [
-    'nome',
+    'nomeCompleto',
     'nomeMae',
     'nomePai',
     'cpf',
@@ -16,7 +16,9 @@ const camposNecessarios = [
     'uf'
 ];
 
-export const gerarCertidaoJusticaEstadual = async (formData: { [key: string]: any }, setPdfUrls: (urls: { [key: string]: string | null }) => void,     uuid: string | null) => {
+export const gerarCertidaoJusticaEstadual = async (formData: { [key: string]: any },
+    setPdfUrls: (callback: (prevUrls: { [key: string]: string | null }) => { [key: string]: string | null }) => void,
+    uuid: string | null) => {
     const sexo = "F";
     const estadoCivil = "1";
 
@@ -25,9 +27,11 @@ export const gerarCertidaoJusticaEstadual = async (formData: { [key: string]: an
         return;
     }
 
-    const endereco = `${formData.rua}, ${formData.numero}, ${formData.cidade} - ${formData.uf}`;
+    console.log(formData)
+    const endereco = `${formData.endereco.rua}, ${formData.endereco.numero}, ${formData.endereco.cidade} - ${formData.endereco.uf}`;
+    console.log(endereco)
 
-    const dataFormatada = formatarDataParaBrasileiro(formData.dataNascimento);
+    const dataFormatada = formatarDataParaBrasileiro(formData.dataNascimento).replaceAll("-", "/");
 
     const formDataCombinado = {
         ...formData,
@@ -47,14 +51,17 @@ export const gerarCertidaoJusticaEstadual = async (formData: { [key: string]: an
             data: formDataCombinado
         });
 
-        const parsedResponse = JSON.parse(response);
+        if (response.statusCode === 200) {
+            setPdfUrls((prevUrls) => ({
+                ...prevUrls,
+                certidaoJusticaEstadual: response.body || null,
+            }));
+        } else {
+            console.error('Erro ao gerar certidão estadual: resposta inesperada do servidor.');
+            throw new Error('Falha ao gerar certidão. Por favor, tente novamente mais tarde.');
+        }
 
-        const urls = {
-            certidaoJusticaEstadual: parsedResponse.urls?.certidaoJusticaEstadual || null,
-        };
-
-        setPdfUrls(urls);
     } catch (error) {
         console.error("Erro ao gerar pdf federal:", error);
     }
-}
+};

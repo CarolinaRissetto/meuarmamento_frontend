@@ -17,7 +17,7 @@ const camposNecessarios = [
 export const gerarPdfsTemplates = async (
     formData: { [key: string]: any },
     uuid: string | null,
-    setPdfUrls: (urls: { [key: string]: string | null }) => void
+    setPdfUrls: (callback: (prevUrls: { [key: string]: string | null }) => { [key: string]: string | null }) => void,
 ) => {
 
     if (!verificarCamposPreenchidos(formData, camposNecessarios)) {
@@ -43,7 +43,7 @@ export const gerarPdfsTemplates = async (
         const mes = (hoje.getMonth() + 1).toString().padStart(2, '0'); // Meses são indexados de 0 a 11
         const ano = hoje.getFullYear();
         const dataAtual = `${formDataCombinado.cidade}, ${dia} de ${mes} de ${ano}`;
-        
+
         const formDataComData = {
             ...formDataCombinado,
             local_data: dataAtual
@@ -53,15 +53,19 @@ export const gerarPdfsTemplates = async (
             tipo: "gerarPdfsBasicos",
             data: formDataComData,
         });
+        
+        const parsedResponse = JSON.parse(response.body);
 
-        const parsedResponse = JSON.parse(response);
-
-        const urls = {
-            segurancaAcervo: parsedResponse.urls?.segurancaAcervo || null,
-            declaracaoIdoneidade: parsedResponse.urls?.declaracaoIdoneidade || null,
-        };
-
-        setPdfUrls(urls);
+        if (response.statusCode === 200) {
+            setPdfUrls((prevUrls) => ({
+                ...prevUrls,
+                segurancaAcervo: parsedResponse.urls?.segurancaAcervo || null,
+                declaracaoIdoneidade: parsedResponse.urls?.declaracaoIdoneidade || null
+            }));
+        } else {
+            console.error('Erro ao gerar certidão estadual: resposta inesperada do servidor.');
+            throw new Error('Falha ao gerar certidão. Por favor, tente novamente mais tarde.');
+        }
 
     } catch (error) {
         console.error("Erro ao chamar a API de geração de PDF:", error);
