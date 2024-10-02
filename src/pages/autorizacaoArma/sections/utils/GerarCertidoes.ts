@@ -2,7 +2,9 @@ import { gerarCertidaoJusticaEstadual } from "../../../../services/pdf/gerarCert
 import { gerarCertidaoJusticaFederal } from "../../../../services/pdf/gerarCertidaoJusticaFederal";
 import { gerarCertidaoJusticaMilitar } from "../../../../services/pdf/gerarCertidaoJusticaMilitar";
 
-export const gerarCertidoes = async (formData: { [key: string]: any }, setPdfUrls: (urls: { [key: string]: string | null }) => void, uuid: string | null) => {
+export const gerarCertidoes = async (formData: { [key: string]: any },
+    setPdfUrls: (callback: (prevUrls: { [key: string]: string | null }) => { [key: string]: string | null }) => void,
+    uuid: string | null) => {
     try {
         await gerarCertidaoJusticaEstadual(formData, setPdfUrls, uuid);
         await gerarCertidaoJusticaMilitar(formData, setPdfUrls, uuid);

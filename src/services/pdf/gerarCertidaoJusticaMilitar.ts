@@ -9,7 +9,9 @@ const camposNecessarios = [
     'nomeMae'
 ];
 
-export const gerarCertidaoJusticaMilitar = async (formData: { [key: string]: any }, setPdfUrls: (urls: { [key: string]: string | null }) => void, uuid: string | null) => {
+export const gerarCertidaoJusticaMilitar = async (formData: { [key: string]: any },
+    setPdfUrls: (callback: (prevUrls: { [key: string]: string | null }) => { [key: string]: string | null }) => void,
+    uuid: string | null) => {
 
     if (!verificarCamposPreenchidos(formData, camposNecessarios)) {
         console.log("Campos obrigatórios não preenchidos.");
@@ -33,14 +35,11 @@ export const gerarCertidaoJusticaMilitar = async (formData: { [key: string]: any
             data: formDataCombinado
         });
 
-        const parsedResponse = JSON.parse(response);
-
-        const urls = {
-            certidaoJusticaMilitar: parsedResponse.urls?.certidaoJusticaMilitar || null,
-        };
-
-        setPdfUrls(urls);
+        setPdfUrls((prevUrls) => ({
+            ...prevUrls,
+            certidaoJusticaMilitar: response || null,
+        }));
     } catch (error) {
         console.error("Erro ao gerar pdf militar:", error);
     }
-}
+};

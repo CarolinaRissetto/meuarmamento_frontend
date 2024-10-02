@@ -68,7 +68,7 @@ interface EnderecoProps {
     setActiveStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, formData, uuid, setFormData, setPdfUrls, setActiveStep }) => {
+const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, formData, uuid, setFormData, setPdfUrls }) => {
     const [filled, setFilled] = useState(false);
     const [open, setOpen] = useState(isVisible);
     const [sameAddress, setSameAddress] = useState('yes');

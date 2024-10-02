@@ -29,7 +29,7 @@ interface DadosPessoaisProps {
   setActiveStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFilled, handleInputChange, formData, uuid, handleInputBlur, setPdfUrls, setActiveStep }) => {
+const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFilled, handleInputChange, formData, uuid, handleInputBlur, setPdfUrls}) => {
   const [filled, setFilled] = useState(false);
   const [open, setOpen] = useState(isVisible);
   const [dirty, setDirty] = useState(false);

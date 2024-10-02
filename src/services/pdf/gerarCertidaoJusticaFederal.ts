@@ -5,7 +5,9 @@ const camposNecessarios = [
     'cpf'
 ];
 
-export const gerarCertidaoJusticaFederal = async (formData: { [key: string]: any }, setPdfUrls: (urls: { [key: string]: string | null }) => void, uuid: string | null) => {
+export const gerarCertidaoJusticaFederal = async (formData: { [key: string]: any },
+    setPdfUrls: (callback: (prevUrls: { [key: string]: string | null }) => { [key: string]: string | null }) => void,
+    uuid: string | null) => {
 
     if (!verificarCamposPreenchidos(formData, camposNecessarios)) {
         console.log("Campos obrigatórios não preenchidos.");
@@ -26,14 +28,11 @@ export const gerarCertidaoJusticaFederal = async (formData: { [key: string]: any
             data: formDataCombinado
         });
 
-        const parsedResponse = JSON.parse(response);
-
-        const urls = {
-            certidaoJusticaFederal: parsedResponse.urls?.certidaoJusticaFederal || null,
-        };
-
-        setPdfUrls(urls);
+        setPdfUrls((prevUrls) => ({
+            ...prevUrls,
+            certidaoJusticaFederal: response || null,
+        }));
     } catch (error) {
         console.error("Erro ao gerar pdf federal:", error);
     }
-}
+};
