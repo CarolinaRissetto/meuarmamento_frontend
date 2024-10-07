@@ -96,13 +96,13 @@ export default function Cadastro() {
         setPdfUrls(data.documentos);
         localStorage.setItem(`form-data-${uuid}`, JSON.stringify(data));
 
-        // const initialActiveStep = data.documentos && Object.keys(data.documentos).length > 0 ? 2 : 0;
-        // setActiveStep(initialActiveStep);
-
       } catch (error) {
         console.error("Erro ao fazer o parse do JSON:", error);
         return;
       }
+    } else {
+      // Tratamento de erro - exibe a mensagem de erro e não salva os dados
+      console.error("Erro ao buscar dados:", response?.message || "Erro desconhecido");
     }
   }, []);
 
@@ -305,6 +305,7 @@ export default function Cadastro() {
             setPdfUrls={setPdfUrls}
             uuid={uuid}
             setActiveStep={setActiveStep}
+            setFormData={setFormData}
           />
 
           <Endereco

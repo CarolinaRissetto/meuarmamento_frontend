@@ -109,7 +109,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                         setOpen(false);
                         // setActiveStep(2);
                         gerarPdfsTemplates(formData, uuid, setPdfUrls);
-                        gerarCertidoes(formData, setPdfUrls, uuid);
+                        gerarCertidoes(formData, setPdfUrls, uuid, setFormData);
                     }
                 }
             }

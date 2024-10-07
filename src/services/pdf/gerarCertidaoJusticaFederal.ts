@@ -6,7 +6,6 @@ const camposNecessarios = [
 ];
 
 export const gerarCertidaoJusticaFederal = async (formData: { [key: string]: any },
-    setPdfUrls: (callback: (prevUrls: { [key: string]: string | null }) => { [key: string]: string | null }) => void,
     uuid: string | null) => {
 
     if (!verificarCamposPreenchidos(formData, camposNecessarios)) {
@@ -23,15 +22,11 @@ export const gerarCertidaoJusticaFederal = async (formData: { [key: string]: any
 
     try {
 
-        const response = await apiRequest({
+        await apiRequest({
             tipo: "gerarCertidaoFederal",
             data: formDataCombinado
         });
 
-        setPdfUrls((prevUrls) => ({
-            ...prevUrls,
-            certidaoJusticaFederal: response || null,
-        }));
     } catch (error) {
         console.error("Erro ao gerar pdf federal:", error);
     }
