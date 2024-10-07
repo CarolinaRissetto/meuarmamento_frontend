@@ -69,7 +69,6 @@ interface EnderecoProps {
 }
 
 const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, formData, uuid, setFormData, setPdfUrls }) => {
-    const [filled, setFilled] = useState(false);
     const [open, setOpen] = useState(isVisible);
     const [sameAddress, setSameAddress] = useState('yes');
     const [dirty, setDirty] = useState(false);
@@ -119,7 +118,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
             document.removeEventListener("mousedown", handleClickOutside);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filled, dirty, formData, uuid]);
+    }, [dirty, formData, uuid]);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         handleInputChange(event);
