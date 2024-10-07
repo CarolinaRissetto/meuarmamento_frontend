@@ -17,7 +17,7 @@ const camposNecessarios = [
 ];
 
 export const gerarCertidaoJusticaEstadual = async (formData: { [key: string]: any },
-    setPdfUrls: (callback: (prevUrls: { [key: string]: string | null }) => { [key: string]: string | null }) => void,
+    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>,
     uuid: string | null) => {
     const sexo = "F";
     const estadoCivil = "1";

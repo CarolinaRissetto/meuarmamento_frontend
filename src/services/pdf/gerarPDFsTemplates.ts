@@ -49,23 +49,23 @@ export const gerarPdfsTemplates = async (
             local_data: dataAtual
         };
 
-        const response = await apiRequest({
+        await apiRequest({
             tipo: "gerarPdfsBasicos",
             data: formDataComData,
         });
-        
-        const parsedResponse = JSON.parse(response.body);
 
-        if (response.statusCode === 200) {
-            setPdfUrls((prevUrls) => ({
-                ...prevUrls,
-                segurancaAcervo: parsedResponse.urls?.segurancaAcervo || null,
-                declaracaoIdoneidade: parsedResponse.urls?.declaracaoIdoneidade || null
-            }));
-        } else {
-            console.error('Erro ao gerar certidão estadual: resposta inesperada do servidor.');
-            throw new Error('Falha ao gerar certidão. Por favor, tente novamente mais tarde.');
-        }
+        // const parsedResponse = JSON.parse(response.body);
+
+        // if (response.statusCode === 200) {
+        //     setPdfUrls((prevUrls) => ({
+        //         ...prevUrls,
+        //         segurancaAcervo: parsedResponse.urls?.segurancaAcervo || null,
+        //         declaracaoIdoneidade: parsedResponse.urls?.declaracaoIdoneidade || null
+        //     }));
+        // } else {
+        //     console.error('Erro ao gerar certidão estadual: resposta inesperada do servidor.');
+        //     throw new Error('Falha ao gerar certidão. Por favor, tente novamente mais tarde.');
+        // }
 
     } catch (error) {
         console.error("Erro ao chamar a API de geração de PDF:", error);
