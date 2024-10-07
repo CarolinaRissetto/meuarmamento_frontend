@@ -94,20 +94,18 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
     };
 
     useEffect(() => {
-        if (isFormFilled() && !filled) {
-            setFilled(true);
+        if (isFormFilled()) {
             onFilled();
         }
-    }, [filled, onFilled, formData]);
+    }, [onFilled, formData]);
 
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (formRef.current && !formRef.current.contains(event.target as Node)) {
-                if (filled && dirty) {
+                if (isFormFilled() && dirty) {
                     if (open) {
                         setOpen(false);
-                        // setActiveStep(2);
                         gerarPdfsTemplates(formData, uuid, setPdfUrls);
                         gerarCertidoes(formData, setPdfUrls, uuid, setFormData);
                     }
@@ -263,6 +261,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                                 name="cep"
                                 type="text"
                                 autoComplete="cep"
+                                placeholder="Cep"
                                 required
                                 value={(formData.endereco as unknown as { [key: string]: string })?.["cep"] || ""}
                                 onChange={handleChange}
@@ -281,6 +280,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                             name="rua"
                             type="text"
                             autoComplete="rua"
+                            placeholder="Rua"
                             required
                             value={(formData.endereco as unknown as { [key: string]: string })?.["rua"] || ""}
                             onChange={handleChange}
@@ -296,6 +296,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                             name="numero"
                             type="text"
                             autoComplete="numero"
+                            placeholder="Número"
                             required
                             value={(formData.endereco as unknown as { [key: string]: string })?.["numero"] || ""}
                             onChange={handleChange}
@@ -310,6 +311,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                             id="complemento"
                             name="complemento"
                             type="text"
+                            placeholder="Complemento"
                             autoComplete="complemento"
                             value={(formData.endereco as unknown as { [key: string]: string })?.["complemento"] || ""}
                             onChange={handleChange}
@@ -325,6 +327,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                             name="cidade"
                             type="text"
                             autoComplete="cidade"
+                            placeholder="Cidade"
                             required
                             value={(formData.endereco as unknown as { [key: string]: string })?.["cidade"] || ""}
                             onChange={handleChange}
@@ -340,6 +343,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                             name="bairro"
                             type="text"
                             autoComplete="bairro"
+                            placeholder="Bairro"
                             required
                             value={(formData.endereco as unknown as { [key: string]: string })?.["bairro"] || ""}
                             onChange={handleChange}
@@ -355,6 +359,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                             name="uf"
                             type="text"
                             autoComplete="uf"
+                            placeholder="UF"
                             required
                             value={(formData.endereco as unknown as { [key: string]: string })?.["uf"] || ""}
                             onChange={handleChange}

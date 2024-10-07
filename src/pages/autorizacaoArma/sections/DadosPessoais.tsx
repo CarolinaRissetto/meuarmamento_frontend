@@ -47,17 +47,16 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
   };
 
   useEffect(() => {
-    if (isFormFilled() && !filled) {
-      setFilled(true);
+    if (isFormFilled()) {
       onFilled();
     }
-  }, [filled, onFilled, formData]);
+  }, [onFilled, formData]);
 
   useEffect(() => {
 
     const handleClickOutside = (event: MouseEvent) => {
       if (formRef.current && !formRef.current.contains(event.target as Node)) {
-        if (filled && dirty) {
+        if (isFormFilled() && dirty) {
           if (open) {
             setOpen(false);
             gerarPdfsTemplates(formData, uuid, setPdfUrls);
