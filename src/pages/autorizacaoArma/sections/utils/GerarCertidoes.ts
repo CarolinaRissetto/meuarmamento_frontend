@@ -7,6 +7,8 @@ export const gerarCertidoes = async (formData: { [key: string]: any },
     setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>,
     uuid: string | null,
     setFormData: (data: any) => void) => {
+
+    buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
     try {
         const promises = [
             gerarCertidaoJusticaEstadual(formData, setPdfUrls, uuid),
@@ -18,6 +20,4 @@ export const gerarCertidoes = async (formData: { [key: string]: any },
     } catch (error) {
         console.error('Erro ao gerar múltiplos certificados:', error);
     }
-
-    buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
 }

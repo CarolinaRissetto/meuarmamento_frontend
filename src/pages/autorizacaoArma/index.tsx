@@ -101,7 +101,6 @@ export default function Cadastro() {
         return;
       }
     } else {
-      // Tratamento de erro - exibe a mensagem de erro e não salva os dados
       console.error("Erro ao buscar dados:", response?.message || "Erro desconhecido");
     }
   }, []);
@@ -164,7 +163,6 @@ export default function Cadastro() {
     setUuid(newUuid);
     setFormData({});
     setPdfUrls({});
-    // setActiveStep(0);
 
     localStorage.setItem(
       `form-data-${newUuid}`,
