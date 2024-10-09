@@ -1,6 +1,7 @@
 import { apiRequest } from '../api/apiRequestService';
 import { verificarCamposPreenchidos } from './utils/formValidator';
 import { formatarDataParaBrasileiro } from './utils/formUtils';
+import { buscarDocumentosPolling } from '../../pages/autorizacaoArma/sections/utils/BuscarDocumentosPolling';
 
 const camposNecessarios = [
     'nomeCompleto',
@@ -10,7 +11,10 @@ const camposNecessarios = [
 ];
 
 export const gerarCertidaoJusticaMilitar = async (formData: { [key: string]: any },
-    uuid: string | null) => {
+    setFormData: (data: any) => void,
+    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>,
+    uuid: string | null
+) => {
 
     if (!verificarCamposPreenchidos(formData, camposNecessarios)) {
         console.log("Campos obrigatórios não preenchidos.");
@@ -33,6 +37,8 @@ export const gerarCertidaoJusticaMilitar = async (formData: { [key: string]: any
             tipo: "gerarCertidaoMilitar",
             data: formDataCombinado
         });
+
+        buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
 
     } catch (error) {
         console.error("Erro ao gerar pdf militar:", error);

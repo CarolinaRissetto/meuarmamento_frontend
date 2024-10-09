@@ -22,7 +22,6 @@ import { validarStepper } from "./sections/utils/ValidarStepper";
 export default function Cadastro() {
   const [uuid, setUuid] = useState<string | null>(null);
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
-
   const navigate = useNavigate();
   const location = useLocation();
   const urlParams = useMemo(
@@ -167,6 +166,7 @@ export default function Cadastro() {
     localStorage.setItem(
       `form-data-${newUuid}`,
       JSON.stringify({ uuid: newUuid, ...formData })
+
     );
 
     urlParams.set("uuid", newUuid);
@@ -354,7 +354,7 @@ export default function Cadastro() {
               mt: 2,
             }}
           >
-            Novo Cadastro
+            Novo Processo
           </Button>
         </Box>
 
