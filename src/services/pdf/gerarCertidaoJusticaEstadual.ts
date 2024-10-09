@@ -1,6 +1,7 @@
 import { apiRequest } from '../api/apiRequestService';
 import { formatarDataParaBrasileiro } from './utils/formUtils';
 import { verificarCamposPreenchidos } from './utils/formValidator';
+import { buscarDocumentosPolling } from '../../pages/autorizacaoArma/sections/utils/BuscarDocumentosPolling';
 
 const camposNecessarios = [
     'nomeCompleto',
@@ -17,6 +18,7 @@ const camposNecessarios = [
 ];
 
 export const gerarCertidaoJusticaEstadual = async (formData: { [key: string]: any },
+    setFormData: (data: any) => void,
     setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>,
     uuid: string | null) => {
     const sexo = "F";
@@ -56,6 +58,9 @@ export const gerarCertidaoJusticaEstadual = async (formData: { [key: string]: an
                 ...prevUrls,
                 certidaoJusticaEstadual: response.body || null,
             }));
+
+            buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
+
         } else {
             console.error('Erro ao gerar certidão estadual: resposta inesperada do servidor.');
             throw new Error('Falha ao gerar certidão. Por favor, tente novamente mais tarde.');

@@ -1,5 +1,6 @@
 import { apiRequest } from '../api/apiRequestService';
 import { verificarCamposPreenchidos } from './utils/formValidator';
+import { buscarDocumentosPolling } from '../../pages/autorizacaoArma/sections/utils/BuscarDocumentosPolling';
 
 const camposNecessarios = [
     'nomeCompleto',
@@ -17,7 +18,8 @@ const camposNecessarios = [
 export const gerarPdfsTemplates = async (
     formData: { [key: string]: any },
     uuid: string | null,
-    setPdfUrls: (callback: (prevUrls: { [key: string]: string | null }) => { [key: string]: string | null }) => void,
+    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>,
+    setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>
 ) => {
 
     if (!verificarCamposPreenchidos(formData, camposNecessarios)) {
@@ -54,18 +56,7 @@ export const gerarPdfsTemplates = async (
             data: formDataComData,
         });
 
-        // const parsedResponse = JSON.parse(response.body);
-
-        // if (response.statusCode === 200) {
-        //     setPdfUrls((prevUrls) => ({
-        //         ...prevUrls,
-        //         segurancaAcervo: parsedResponse.urls?.segurancaAcervo || null,
-        //         declaracaoIdoneidade: parsedResponse.urls?.declaracaoIdoneidade || null
-        //     }));
-        // } else {
-        //     console.error('Erro ao gerar certidão estadual: resposta inesperada do servidor.');
-        //     throw new Error('Falha ao gerar certidão. Por favor, tente novamente mais tarde.');
-        // }
+        buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
 
     } catch (error) {
         console.error("Erro ao chamar a API de geração de PDF:", error);

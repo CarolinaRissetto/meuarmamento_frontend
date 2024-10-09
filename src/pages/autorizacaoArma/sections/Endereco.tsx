@@ -1,24 +1,28 @@
 import * as React from "react";
-import FormLabel from "@mui/material/FormLabel";
-import Grid from "@mui/material/Grid";
-import OutlinedInput from "@mui/material/OutlinedInput";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import { styled } from "@mui/system";
-import { Button, Typography } from "@mui/material";
 import { useState, useEffect, useRef } from "react";
+import {
+    Box,
+    Button,
+    Collapse,
+    FormControlLabel,
+    FormLabel,
+    Grid,
+    IconButton,
+    OutlinedInput,
+    Radio,
+    RadioGroup,
+    Typography,
+    styled,
+} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import IconButton from "@mui/material/IconButton";
 import RefreshIcon from '@mui/icons-material/Refresh';
-import Collapse from "@mui/material/Collapse";
-import Box from '@mui/material/Box';
+import { keyframes } from '@mui/system';
 import { apiRequest } from '../../../services/api/apiRequestService';
 import { gerarPdfsTemplates } from "../../../services/pdf/gerarPDFsTemplates";
 import axios from "axios";
-import { keyframes } from '@mui/system';
-import { gerarCertidoes } from "./utils/GerarCertidoes";
+import { gerarCertidaoJusticaEstadual } from "../../../services/pdf/gerarCertidaoJusticaEstadual";
+import CustomSnackbar from './utils/CustomSnackbar';
 
 const spin = keyframes`
   from {
@@ -77,6 +81,7 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
     const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
     const [, setFiles] = useState<{ [key: number]: File | null }>({});
     const [loading, setLoading] = useState(false);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
 
     const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSameAddress((event.target as HTMLInputElement).value);
@@ -105,8 +110,9 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                 if (isFormFilled() && dirty) {
                     if (open) {
                         setOpen(false);
-                        gerarPdfsTemplates(formData, uuid, setPdfUrls);
-                        gerarCertidoes(formData, setPdfUrls, uuid, setFormData);
+                        setSnackbarOpen(true);
+                        gerarPdfsTemplates(formData, uuid, setPdfUrls, setFormData);
+                        gerarCertidaoJusticaEstadual(formData, setFormData, setPdfUrls, uuid);
                     }
                 }
             }
@@ -393,6 +399,13 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                     </Grid>
                 </Grid>
             </Collapse>
+            <CustomSnackbar
+                snackbarOpen={snackbarOpen}
+                setSnackbarOpen={setSnackbarOpen}
+                message="Iniciando a geração de mais 3 documentos..."
+                severity="success"
+                autoHideDuration={4000}
+            />
         </div>
     );
 };

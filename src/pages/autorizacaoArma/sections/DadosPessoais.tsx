@@ -1,16 +1,19 @@
 import * as React from "react";
 import { useState, useEffect, useRef } from "react";
-import FormLabel from "@mui/material/FormLabel";
-import Grid from "@mui/material/Grid";
-import OutlinedInput from "@mui/material/OutlinedInput";
-import { styled } from "@mui/system";
-import Collapse from "@mui/material/Collapse";
-import IconButton from "@mui/material/IconButton";
+import {
+  Collapse,
+  FormLabel,
+  Grid,
+  IconButton,
+  OutlinedInput,
+  Typography,
+  styled,
+} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { gerarPdfsTemplates } from "../../../services/pdf/gerarPDFsTemplates";
-import { Typography } from '@mui/material';
 import { gerarCertidoes } from "./utils/GerarCertidoes";
+import CustomSnackbar from './utils/CustomSnackbar';
 
 const FormGrid = styled(Grid)(() => ({
   display: "flex",
@@ -34,6 +37,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
   const [open, setOpen] = useState(isVisible);
   const [dirty, setDirty] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const isFormFilled = () => {
     const inputs = document.querySelectorAll("#dados-pessoais-form input[required]");
@@ -58,7 +62,8 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
         if (isFormFilled() && dirty) {
           if (open) {
             setOpen(false);
-            gerarPdfsTemplates(formData, uuid, setPdfUrls);
+            setSnackbarOpen(true);
+            gerarPdfsTemplates(formData, uuid, setPdfUrls, setFormData);
             gerarCertidoes(formData, setPdfUrls, uuid, setFormData);
           }
         }
@@ -124,8 +129,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
               value={formData["nomeCompleto"] || ""}
               onChange={handleChange}
               onBlur={handleInputBlur}
-              sx={{ backgroundColor: 'white' }} // Fundo branco
-
+              sx={{ backgroundColor: 'white' }}
             />
           </FormGrid>
           <FormGrid item xs={12} md={6}>
@@ -226,6 +230,13 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
           </FormGrid>
         </Grid>
       </Collapse>
+      <CustomSnackbar
+        snackbarOpen={snackbarOpen}
+        setSnackbarOpen={setSnackbarOpen}
+        message="Iniciando a geração de 2 documentos..."
+        severity="success"
+        autoHideDuration={4000}
+      />
     </div>
   );
 };
