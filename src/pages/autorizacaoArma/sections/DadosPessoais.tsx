@@ -53,7 +53,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
     if (isFormFilled()) {
       onFilled();
     }
-  }, [formData]);
+  }, [onFilled, formData]);
 
   useEffect(() => {
 
