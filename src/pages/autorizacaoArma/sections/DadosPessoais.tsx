@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, RefObject } from "react";
 import {
   Collapse,
   FormLabel,
@@ -31,9 +31,10 @@ interface DadosPessoaisProps {
   uuid: string | null;
   setActiveStep: React.Dispatch<React.SetStateAction<number>>;
   setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
+  inputRef?: RefObject<HTMLInputElement>;
 }
 
-const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFilled, handleInputChange, formData, uuid, handleInputBlur, setPdfUrls, setFormData }) => {
+const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFilled, handleInputChange, formData, uuid, handleInputBlur, setPdfUrls, setFormData, inputRef }) => {
   const [open, setOpen] = useState(isVisible);
   const [dirty, setDirty] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
@@ -129,7 +130,13 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
               value={formData["nomeCompleto"] || ""}
               onChange={handleChange}
               onBlur={handleInputBlur}
-              sx={{ backgroundColor: 'white' }}
+              inputRef={inputRef}
+              sx={{
+                backgroundColor: 'white',
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#1976D2 !important', // Cor ao focar
+                },
+              }}
             />
           </FormGrid>
           <FormGrid item xs={12} md={6}>

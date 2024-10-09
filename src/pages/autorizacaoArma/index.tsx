@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import React, { useEffect, useState, useMemo, useCallback, useRef, RefObject } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Button,
@@ -24,10 +24,7 @@ export default function Cadastro() {
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const navigate = useNavigate();
   const location = useLocation();
-  const urlParams = useMemo(
-    () => new URLSearchParams(location.search),
-    [location.search]
-  );
+  const urlParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const [sectionVisibility, setSectionVisibility] = React.useState({
     dadosPessoais: true,
     endereco: true,
@@ -36,6 +33,7 @@ export default function Cadastro() {
   const [pdfUrls, setPdfUrls] = useState<{ [key: string]: string | null }>({});
   const [buttonText, setButtonText] = useState("Clique para copiar sua url");
   const [activeStep, setActiveStep] = React.useState<number>(0);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const limparLocalStorage = useCallback((newUuid: string) => {
     for (const key in localStorage) {
@@ -153,7 +151,7 @@ export default function Cadastro() {
     }
   };
 
-  const handleNovoCadastro = () => {
+  const handleNovoProcesso = () => {
     console.log("Botão de novo cadastro clicado");
 
     const newUuid = nanoid(6);
@@ -171,6 +169,10 @@ export default function Cadastro() {
 
     urlParams.set("uuid", newUuid);
     navigate(`?${urlParams.toString()}`, { replace: true });
+
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
   };
 
   const handleSecaoPreenchida = async (section: string) => {
@@ -304,6 +306,7 @@ export default function Cadastro() {
             uuid={uuid}
             setActiveStep={setActiveStep}
             setFormData={setFormData}
+            inputRef={inputRef}
           />
 
           <Endereco
@@ -346,7 +349,7 @@ export default function Cadastro() {
             ref={buttonRef}
             onClick={(event) => {
               event.stopPropagation(); // Impede que o clique seja capturado como clique fora
-              handleNovoCadastro();
+              handleNovoProcesso();
             }}
             variant="contained"
             sx={{
