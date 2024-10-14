@@ -3,7 +3,7 @@ import { gerarCertidaoJusticaFederal } from "../../../../services/pdf/gerarCerti
 import { gerarCertidaoJusticaMilitar } from "../../../../services/pdf/gerarCertidaoJusticaMilitar";
 
 export const gerarCertidoes = async (formData: { [key: string]: any },
-    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>,
+    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
     uuid: string | null,
     setFormData: (data: any) => void
 ) => {

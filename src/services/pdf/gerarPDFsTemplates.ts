@@ -18,7 +18,7 @@ const camposNecessarios = [
 export const gerarPdfsTemplates = async (
     formData: { [key: string]: any },
     uuid: string | null,
-    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>,
+    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
     setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>
 ) => {
 
@@ -27,13 +27,11 @@ export const gerarPdfsTemplates = async (
         return;
     }
 
-    // Desestruture o objeto 'endereco' do formData
     const { endereco = {}, ...outrosDados } = formData;
 
-    // Combine os dados do endereço com os demais campos
     const formDataCombinado = {
         ...outrosDados,
-        ...endereco,  // Aqui você espalha as chaves do endereço no nível superior
+        ...endereco,
         uuid
     };
 
@@ -42,7 +40,7 @@ export const gerarPdfsTemplates = async (
     try {
         const hoje = new Date();
         const dia = hoje.getDate().toString().padStart(2, '0');
-        const mes = (hoje.getMonth() + 1).toString().padStart(2, '0'); // Meses são indexados de 0 a 11
+        const mes = (hoje.getMonth() + 1).toString().padStart(2, '0');
         const ano = hoje.getFullYear();
         const dataAtual = `${formDataCombinado.cidade}, ${dia} de ${mes} de ${ano}`;
 

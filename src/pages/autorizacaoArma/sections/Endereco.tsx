@@ -67,7 +67,7 @@ interface EnderecoProps {
     onFilled: () => void;
     formData: { [key: string]: any };
     setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
-    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>;
+    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>;
     uuid: string | null;
     setActiveStep: React.Dispatch<React.SetStateAction<number>>;
 }
@@ -404,7 +404,6 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                 setSnackbarOpen={setSnackbarOpen}
                 message="Iniciando a geração de mais 3 documentos..."
                 severity="success"
-                autoHideDuration={4000}
             />
         </div>
     );
