@@ -1,12 +1,16 @@
 import React from "react";
 import Link from "@mui/material/Link";
 import DownloadIcon from "@mui/icons-material/Download";
-import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
+import WarningIcon from '@mui/icons-material/Warning';
+import HourglassEmptyIcon from "@mui/icons-material/HourglassBottom";
+import FileDownloadOffIcon from '@mui/icons-material/FileDownloadOff';
 import {
+  CircularProgress,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
+  Tooltip,
   Typography,
 } from "@mui/material";
 
@@ -23,81 +27,109 @@ function translateFileNames(arquivo: string): string {
 }
 
 export default function DocumentosParaAssinar({
-  urls = {},
+  urls: documentos = {},
   fullView = true,
 }: {
-  urls: { [key: string]: string | null };
+  urls: { [key: string]: { url: string | null; status: string | null; }; };
   fullView?: boolean;
 }) {
-  const missingFiles = Object.keys(translations).filter((key) => !urls[key]);
-  const hasFiles = Object.keys(urls).length > 0;
+  const missingFiles = Object.keys(translations).filter((key) => !documentos[key]);
 
   return (
     <div>
       {fullView && (
         <div>
-          {missingFiles.length > 0 && (
-            <Typography sx={{ mt: 3, mb: 2 }} paragraph>
-              Documentos que poderão ser gerados após a conclusão do
-              preenchimento dos formulários acima:
-            </Typography>
+          {missingFiles.length !== 0 && (
+            <div>
+              <Typography sx={{ mt: 3, mb: 2 }} paragraph>
+                Documentos que poderão ser gerados após a conclusão do
+                preenchimento dos formulários acima:
+              </Typography>
+
+              <List>
+                {missingFiles.map((arquivo) => (
+                  <ListItem
+                    key={arquivo + "empty"}
+                    sx={{ pt: 0, pb: 0, pl: fullView ? 2 : 0 }}
+                  >
+                    {fullView && (
+                      <ListItemIcon sx={{ minWidth: 30 }}>
+                        <Tooltip title="Preencha o formulário acima para que a automação possa ser iniciada" arrow>
+                          <FileDownloadOffIcon />
+                        </Tooltip>
+                      </ListItemIcon>
+                    )}
+                    <ListItemText>
+                      <Typography sx={{ fontSize: fullView ? "1rem" : "0.9rem" }}>
+                        {translateFileNames(arquivo)}
+                      </Typography>
+                    </ListItemText>
+                  </ListItem>
+                ))}
+              </List>
+            </div>
           )}
 
-          <List>
-            {missingFiles.map((arquivo) => (
-              <ListItem
-                key={arquivo + "empty"}
-                sx={{ pt: 0, pb: 0, pl: fullView ? 2 : 0 }}
-              >
-                {fullView && (
-                  <ListItemIcon sx={{ minWidth: 30 }}>
-                    <HourglassBottomIcon />
-                  </ListItemIcon>
-                )}
-                <ListItemText>
-                  <Typography sx={{ fontSize: fullView ? "1rem" : "0.9rem" }}>
-                    {translateFileNames(arquivo)}
-                  </Typography>
-                </ListItemText>
-              </ListItem>
-            ))}
-          </List>
-
-          {hasFiles && (
-            <Typography variant="h6" sx={{ mt: 3, mb: 0 }} paragraph>
-              Documentos prontos:
-            </Typography>
-          )}
         </div>
       )}
       <List>
-        {Object.keys(urls)
+        {Object.keys(documentos)
           .reverse()
           .map((arquivo, index) => {
             return (
               <ListItem
                 sx={{ pt: 0, pb: 0, pl: fullView ? 2 : 0 }}
-                key={urls[arquivo]!}
+                key={arquivo}
               >
                 {fullView && (
                   <ListItemIcon sx={{ minWidth: 30 }}>
-                    <DownloadIcon />
+                    {(() => {
+                      switch (documentos[arquivo].status) {
+                        case 'INICIADO':
+                          return <CircularProgress size={24} />;
+                        case 'PENDENTE':
+                          return <HourglassEmptyIcon />;
+                        case 'CONCLUIDO':
+                          return <DownloadIcon sx={{ color: '#1976d2' }} />;
+                        case 'ERRO':
+                          return (
+                            <Tooltip title="Ocorreu um erro ao gerar o arquivo :(" arrow>
+                              <WarningIcon sx={{ color: '#fe9513' }} />
+                            </Tooltip>
+                          );
+                        default:
+                          return <FileDownloadOffIcon sx={{ color: '#FF9800' }} />;
+                      }
+                    })()}
                   </ListItemIcon>
                 )}
-                <Link href={urls[arquivo]!} target="_blank" underline="hover">
+                {documentos[arquivo].status === 'CONCLUIDO' ? (
+                  <Link
+                    href={documentos[arquivo].url || undefined}
+                    target="_blank"
+                    underline="hover"
+                    sx={{ color: '#1976d2', cursor: 'pointer' }}
+                  >
+                    <ListItemText>
+                      <Typography sx={{ fontSize: fullView ? "1rem" : "0.85rem" }}>
+                        {translateFileNames(arquivo)}
+                      </Typography>
+                    </ListItemText>
+                  </Link>
+                ) : (
                   <ListItemText>
                     <Typography sx={{ fontSize: fullView ? "1rem" : "0.85rem" }}>
                       {translateFileNames(arquivo)}
                     </Typography>
                   </ListItemText>
-                </Link>
+                )}
               </ListItem>
             );
           })}
       </List>
 
       {
-        fullView && hasFiles && (
+        fullView && (
           <div>
             <Typography sx={{ mb: 5 }} paragraph>
               Após baixar, acesse o

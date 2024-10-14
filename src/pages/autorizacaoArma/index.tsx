@@ -1,23 +1,15 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-  Button,
-  Box,
-  Grid,
-  Typography,
-} from "@mui/material";
+import { Button, Box, Grid, Typography, Card, CardActions, CardContent, useMediaQuery } from "@mui/material";
 import { nanoid } from "nanoid";
 import DadosPessoais from "./sections/DadosPessoais";
 import Endereco from "./sections/Endereco";
 import DocumentosParaAssinar from "./sections/DocumentosParaAssinar";
 import SideBar from "../../components/sideBar/SideBar";
+import StepperMobile from '../../components/stepper/StepperMobile';
 import { apiRequest } from "../../services/api/apiRequestService";
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import { useMediaQuery } from '@mui/material';
-import StepperMobile from '../../components/stepper/StepperMobile'
 import { validarStepper } from "./sections/utils/ValidarStepper";
+
 
 export default function Cadastro() {
   const [uuid, setUuid] = useState<string | null>(null);
@@ -30,7 +22,7 @@ export default function Cadastro() {
     endereco: true,
     documentosParaAssinar: true,
   });
-  const [pdfUrls, setPdfUrls] = useState<{ [key: string]: string | null }>({});
+  const [pdfUrls, setPdfUrls] = useState<{ [key: string]: { url: string | null; status: string | null; }; }>({});
   const [buttonText, setButtonText] = useState("Clique para copiar sua url");
   const [activeStep, setActiveStep] = React.useState<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -323,7 +315,7 @@ export default function Cadastro() {
           <Grid item xs={12} sx={{ padding: '10px', paddingBottom: 0 }}>
 
             <Typography variant="h5" component="h2" color={"#1465C0"} align='center'>
-              Documentos Gerados
+              Seus documentos
             </Typography>
 
             <DocumentosParaAssinar urls={pdfUrls} />

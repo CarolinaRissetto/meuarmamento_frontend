@@ -12,9 +12,11 @@ const camposNecessarios = [
 
 export const gerarCertidaoJusticaMilitar = async (formData: { [key: string]: any },
     setFormData: (data: any) => void,
-    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>,
+    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
     uuid: string | null
 ) => {
+
+    buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
 
     if (!verificarCamposPreenchidos(formData, camposNecessarios)) {
         console.log("Campos obrigatórios não preenchidos.");
@@ -37,8 +39,6 @@ export const gerarCertidaoJusticaMilitar = async (formData: { [key: string]: any
             tipo: "gerarCertidaoMilitar",
             data: formDataCombinado
         });
-
-        buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
 
     } catch (error) {
         console.error("Erro ao gerar pdf militar:", error);

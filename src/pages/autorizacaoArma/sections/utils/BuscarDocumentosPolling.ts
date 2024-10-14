@@ -4,7 +4,7 @@ let currentPollingIntervalId: number | NodeJS.Timeout | null = null;
 
 const buscarDocumentosEAtualizarLocalStorage = async (
     setFormData: (data: any) => void,
-    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>,
+    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
     uuid: string | null
 ) => {
     try {
@@ -25,7 +25,8 @@ const buscarDocumentosEAtualizarLocalStorage = async (
 
             console.log('Dados obtidos:', data);
 
-            // Atualizar apenas a parte dos documentos no localStorage
+            const documentosAtualizados = mapearDadosDocumentos(data.documentos);
+
             const storedData = localStorage.getItem(`form-data-${uuid}`);
             const existingData = storedData ? JSON.parse(storedData) : {};
             const updatedData = {
@@ -35,25 +36,41 @@ const buscarDocumentosEAtualizarLocalStorage = async (
             localStorage.setItem(`form-data-${uuid}`, JSON.stringify(updatedData));
 
             setFormData(updatedData);
-            setPdfUrls(data.documentos);
+            setPdfUrls(documentosAtualizados);
 
-            return data.documentos;
+            return documentosAtualizados;
         }
     } catch (error) {
         console.error("Erro ao buscar documentos:", error);
-        throw error; // Propaga o erro para o polling
+        throw error;
     }
 };
 
-const buscouTodosDocumentos = (documentos: { [key: string]: string }) => {
-    return documentos && Object.keys(documentos).length === 5;
+const mapearDadosDocumentos = (documentos: { [key: string]: any }) => {
+    const documentosMapeados: { [key: string]: { url: string | null, status: string | null } } = {};
+
+    Object.keys(documentos).forEach((tipoDocumento) => {
+        documentosMapeados[tipoDocumento] = {
+            url: documentos[tipoDocumento]?.url || null,
+            status: documentos[tipoDocumento]?.status || null,
+        };
+    });
+
+    return documentosMapeados;
+};
+
+const buscouTodosDocumentos = (documentos: {
+    [key: string]: { url: string | null; status: string | null; };
+} | undefined
+) => {
+    return documentos && Object.values(documentos).every(doc => doc?.status === 'concluido');
 };
 
 export const buscarDocumentosPolling = (
     setFormData: (data: any) => void,
-    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>,
+    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
     uuid: string | null,
-    checkInterval = 20000,
+    checkInterval = 5000,
     maxAttempts = 12
 ) => {
     if (currentPollingIntervalId) {
@@ -73,16 +90,16 @@ export const buscarDocumentosPolling = (
             if (buscouTodosDocumentos(documentos)) {
                 console.log("Todos os 5 documentos foram obtidos. Parando o polling.");
                 clearInterval(currentPollingIntervalId as NodeJS.Timeout | number);
-                currentPollingIntervalId = null; // Reseta o ID do polling atual
+                currentPollingIntervalId = null;
             } else if (attempts >= maxAttempts) {
                 console.log("Número máximo de tentativas alcançado. Parando o polling.");
                 clearInterval(currentPollingIntervalId as NodeJS.Timeout | number);
-                currentPollingIntervalId = null; // Reseta o ID do polling atual
+                currentPollingIntervalId = null;
             }
         } catch (error) {
             console.error("Erro durante o polling:", error);
             clearInterval(currentPollingIntervalId as NodeJS.Timeout | number);
-            currentPollingIntervalId = null; // Reseta o ID do polling atual
+            currentPollingIntervalId = null;
         }
     }, checkInterval);
 };

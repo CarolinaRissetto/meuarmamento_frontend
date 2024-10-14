@@ -19,10 +19,12 @@ const camposNecessarios = [
 
 export const gerarCertidaoJusticaEstadual = async (formData: { [key: string]: any },
     setFormData: (data: any) => void,
-    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>,
+    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
     uuid: string | null) => {
     const sexo = "F";
     const estadoCivil = "1";
+
+    buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
 
     if (!verificarCamposPreenchidos(formData, camposNecessarios)) {
         console.log("Campos obrigatórios não preenchidos.");
@@ -58,8 +60,6 @@ export const gerarCertidaoJusticaEstadual = async (formData: { [key: string]: an
                 ...prevUrls,
                 certidaoJusticaEstadual: response.body || null,
             }));
-
-            buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
 
         } else {
             console.error('Erro ao gerar certidão estadual: resposta inesperada do servidor.');

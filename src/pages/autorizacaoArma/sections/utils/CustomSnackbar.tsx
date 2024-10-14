@@ -2,11 +2,10 @@ import React from 'react';
 import { Snackbar, Alert } from '@mui/material';
 
 interface CustomSnackbarProps {
-    snackbarOpen: boolean; 
-    setSnackbarOpen: React.Dispatch<React.SetStateAction<boolean>>; 
+    snackbarOpen: boolean;
+    setSnackbarOpen: React.Dispatch<React.SetStateAction<boolean>>;
     message: string;
     severity?: 'success' | 'info' | 'warning' | 'error';
-    autoHideDuration?: number;
 }
 
 const CustomSnackbar: React.FC<CustomSnackbarProps> = ({
@@ -14,7 +13,6 @@ const CustomSnackbar: React.FC<CustomSnackbarProps> = ({
     setSnackbarOpen,
     message,
     severity = 'info',
-    autoHideDuration = 4000
 }) => {
     const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
         if (reason === 'clickaway') {
@@ -26,9 +24,9 @@ const CustomSnackbar: React.FC<CustomSnackbarProps> = ({
     return (
         <Snackbar
             open={snackbarOpen}
-            autoHideDuration={autoHideDuration}
             onClose={handleClose}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            autoHideDuration={3000}
         >
             <Alert onClose={handleClose} severity={severity} variant="filled" sx={{ width: '100%' }}>
                 {message}

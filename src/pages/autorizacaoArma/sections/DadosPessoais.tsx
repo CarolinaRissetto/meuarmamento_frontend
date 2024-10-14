@@ -27,7 +27,7 @@ interface DadosPessoaisProps {
   handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleInputBlur: (event: React.FocusEvent<HTMLInputElement>) => void;
   formData: { [key: string]: string };
-  setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>;
+  setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>;
   uuid: string | null;
   setActiveStep: React.Dispatch<React.SetStateAction<number>>;
   setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
@@ -242,7 +242,6 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
         setSnackbarOpen={setSnackbarOpen}
         message="Iniciando a geração de 2 documentos..."
         severity="success"
-        autoHideDuration={4000}
       />
     </div>
   );
