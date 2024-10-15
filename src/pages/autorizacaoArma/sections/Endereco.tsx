@@ -87,6 +87,10 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
         setSameAddress((event.target as HTMLInputElement).value);
     };
 
+    useEffect(() => {
+        setOpen(isVisible);
+      }, [isVisible]);
+      
     const isFormFilled = () => {
         const inputs = document.querySelectorAll("#endereco-form input[required]");
         for (let i = 0; i < inputs.length; i++) {

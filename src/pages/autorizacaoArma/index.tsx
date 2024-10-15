@@ -162,6 +162,12 @@ export default function Cadastro() {
     urlParams.set("uuid", newUuid);
     navigate(`?${urlParams.toString()}`, { replace: true });
 
+    setSectionVisibility((prev) => ({
+      ...prev,
+      dadosPessoais: true,
+      endereco: true,
+    }));
+
     if (inputRef.current) {
       inputRef.current.focus();
     }
