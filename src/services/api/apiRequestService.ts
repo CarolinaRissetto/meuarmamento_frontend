@@ -1,15 +1,18 @@
 import axios from 'axios';
 
+const API_URL = process.env.REACT_APP_API_URL as string;
+
 export const apiRequest = async (data?: any) => {
+
+    if (!API_URL) {
+        throw new Error('REACT_APP_API_URL não está definida.');
+    }
+
     try {
-        const response = await axios({
-            method: 'POST',
-            url: 'https://fv3af26004.execute-api.us-east-1.amazonaws.com/Prod/processos',
-            // url: 'http://localhost:3001/processos/',
+        const response = await axios.post(API_URL, data, {
             headers: {
                 'Content-Type': 'application/json',
             },
-            data: data,
         });
 
         console.log('Response data:', response.data);

@@ -36,7 +36,7 @@ Inicie o servidor de desenvolvimento:
 npm start
 ```
 
-Percisa ser criado o arquivo .env para testar localmente.
+Percisa ser criado o arquivo .env.development.local para testar localmente, conforme o exemplo do arquivo .env.exemple do projeto.
 
 ## 📦 Implantação
 
