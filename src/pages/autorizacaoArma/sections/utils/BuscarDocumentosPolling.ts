@@ -89,17 +89,21 @@ export const buscarDocumentosPolling = (
 
             if (buscouTodosDocumentos(documentos)) {
                 console.log("Todos os 5 documentos foram obtidos. Parando o polling.");
-                clearInterval(currentPollingIntervalId as NodeJS.Timeout | number);
-                currentPollingIntervalId = null;
+                cancelarPoolingDocumentos();
             } else if (attempts >= maxAttempts) {
                 console.log("Número máximo de tentativas alcançado. Parando o polling.");
-                clearInterval(currentPollingIntervalId as NodeJS.Timeout | number);
-                currentPollingIntervalId = null;
+                cancelarPoolingDocumentos();
             }
         } catch (error) {
             console.error("Erro durante o polling:", error);
-            clearInterval(currentPollingIntervalId as NodeJS.Timeout | number);
-            currentPollingIntervalId = null;
+            cancelarPoolingDocumentos();
         }
     }, checkInterval);
+};
+
+export const cancelarPoolingDocumentos = () => {
+    if (currentPollingIntervalId) {
+        clearInterval(currentPollingIntervalId as NodeJS.Timeout | number);
+        currentPollingIntervalId = null;
+    }
 };
