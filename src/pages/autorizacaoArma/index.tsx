@@ -173,14 +173,14 @@ export default function Cadastro() {
     }
   };
 
-  const handleSecaoPreenchida = async (section: string) => {
+  const fecharSessaoPreenchida = async (section: string) => {
     setSectionVisibility((prev) => ({
       ...prev,
       [section]: false,
     }));
   };
 
-  const handleAlternarVisibilidade = (section: string) => {
+  const alternarVisibilidadeSessao = (section: string) => {
     setSectionVisibility((prev) => ({
       ...prev,
       [section]: !prev[section as keyof typeof prev],
@@ -294,9 +294,9 @@ export default function Cadastro() {
           )}
 
           <DadosPessoais
-            isVisible={sectionVisibility.dadosPessoais}
-            onToggle={() => handleAlternarVisibilidade("dadosPessoais")}
-            onFilled={() => handleSecaoPreenchida("dadosPessoais")}
+            visibilidadeSessao={sectionVisibility.dadosPessoais}
+            alternarVisibilidadeSessao={() => alternarVisibilidadeSessao("dadosPessoais")}
+            fecharSessaoPreenchida={() => fecharSessaoPreenchida("dadosPessoais")}
             handleInputChange={handleInputChange}
             handleInputBlur={handleInputBlur("dadosPessoais")}
             formData={formData}
@@ -308,9 +308,9 @@ export default function Cadastro() {
           />
 
           <Endereco
-            isVisible={sectionVisibility.endereco}
-            onToggle={() => handleAlternarVisibilidade("endereco")}
-            onFilled={() => handleSecaoPreenchida("endereco")}
+            visibilidadeSessao={sectionVisibility.endereco}
+            alternarVisibilidadeSessao={() => alternarVisibilidadeSessao("endereco")}
+            fecharSessaoPreenchida={() => fecharSessaoPreenchida("endereco")}
             setFormData={setFormData}
             setPdfUrls={setPdfUrls}
             formData={formData}

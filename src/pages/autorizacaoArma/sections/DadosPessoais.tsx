@@ -21,9 +21,9 @@ const FormGrid = styled(Grid)(() => ({
 }));
 
 interface DadosPessoaisProps {
-  isVisible: boolean;
-  onToggle: () => void;
-  onFilled: () => void;
+  visibilidadeSessao: boolean;
+  alternarVisibilidadeSessao: () => void;
+  fecharSessaoPreenchida: () => void;
   handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleInputBlur: (event: React.FocusEvent<HTMLInputElement>) => void;
   formData: { [key: string]: string };
@@ -34,8 +34,8 @@ interface DadosPessoaisProps {
   inputRef?: RefObject<HTMLInputElement>;
 }
 
-const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFilled, handleInputChange, formData, uuid, handleInputBlur, setPdfUrls, setFormData, inputRef }) => {
-  const [open, setOpen] = useState(isVisible);
+const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alternarVisibilidadeSessao, fecharSessaoPreenchida, handleInputChange, formData, uuid, handleInputBlur, setPdfUrls, setFormData, inputRef }) => {
+  const [sessaoAberta, setSessaoAberta] = useState(visibilidadeSessao);
   const [dirty, setDirty] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -51,25 +51,20 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
   };
 
   useEffect(() => {
-    setOpen(isVisible);
-  }, [isVisible]);
-
-  useEffect(() => {
-    if (isFormFilled()) {
-      onFilled();
-    }
-  }, [onFilled, formData]);
+    setSessaoAberta(visibilidadeSessao);
+  }, [visibilidadeSessao]);
 
   useEffect(() => {
 
     const handleClickOutside = (event: MouseEvent) => {
       if (formRef.current && !formRef.current.contains(event.target as Node)) {
         if (isFormFilled() && dirty) {
-          if (open) {
-            setOpen(false);
+          if (sessaoAberta) {
+            fecharSessaoPreenchida();
             setSnackbarOpen(true);
             gerarPdfsTemplates(formData, uuid, setPdfUrls, setFormData);
             gerarCertidoes(formData, setPdfUrls, uuid, setFormData);
+            setDirty(false)
           }
         }
       }
@@ -84,13 +79,19 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
   }, [dirty, formData, uuid]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+
+    const valorAnterior = formData[name as keyof typeof formData];
+
+    if (valorAnterior !== value) {
+      setDirty(true);
+    }
+
     handleInputChange(event);
-    setDirty(true);
   };
 
   const handleToggle = () => {
-    setOpen(!open);
-    onToggle();
+    alternarVisibilidadeSessao();
   };
 
   return (
@@ -114,11 +115,11 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ isVisible, onToggle, onFi
         </Grid>
         <Grid item xs={1}>
           <IconButton>
-            {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            {sessaoAberta ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </IconButton>
         </Grid>
       </Grid>
-      <Collapse in={open}>
+      <Collapse in={sessaoAberta}>
         <Grid container spacing={3} marginTop={"5px"} id="dados-pessoais-form" ref={formRef}>
           <FormGrid item xs={12}>
             <FormLabel htmlFor="nomeCompleto" required>

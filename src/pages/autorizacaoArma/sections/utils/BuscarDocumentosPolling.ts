@@ -70,8 +70,8 @@ export const buscarDocumentosPolling = (
     setFormData: (data: any) => void,
     setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
     uuid: string | null,
-    checkInterval = 5000,
-    maxAttempts = 12
+    checkInterval = 9000,
+    maxAttempts = 20
 ) => {
     if (currentPollingIntervalId) {
         clearInterval(currentPollingIntervalId);
