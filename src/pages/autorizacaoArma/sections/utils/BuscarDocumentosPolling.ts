@@ -80,6 +80,9 @@ export const buscarDocumentosPolling = (
 
     let attempts = 0;
 
+    const buscarDadosImediatamente = async () => await buscarDocumentosEAtualizarLocalStorage(setFormData, setPdfUrls, uuid);
+    buscarDadosImediatamente();
+
     currentPollingIntervalId = setInterval(async () => {
         attempts += 1;
         console.log(`Tentativa ${attempts} de ${maxAttempts}`);
