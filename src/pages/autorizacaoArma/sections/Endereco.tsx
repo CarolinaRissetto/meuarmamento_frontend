@@ -62,9 +62,9 @@ const handleFileChange = (
 };
 
 interface EnderecoProps {
-    isVisible: boolean;
-    onToggle: () => void;
-    onFilled: () => void;
+    visibilidadeSessao: boolean;
+    alternarVisibilidadeSessao: () => void;
+    fecharSessaoPreenchida: () => void;
     formData: { [key: string]: any };
     setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
     setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>;
@@ -72,8 +72,8 @@ interface EnderecoProps {
     setActiveStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, formData, uuid, setFormData, setPdfUrls }) => {
-    const [open, setOpen] = useState(isVisible);
+const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibilidadeSessao, fecharSessaoPreenchida, formData, uuid, setFormData, setPdfUrls }) => {
+    const [sessaoAberta, setSessaoAberta] = useState(visibilidadeSessao);
     const [sameAddress, setSameAddress] = useState('yes');
     const [dirty, setDirty] = useState(false);
     const formRef = useRef<HTMLDivElement>(null);
@@ -88,9 +88,9 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
     };
 
     useEffect(() => {
-        setOpen(isVisible);
-      }, [isVisible]);
-      
+        setSessaoAberta(visibilidadeSessao);
+    }, [visibilidadeSessao]);
+
     const isFormFilled = () => {
         const inputs = document.querySelectorAll("#endereco-form input[required]");
         for (let i = 0; i < inputs.length; i++) {
@@ -102,21 +102,15 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
     };
 
     useEffect(() => {
-        if (isFormFilled()) {
-            onFilled();
-        }
-    }, [onFilled, formData]);
-
-
-    useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (formRef.current && !formRef.current.contains(event.target as Node)) {
                 if (isFormFilled() && dirty) {
-                    if (open) {
-                        setOpen(false);
+                    if (sessaoAberta) {
+                        fecharSessaoPreenchida();
                         setSnackbarOpen(true);
                         gerarPdfsTemplates(formData, uuid, setPdfUrls, setFormData);
                         gerarCertidaoJusticaEstadual(formData, setFormData, setPdfUrls, uuid);
+                        setDirty(false)
                     }
                 }
             }
@@ -131,13 +125,19 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
     }, [dirty, formData, uuid]);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
+
+        const valorAnterior = formData[name as keyof typeof formData];
+
+        if (valorAnterior !== value) {
+            setDirty(true);
+        }
+
         handleInputChange(event);
-        setDirty(true);
     };
 
     const handleToggle = () => {
-        setOpen(!open);
-        onToggle();
+        alternarVisibilidadeSessao();
     };
 
     const handleInputBlur = async (event: React.FocusEvent<HTMLInputElement>) => {
@@ -221,12 +221,12 @@ const Endereco: React.FC<EnderecoProps> = ({ isVisible, onToggle, onFilled, form
                     </Grid>
                     <Grid item xs={1}>
                         <IconButton onClick={handleToggle}>
-                            {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                            {sessaoAberta ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                         </IconButton>
                     </Grid>
                 </Grid>
             </Box>
-            <Collapse in={open}>
+            <Collapse in={sessaoAberta}>
                 <Grid container spacing={3} marginTop={"5px"} id="endereco-form" marginBottom={"70px"} ref={formRef} >
                     <FormGrid item xs={12}>
                         <FormLabel component="legend">
