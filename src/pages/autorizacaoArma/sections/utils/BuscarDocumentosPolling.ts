@@ -2,6 +2,12 @@ import { apiRequest } from "../../../../services/api/apiRequestService";
 
 let currentPollingIntervalId: number | NodeJS.Timeout | null = null;
 
+export const getCurrentPollingIntervalId = () => currentPollingIntervalId;
+
+export const setCurrentPollingIntervalId = (id: number | NodeJS.Timeout | null) => {
+    currentPollingIntervalId = id;
+};
+
 const buscarDocumentosEAtualizarLocalStorage = async (
     setFormData: (data: any) => void,
     setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,

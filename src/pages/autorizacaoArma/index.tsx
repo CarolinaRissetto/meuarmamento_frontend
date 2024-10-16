@@ -9,7 +9,7 @@ import SideBar from "../../components/sideBar/SideBar";
 import StepperMobile from '../../components/stepper/StepperMobile';
 import { apiRequest } from "../../services/api/apiRequestService";
 import { validarStepper } from "./sections/utils/ValidarStepper";
-
+import { getCurrentPollingIntervalId, setCurrentPollingIntervalId } from "./sections/utils/BuscarDocumentosPolling";
 
 export default function Cadastro() {
   const [uuid, setUuid] = useState<string | null>(null);
@@ -145,6 +145,13 @@ export default function Cadastro() {
 
   const handleNovoProcesso = () => {
     console.log("Botão de novo cadastro clicado");
+
+    const currentPollingIntervalId = getCurrentPollingIntervalId();
+    if (currentPollingIntervalId) {
+      clearInterval(currentPollingIntervalId as NodeJS.Timeout | number);
+      setCurrentPollingIntervalId(null);
+      console.log("Polling interrompido para iniciar um novo processo.");
+    }
 
     const newUuid = nanoid(6);
     limparLocalStorage(newUuid);
