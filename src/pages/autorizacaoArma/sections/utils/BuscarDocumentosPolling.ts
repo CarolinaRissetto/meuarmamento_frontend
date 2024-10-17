@@ -2,6 +2,48 @@ import { apiRequest } from "../../../../services/api/apiRequestService";
 
 let currentPollingIntervalId: number | NodeJS.Timeout | null = null;
 
+export const buscarDocumentosPolling = (
+    setFormData: (data: any) => void,
+    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
+    uuid: string | null,
+    checkInterval = 9000,
+    maxAttempts = 20
+) => {
+    if (currentPollingIntervalId) {
+        clearInterval(currentPollingIntervalId);
+        console.log("Polling anterior interrompido para iniciar um novo.");
+    }
+
+    let attempts = 0;
+
+    currentPollingIntervalId = setInterval(async () => {
+        attempts += 1;
+        console.log(`Tentativa ${attempts} de ${maxAttempts}`);
+
+        try {
+            const documentos = await buscarDocumentosEAtualizarLocalStorage(setFormData, setPdfUrls, uuid);
+
+            if (buscouTodosDocumentos(documentos)) {
+                console.log("Todos os 5 documentos foram obtidos. Parando o polling.");
+                cancelarPoolingDocumentos();
+            } else if (attempts >= maxAttempts) {
+                console.log("Número máximo de tentativas alcançado. Parando o polling.");
+                cancelarPoolingDocumentos();
+            }
+        } catch (error) {
+            console.error("Erro durante o polling:", error);
+            cancelarPoolingDocumentos();
+        }
+    }, checkInterval);
+};
+
+export const cancelarPoolingDocumentos = () => {
+    if (currentPollingIntervalId) {
+        clearInterval(currentPollingIntervalId as NodeJS.Timeout | number);
+        currentPollingIntervalId = null;
+    }
+};
+
 const buscarDocumentosEAtualizarLocalStorage = async (
     setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>,
     setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
@@ -63,46 +105,4 @@ const buscouTodosDocumentos = (documentos: {
 } | undefined
 ) => {
     return documentos && Object.values(documentos).every(doc => doc?.status === 'concluido');
-};
-
-export const buscarDocumentosPolling = (
-    setFormData: (data: any) => void,
-    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
-    uuid: string | null,
-    checkInterval = 9000,
-    maxAttempts = 20
-) => {
-    if (currentPollingIntervalId) {
-        clearInterval(currentPollingIntervalId);
-        console.log("Polling anterior interrompido para iniciar um novo.");
-    }
-
-    let attempts = 0;
-
-    currentPollingIntervalId = setInterval(async () => {
-        attempts += 1;
-        console.log(`Tentativa ${attempts} de ${maxAttempts}`);
-
-        try {
-            const documentos = await buscarDocumentosEAtualizarLocalStorage(setFormData, setPdfUrls, uuid);
-
-            if (buscouTodosDocumentos(documentos)) {
-                console.log("Todos os 5 documentos foram obtidos. Parando o polling.");
-                cancelarPoolingDocumentos();
-            } else if (attempts >= maxAttempts) {
-                console.log("Número máximo de tentativas alcançado. Parando o polling.");
-                cancelarPoolingDocumentos();
-            }
-        } catch (error) {
-            console.error("Erro durante o polling:", error);
-            cancelarPoolingDocumentos();
-        }
-    }, checkInterval);
-};
-
-export const cancelarPoolingDocumentos = () => {
-    if (currentPollingIntervalId) {
-        clearInterval(currentPollingIntervalId as NodeJS.Timeout | number);
-        currentPollingIntervalId = null;
-    }
 };
