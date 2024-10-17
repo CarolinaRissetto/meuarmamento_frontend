@@ -27,14 +27,6 @@ export default function Cadastro() {
   const [activeStep, setActiveStep] = React.useState<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const limparLocalStorage = useCallback((newUuid: string) => {
-    for (const key in localStorage) {
-      if (key.startsWith("form-data-") && key !== `form-data-${newUuid}`) {
-        localStorage.removeItem(key);
-      }
-    }
-  }, []);
-
   const atualizaUuidUrlELocalStorage = useCallback(
     (uuid: string) => {
       localStorage.setItem("user-uuid", uuid);
@@ -51,16 +43,6 @@ export default function Cadastro() {
     const step = validarStepper(formData);
     setActiveStep(step);
   }, [formData]);
-
-  useEffect(() => {
-    if (uuid) {
-      const updatedFormData = {
-        ...formData,
-        documentos: pdfUrls,
-      };
-      localStorage.setItem(`form-data-${uuid}`, JSON.stringify(updatedFormData));
-    }
-  }, [pdfUrls, uuid, formData]);
 
   const buscarDados = useCallback(async (uuid: string) => {
     const response = await apiRequest({
@@ -83,7 +65,6 @@ export default function Cadastro() {
 
         setFormData(data);
         setPdfUrls(data.documentos);
-        localStorage.setItem(`form-data-${uuid}`, JSON.stringify(data));
 
       } catch (error) {
         console.error("Erro ao fazer o parse do JSON:", error);
@@ -94,14 +75,6 @@ export default function Cadastro() {
     }
   }, []);
 
-  const limparDadosAntigos = (uuidAtual: string) => {
-    for (const key in localStorage) {
-      if (key.startsWith("form-data-") && key !== `form-data-${uuidAtual}`) {
-        localStorage.removeItem(key);
-      }
-    }
-  };
-
   useEffect(() => {
 
     const buscarDadosEAtualizarEstado = async () => {
@@ -110,18 +83,15 @@ export default function Cadastro() {
       const storedUuid = localStorage.getItem("user-uuid");
 
       if (urlUuid && urlUuid !== storedUuid) {
-        limparDadosAntigos(urlUuid);
         setUuid(urlUuid);
         await buscarDados(urlUuid);
         atualizaUuidUrlELocalStorage(urlUuid);
       } else if (storedUuid) {
-        limparDadosAntigos(storedUuid);
         setUuid(storedUuid);
         await buscarDados(storedUuid);
         atualizaUuidUrlELocalStorage(storedUuid);
       } else {
         const newUuid = nanoid(6);
-        limparDadosAntigos(newUuid);
         setUuid(newUuid);
         await buscarDados(newUuid);
         atualizaUuidUrlELocalStorage(newUuid);
@@ -135,12 +105,6 @@ export default function Cadastro() {
     const { name, value } = event.target;
     const updatedFormData = { ...formData, [name]: value };
     setFormData(updatedFormData);
-    if (uuid) {
-      localStorage.setItem(
-        `form-data-${uuid}`,
-        JSON.stringify({ uuid, ...updatedFormData })
-      );
-    }
   };
 
   const handleNovoProcesso = () => {
@@ -149,17 +113,10 @@ export default function Cadastro() {
     cancelarPoolingDocumentos();
 
     const newUuid = nanoid(6);
-    limparLocalStorage(newUuid);
     localStorage.setItem("user-uuid", newUuid);
     setUuid(newUuid);
     setFormData({});
     setPdfUrls({});
-
-    localStorage.setItem(
-      `form-data-${newUuid}`,
-      JSON.stringify({ uuid: newUuid, ...formData })
-
-    );
 
     urlParams.set("uuid", newUuid);
     navigate(`?${urlParams.toString()}`, { replace: true });
@@ -195,10 +152,6 @@ export default function Cadastro() {
     setFormData(updatedFormData);
 
     if (uuid) {
-      localStorage.setItem(
-        `form-data-${uuid}`,
-        JSON.stringify({ uuid, ...updatedFormData })
-      );
       await apiRequest({
         tipo,
         data: {

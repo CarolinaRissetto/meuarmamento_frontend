@@ -3,7 +3,7 @@ import { apiRequest } from "../../../../services/api/apiRequestService";
 let currentPollingIntervalId: number | NodeJS.Timeout | null = null;
 
 const buscarDocumentosEAtualizarLocalStorage = async (
-    setFormData: (data: any) => void,
+    setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>,
     setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
     uuid: string | null
 ) => {
@@ -27,16 +27,15 @@ const buscarDocumentosEAtualizarLocalStorage = async (
 
             const documentosAtualizados = mapearDadosDocumentos(data.documentos);
 
-            const storedData = localStorage.getItem(`form-data-${uuid}`);
-            const existingData = storedData ? JSON.parse(storedData) : {};
-            const updatedData = {
-                ...existingData,
-                documentos: data.documentos,
-            };
-            localStorage.setItem(`form-data-${uuid}`, JSON.stringify(updatedData));
+            setFormData(prevFormData => ({
+                ...prevFormData,
+                ...parsedData,
+            }));
 
-            setFormData(updatedData);
-            setPdfUrls(documentosAtualizados);
+            setPdfUrls(prevPdfUrls => ({
+                ...prevPdfUrls,
+                ...documentosAtualizados,
+            }));
 
             return documentosAtualizados;
         }
