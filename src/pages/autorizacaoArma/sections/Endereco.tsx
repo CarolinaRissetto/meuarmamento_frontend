@@ -172,7 +172,6 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
         setFormData(updatedFormData);
 
         if (uuid) {
-            localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
             apiRequest({
                 tipo: "endereco",
                 data: {
@@ -194,9 +193,6 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
             }
         };
         setFormData(updatedFormData);
-        if (uuid) {
-            localStorage.setItem(`form-data-${uuid}`, JSON.stringify({ uuid, ...updatedFormData }));
-        }
     };
 
     return (
@@ -211,9 +207,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                         padding: '10px',
                     }}
                     onClick={handleToggle}
-
                 >
-
                     <Grid item xs={11}>
                         <Typography variant="h5" component="h2" color={"#1465C0"} align='center'>
                             Endereço
