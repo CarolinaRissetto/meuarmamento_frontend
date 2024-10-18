@@ -107,18 +107,18 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
 
     useEffect(() => {
         if (!dirty || !isFormFilled()) return;
-      
+
         const timer = setTimeout(() => {
-          const activeElement = document.activeElement;
-      
-          if (activeElement instanceof HTMLElement) {
-            activeElement.blur(); 
-          }
+            const activeElement = document.activeElement;
+
+            if (activeElement instanceof HTMLElement) {
+                activeElement.blur();
+            }
         }, 2000);
-      
+
         return () => clearTimeout(timer);
-      }, [formData, dirty]);
-      
+    }, [formData, dirty]);
+
 
     const handleInputBlur = async (event: React.FocusEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
@@ -213,7 +213,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                         </Typography>
                     </Grid>
                     <Grid item xs={1}>
-                        <IconButton onClick={handleToggle}>
+                        <IconButton>
                             {sessaoAberta ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                         </IconButton>
                     </Grid>
