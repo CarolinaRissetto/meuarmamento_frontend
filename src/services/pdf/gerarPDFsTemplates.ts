@@ -27,6 +27,8 @@ export const gerarPdfsTemplates = async (
         return;
     }
 
+    buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
+
     const { endereco = {}, ...outrosDados } = formData;
 
     const formDataCombinado = {
@@ -53,8 +55,6 @@ export const gerarPdfsTemplates = async (
             tipo: "gerarPdfsBasicos",
             data: formDataComData,
         });
-
-        buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
 
     } catch (error) {
         console.error("Erro ao chamar a API de geração de PDF:", error);

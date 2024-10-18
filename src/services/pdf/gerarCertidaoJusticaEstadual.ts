@@ -24,12 +24,17 @@ export const gerarCertidaoJusticaEstadual = async (formData: { [key: string]: an
     const sexo = "F";
     const estadoCivil = "1";
 
-    buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
-
     if (!verificarCamposPreenchidos(formData, camposNecessarios)) {
         console.log("Campos obrigatórios não preenchidos.");
         return;
     }
+
+    setPdfUrls((prevPdfUrls) => ({
+        ...prevPdfUrls,
+        certidaoJusticaEstadual: { url: null, status: 'INICIADO' },
+    }));
+
+    buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
 
     console.log(formData)
     const endereco = `${formData.endereco.rua}, ${formData.endereco.numero}, ${formData.endereco.cidade} - ${formData.endereco.uf}`;
