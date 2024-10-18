@@ -105,6 +105,21 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
         alternarVisibilidadeSessao();
     };
 
+    useEffect(() => {
+        if (!dirty || !isFormFilled()) return;
+      
+        const timer = setTimeout(() => {
+          const activeElement = document.activeElement;
+      
+          if (activeElement instanceof HTMLElement) {
+            activeElement.blur(); 
+          }
+        }, 2000);
+      
+        return () => clearTimeout(timer);
+      }, [formData, dirty]);
+      
+
     const handleInputBlur = async (event: React.FocusEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
 
@@ -152,11 +167,11 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                     }
                 };
 
-                return updatedFormData; 
+                return updatedFormData;
             }
         }
 
-        return formData;  
+        return formData;
     };
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {

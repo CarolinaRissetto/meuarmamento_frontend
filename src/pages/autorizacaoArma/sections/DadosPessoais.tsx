@@ -14,6 +14,7 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { gerarPdfsTemplates } from "../../../services/pdf/gerarPDFsTemplates";
 import { gerarCertidoes } from "./utils/GerarCertidoes";
 import CustomSnackbar from './utils/CustomSnackbar';
+import { apiRequest } from "../../../services/api/apiRequestService";
 
 const FormGrid = styled(Grid)(() => ({
   display: "flex",
@@ -24,8 +25,6 @@ interface DadosPessoaisProps {
   visibilidadeSessao: boolean;
   alternarVisibilidadeSessao: () => void;
   fecharSessaoPreenchida: () => void;
-  handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  handleInputBlur: (event: React.FocusEvent<HTMLInputElement>) => void;
   formData: { [key: string]: string };
   setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>;
   uuid: string | null;
@@ -34,7 +33,7 @@ interface DadosPessoaisProps {
   inputRef?: RefObject<HTMLInputElement>;
 }
 
-const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alternarVisibilidadeSessao, fecharSessaoPreenchida, handleInputChange, formData, uuid, handleInputBlur, setPdfUrls, setFormData, inputRef }) => {
+const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alternarVisibilidadeSessao, fecharSessaoPreenchida, formData, uuid, setPdfUrls, setFormData, inputRef }) => {
   const [sessaoAberta, setSessaoAberta] = useState(visibilidadeSessao);
   const [dirty, setDirty] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
@@ -78,7 +77,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dirty, formData, uuid]);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
 
     const valorAnterior = formData[name as keyof typeof formData];
@@ -87,7 +86,24 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
       setDirty(true);
     }
 
-    handleInputChange(event);
+    const updatedFormData = { ...formData, [name]: value };
+    setFormData(updatedFormData);
+  };
+
+  const handleInputBlur = async (event: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    const updatedFormData = { ...formData, [name]: value };
+    setFormData(updatedFormData);
+
+    if (uuid) {
+      await apiRequest({
+        tipo: "dadosPessoais",
+        data: {
+          uuid,
+          ...updatedFormData,
+        },
+      });
+    }
   };
 
   const handleToggle = () => {
@@ -133,7 +149,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
               autoComplete="nomeCompleto"
               required
               value={formData["nomeCompleto"] || ""}
-              onChange={handleChange}
+              onChange={handleInputChange}
               onBlur={handleInputBlur}
               inputRef={inputRef}
               sx={{
@@ -156,7 +172,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
               autoComplete="cpf"
               required
               value={formData["cpf"] || ""}
-              onChange={handleChange}
+              onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
           </FormGrid>
@@ -172,7 +188,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
               autoComplete="rg"
               required
               value={formData["rg"] || ""}
-              onChange={handleChange}
+              onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
           </FormGrid>
@@ -188,7 +204,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
               autoComplete="nacionalidade"
               required
               value={formData["nacionalidade"] || ""}
-              onChange={handleChange}
+              onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
           </FormGrid>
@@ -204,7 +220,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
               autoComplete="dataNascimento"
               required
               value={formData["dataNascimento"] || ""}
-              onChange={handleChange}
+              onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
           </FormGrid>
@@ -220,7 +236,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
               autoComplete="nomeMae"
               required
               value={formData["nomeMae"] || ""}
-              onChange={handleChange}
+              onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
           </FormGrid>
@@ -236,7 +252,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
               autoComplete="nomePai"
               required
               value={formData["nomePai"] || ""}
-              onChange={handleChange}
+              onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
           </FormGrid>
