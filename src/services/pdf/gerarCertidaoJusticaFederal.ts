@@ -12,14 +12,19 @@ export const gerarCertidaoJusticaFederal = async (formData: { [key: string]: any
     uuid: string | null
 ) => {
 
-    buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
-
     if (!verificarCamposPreenchidos(formData, camposNecessarios)) {
         console.log("Campos obrigatórios não preenchidos.");
         return;
     }
 
     console.log("Gerando certidão justiça federal");
+
+    setPdfUrls((prevPdfUrls) => ({
+        ...prevPdfUrls,
+        certidaoJusticaFederal: { url: null, status: 'INICIADO' },
+    }));
+
+    buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
 
     const formDataCombinado = {
         ...formData,

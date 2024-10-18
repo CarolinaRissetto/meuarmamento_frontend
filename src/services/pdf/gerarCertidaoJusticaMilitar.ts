@@ -16,14 +16,19 @@ export const gerarCertidaoJusticaMilitar = async (formData: { [key: string]: any
     uuid: string | null
 ) => {
 
-    buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
-
     if (!verificarCamposPreenchidos(formData, camposNecessarios)) {
         console.log("Campos obrigatórios não preenchidos.");
         return;
     }
 
     console.log("Gerando certidão justiça militar");
+
+    setPdfUrls((prevPdfUrls) => ({
+        ...prevPdfUrls,
+        certidaoJusticaMilitar: { url: null, status: 'INICIADO' },
+    }));
+
+    buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
 
     const dataFormatada = formatarDataParaBrasileiro(formData.dataNascimento);
 
