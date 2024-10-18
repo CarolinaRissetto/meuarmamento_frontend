@@ -56,7 +56,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
 
   useEffect(() => {
 
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleFocusChange = (event: FocusEvent) => {
       if (formRef.current && !formRef.current.contains(event.target as Node)) {
         if (isFormFilled() && dirty) {
           if (sessaoAberta) {
@@ -70,10 +70,10 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("focusin", handleFocusChange);
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("focusin", handleFocusChange);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dirty, formData, uuid]);
