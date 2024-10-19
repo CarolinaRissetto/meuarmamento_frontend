@@ -10,10 +10,16 @@ import StepperMobile from '../../components/stepper/StepperMobile';
 import { apiRequest } from "../../services/api/apiRequestService";
 import { validarStepper } from "./sections/utils/ValidarStepper";
 import { cancelarPoolingDocumentos } from "./sections/utils/BuscarDocumentosPolling";
+import { ProcessoAggregate } from './domain/ProcessoAggregate'
+import { DadosPessoaisEntity } from './domain/DadosPessoaisEntity'
 
 export default function Cadastro() {
   const [uuid, setUuid] = useState<string | null>(null);
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
+  const [processoAggregate, setProcessoAggregate] = useState<ProcessoAggregate>({
+    dadosPessoais: {},
+    endereco: {},
+  });
   const navigate = useNavigate();
   const location = useLocation();
   const urlParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
@@ -40,6 +46,15 @@ export default function Cadastro() {
   );
 
   useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      ...processoAggregate,
+    }));
+  }, [processoAggregate]);
+  
+  console.log("\n\nFormData:", formData, "Processo: ", processoAggregate, "\n\n\n") // TODO: remover
+
+  useEffect(() => {
     const step = validarStepper(formData);
     setActiveStep(step);
   }, [formData]);
@@ -52,17 +67,9 @@ export default function Cadastro() {
       },
     });
 
-    if (response) {
+    if (response.statusCode == 200) {
       try {
-        const parsedData = typeof response === "string" ? JSON.parse(response) : response;
-
-        let data = parsedData;
-
-        if (data.body) {
-          data = data.body;
-        }
-        console.log('Dados obtidos:', data);
-
+        let data = JSON.parse(response);
         setFormData(data);
         setPdfUrls(data.documentos);
 
@@ -154,8 +161,7 @@ export default function Cadastro() {
 
   const isScreenSmall = useMediaQuery('(max-width:1500px)');
   const isExtraSmallScreen = useMediaQuery('(max-width:899px)');
-  const buttonRef = useRef(null);
-
+  const buttonRef = useRef(null);  
   const steps = ['Dados pessoais', 'Endereço', 'Documentos já concluídos'];
 
   const stepsWithContent = [
@@ -225,16 +231,16 @@ export default function Cadastro() {
             <StepperMobile activeStep={activeStep} steps={steps} />
 
           )}
-
+          
           <DadosPessoais
             visibilidadeSessao={sectionVisibility.dadosPessoais}
             alternarVisibilidadeSessao={() => alternarVisibilidadeSessao("dadosPessoais")}
             fecharSessaoPreenchida={() => fecharSessaoPreenchida("dadosPessoais")}
-            formData={formData}
+            processoAggregate={processoAggregate}
+            setProcessoAggregate={setProcessoAggregate}
             setPdfUrls={setPdfUrls}
             uuid={uuid}
             setActiveStep={setActiveStep}
-            setFormData={setFormData}
             inputRef={inputRef}
           />
 

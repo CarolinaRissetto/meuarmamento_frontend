@@ -83,10 +83,6 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
     const [loading, setLoading] = useState(false);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-    const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSameAddress((event.target as HTMLInputElement).value);
-    };
-
     useEffect(() => {
         setSessaoAberta(visibilidadeSessao);
     }, [visibilidadeSessao]);
@@ -99,10 +95,6 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
             }
         }
         return true;
-    };
-
-    const handleToggle = () => {
-        alternarVisibilidadeSessao();
     };
 
     useEffect(() => {
@@ -205,7 +197,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                         cursor: 'pointer',
                         padding: '10px',
                     }}
-                    onClick={handleToggle}
+                    onClick={alternarVisibilidadeSessao}
                 >
                     <Grid item xs={11}>
                         <Typography variant="h5" component="h2" color={"#1465C0"} align='center'>
@@ -231,7 +223,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             name="same-address"
                             defaultValue="yes"
                             value={sameAddress}
-                            onChange={handleRadioChange}
+                            onChange={(e) => setSameAddress((e.target as HTMLInputElement).value)}
                         >
                             <FormControlLabel value="yes" control={<Radio />} label="Sim" />
                             <FormControlLabel value="no" control={<Radio />} label="Não" />
