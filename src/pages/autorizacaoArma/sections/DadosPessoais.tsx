@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, RefObject } from "react";
 import {
   Collapse,
   FormLabel,
+  FormControl,
+  FormHelperText,
   Grid,
   IconButton,
   OutlinedInput,
@@ -11,9 +13,12 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import CustomSnackbar from './utils/CustomSnackbar';
 import { apiRequest } from "../../../services/api/apiRequestService";
-import { ProcessoAggregate, isDadosPessoaisFilled } from '../domain/ProcessoAggregate'
+import { ProcessoAggregate, isDadosPessoaisFilled } from '../domain/ProcessoAggregate';
 import { gerarPdfsTemplates } from "../../../services/pdf/gerarPDFsTemplates";
 import { gerarCertidoes } from "./utils/GerarCertidoes";
+import MaskInput from './utils/inputs/MaskInput';
+import CPFInput from './utils/inputs/CPFInput';
+import RGInput from './utils/inputs/RGInput';
 
 interface DadosPessoaisProps {
   visibilidadeSessao: boolean;
@@ -150,32 +155,16 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
             />
           </Grid>
           <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
-            <FormLabel htmlFor="cpf" required>
-              CPF
-            </FormLabel>
-            <OutlinedInput
-              id="cpf"
+            <CPFInput
               name="cpf"
-              type="text"
-              placeholder="000.000.000-00"
-              autoComplete="cpf"
-              required
               value={processoAggregate.cpf || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
           </Grid>
           <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
-            <FormLabel htmlFor="rg" required>
-              RG
-            </FormLabel>
-            <OutlinedInput
-              id="rg"
+            <RGInput
               name="rg"
-              type="text"
-              placeholder="00.000.000-0"
-              autoComplete="rg"
-              required
               value={processoAggregate.rg || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
@@ -204,13 +193,19 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
             <OutlinedInput
               id="dataNascimento"
               name="dataNascimento"
-              type="date"
+              type="text"
               placeholder="DD/MM/AAAA"
               autoComplete="dataNascimento"
               required
               value={processoAggregate.dataNascimento || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
+              inputComponent={MaskInput as any}
+              inputProps={{
+                mask: "00/00/0000",
+                name: "dataNascimento",
+                unmask: false, // Mantém as barras no valor
+              }}
             />
           </Grid>
           <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column' }}>

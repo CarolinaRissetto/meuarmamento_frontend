@@ -249,7 +249,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                                 name="cep"
                                 type="text"
                                 autoComplete="cep"
-                                placeholder="Cep"
+                                placeholder="00000-000"
                                 required
                                 value={processoAggregate.endereco.cep || ""}
                                 onChange={handleInputChange}
