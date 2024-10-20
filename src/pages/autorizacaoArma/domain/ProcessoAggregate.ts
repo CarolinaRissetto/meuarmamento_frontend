@@ -29,5 +29,13 @@ export const isDadosPessoaisFilled = (data: ProcessoAggregate): boolean => {
 };
 
 export const isEnderecoFilled = (data: EnderecoEntity): boolean => {
-    return Object.values(data).every(value => value != null && value.trim() !== '');
+    const { cep, rua, numero, cidade, bairro, uf } = data;
+    return (
+        cep != null && cep.trim() !== '' &&
+        rua != null && rua.trim() !== '' &&
+        numero != null && numero.trim() !== '' &&
+        cidade != null && cidade.trim() !== '' &&
+        bairro != null && bairro.trim() !== '' &&
+        uf != null && uf.trim() !== ''
+    );
 };
