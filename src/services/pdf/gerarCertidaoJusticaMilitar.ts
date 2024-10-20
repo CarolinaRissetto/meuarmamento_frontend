@@ -2,6 +2,7 @@ import { apiRequest } from '../api/apiRequestService';
 import { verificarCamposPreenchidos } from './utils/formValidator';
 import { formatarDataParaBrasileiro } from './utils/formUtils';
 import { buscarDocumentosPolling } from '../../pages/autorizacaoArma/sections/utils/BuscarDocumentosPolling';
+import { ProcessoAggregate } from '../../pages/autorizacaoArma/domain/ProcessoAggregate';
 
 const camposNecessarios = [
     'nomeCompleto',
@@ -10,13 +11,14 @@ const camposNecessarios = [
     'nomeMae'
 ];
 
-export const gerarCertidaoJusticaMilitar = async (formData: { [key: string]: any },
-    setFormData: (data: any) => void,
+export const gerarCertidaoJusticaMilitar = async (
+    uuid: string | null,
     setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
-    uuid: string | null
+    processoAggregate: ProcessoAggregate,
+    setProcessoAggregate: React.Dispatch<React.SetStateAction<ProcessoAggregate>>,
 ) => {
 
-    if (!verificarCamposPreenchidos(formData, camposNecessarios)) {
+    if (!verificarCamposPreenchidos(processoAggregate, camposNecessarios)) {
         console.log("Campos obrigatórios não preenchidos.");
         return;
     }
@@ -28,12 +30,12 @@ export const gerarCertidaoJusticaMilitar = async (formData: { [key: string]: any
         certidaoJusticaMilitar: { url: null, status: 'INICIADO' },
     }));
 
-    buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
+    buscarDocumentosPolling(setProcessoAggregate, setPdfUrls, uuid);
 
-    const dataFormatada = formatarDataParaBrasileiro(formData.dataNascimento);
+    const dataFormatada = formatarDataParaBrasileiro(processoAggregate.dataNascimento!);
 
     const formDataCombinado = {
-        ...formData,
+        ...processoAggregate,
         dataNascimento: dataFormatada,
         uuid
     }

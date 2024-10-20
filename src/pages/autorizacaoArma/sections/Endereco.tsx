@@ -23,6 +23,7 @@ import { gerarPdfsTemplates } from "../../../services/pdf/gerarPDFsTemplates";
 import axios from "axios";
 import { gerarCertidaoJusticaEstadual } from "../../../services/pdf/gerarCertidaoJusticaEstadual";
 import CustomSnackbar from './utils/CustomSnackbar';
+import { ProcessoAggregate, isEnderecoFilled } from '../domain/ProcessoAggregate';
 
 const spin = keyframes`
   from {
@@ -65,14 +66,14 @@ interface EnderecoProps {
     visibilidadeSessao: boolean;
     alternarVisibilidadeSessao: () => void;
     fecharSessaoPreenchida: () => void;
-    formData: { [key: string]: any };
-    setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
+    processoAggregate: ProcessoAggregate;
+    setProcessoAggregate: React.Dispatch<React.SetStateAction<ProcessoAggregate>>;
     setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>;
     uuid: string | null;
     setActiveStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibilidadeSessao, fecharSessaoPreenchida, formData, uuid, setFormData, setPdfUrls }) => {
+const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibilidadeSessao, fecharSessaoPreenchida, processoAggregate, setProcessoAggregate, uuid, setPdfUrls }) => {
     const [sessaoAberta, setSessaoAberta] = useState(visibilidadeSessao);
     const [sameAddress, setSameAddress] = useState('yes');
     const [dirty, setDirty] = useState(false);
@@ -88,13 +89,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
     }, [visibilidadeSessao]);
 
     const isFormFilled = () => {
-        const inputs = document.querySelectorAll("#endereco-form input[required]");
-        for (let i = 0; i < inputs.length; i++) {
-            if (!(inputs[i] as HTMLInputElement).value) {
-                return false;
-            }
-        }
-        return true;
+        return isEnderecoFilled(processoAggregate.endereco);
     };
 
     useEffect(() => {
@@ -109,22 +104,21 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
         }, 2000);
 
         return () => clearTimeout(timer);
-    }, [formData, dirty]);
-
+    }, [processoAggregate, dirty]);
 
     const handleInputBlur = async (event: React.FocusEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
 
-        const updatedFormData = await buscarEnderecoPorCep(name, value, formData);
+        const updatedProcessoAggregate = await buscarEnderecoPorCep(name, value, processoAggregate);
 
-        setFormData(updatedFormData);
+        setProcessoAggregate(updatedProcessoAggregate);
 
         if (uuid) {
             apiRequest({
                 tipo: "endereco",
                 data: {
                     uuid,
-                    ...updatedFormData,
+                    ...updatedProcessoAggregate,
                 },
             }).catch(error => console.error(error));
         }
@@ -133,24 +127,24 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
             if (sessaoAberta) {
                 fecharSessaoPreenchida();
                 setSnackbarOpen(true);
-                gerarPdfsTemplates(formData, uuid, setPdfUrls, setFormData);
-                gerarCertidaoJusticaEstadual(formData, setFormData, setPdfUrls, uuid);
-                setDirty(false)
+                gerarPdfsTemplates(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
+                gerarCertidaoJusticaEstadual(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
+                setDirty(false);
             }
         }
     };
 
-    const buscarEnderecoPorCep = async (name: string, value: string, formData: any) => {
+    const buscarEnderecoPorCep = async (name: string, value: string, processoAggregate: ProcessoAggregate) => {
         if (name === "cep" && value.replace("-", "").length === 8) {
             setLoading(true);
             const endereco = await findCep(value);
             setLoading(false);
 
             if (endereco) {
-                const updatedFormData = {
-                    ...formData,
+                const updatedProcessoAggregate = {
+                    ...processoAggregate,
                     endereco: {
-                        ...formData.endereco,
+                        ...processoAggregate.endereco,
                         rua: endereco.logradouro || "",
                         bairro: endereco.bairro || "",
                         cidade: endereco.localidade || "",
@@ -159,31 +153,31 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                     }
                 };
 
-                return updatedFormData;
+                return updatedProcessoAggregate;
             }
         }
 
-        return formData;
+        return processoAggregate;
     };
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
 
-        const valorAnterior = formData[name as keyof typeof formData];
+        const previousValue = processoAggregate.endereco[name as keyof typeof processoAggregate.endereco];
 
-        if (valorAnterior !== value) {
+        if (previousValue !== value) {
             setDirty(true);
         }
 
-        const updatedFormData = {
-            ...formData,
+        const updatedProcessoAggregate = {
+            ...processoAggregate,
             endereco: {
-                ...formData.endereco,
+                ...processoAggregate.endereco,
                 [name]: value,
-            }
+            },
         };
 
-        setFormData(updatedFormData);
+        setProcessoAggregate(updatedProcessoAggregate);
     };
 
     return (
@@ -236,10 +230,10 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             </FormLabel>
                             <OutlinedInput
                                 id="num-addresses"
-                                name="num-addresses"
+                                name="quantosEnderecosMorou"
                                 type="number"
                                 autoComplete="num-addresses"
-                                value={(formData.endereco as unknown as { [key: string]: string })?.["quantosEnderecosMorou"] || ""}
+                                value={processoAggregate.endereco.quantosEnderecosMorou || ""}
                                 onChange={handleInputChange}
                                 onBlur={handleInputBlur}
                             />
@@ -257,7 +251,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                                 autoComplete="cep"
                                 placeholder="Cep"
                                 required
-                                value={(formData.endereco as unknown as { [key: string]: string })?.["cep"] || ""}
+                                value={processoAggregate.endereco.cep || ""}
                                 onChange={handleInputChange}
                                 onBlur={handleInputBlur}
                                 sx={{ flexGrow: 1 }}
@@ -276,7 +270,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             autoComplete="rua"
                             placeholder="Rua"
                             required
-                            value={(formData.endereco as unknown as { [key: string]: string })?.["rua"] || ""}
+                            value={processoAggregate.endereco.rua || ""}
                             onChange={handleInputChange}
                             onBlur={handleInputBlur}
                         />
@@ -292,7 +286,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             autoComplete="numero"
                             placeholder="Número"
                             required
-                            value={(formData.endereco as unknown as { [key: string]: string })?.["numero"] || ""}
+                            value={processoAggregate.endereco.numero || ""}
                             onChange={handleInputChange}
                             onBlur={handleInputBlur}
                         />
@@ -307,7 +301,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             type="text"
                             placeholder="Complemento"
                             autoComplete="complemento"
-                            value={(formData.endereco as unknown as { [key: string]: string })?.["complemento"] || ""}
+                            value={processoAggregate.endereco.complemento || ""}
                             onChange={handleInputChange}
                             onBlur={handleInputBlur}
                         />
@@ -323,7 +317,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             autoComplete="cidade"
                             placeholder="Cidade"
                             required
-                            value={(formData.endereco as unknown as { [key: string]: string })?.["cidade"] || ""}
+                            value={processoAggregate.endereco.cidade || ""}
                             onChange={handleInputChange}
                             onBlur={handleInputBlur}
                         />
@@ -339,7 +333,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             autoComplete="bairro"
                             placeholder="Bairro"
                             required
-                            value={(formData.endereco as unknown as { [key: string]: string })?.["bairro"] || ""}
+                            value={processoAggregate.endereco.bairro || ""}
                             onChange={handleInputChange}
                             onBlur={handleInputBlur}
                         />
@@ -355,7 +349,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             autoComplete="uf"
                             placeholder="UF"
                             required
-                            value={(formData.endereco as unknown as { [key: string]: string })?.["uf"] || ""}
+                            value={processoAggregate.endereco.uf || ""}
                             onChange={handleInputChange}
                             onBlur={handleInputBlur}
                         />
@@ -371,6 +365,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                         <br />
                         {years.map((year) => (
                             <Button
+                                key={year}
                                 variant="contained"
                                 component="label"
                                 sx={{ mr: 1, marginTop: '5px' }}

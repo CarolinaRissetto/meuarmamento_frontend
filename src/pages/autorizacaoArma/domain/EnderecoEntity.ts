@@ -6,4 +6,5 @@ export interface EnderecoEntity {
     bairro?: string;
     cidade?: string;
     uf?: string;
+    quantosEnderecosMorou?: number;
 }

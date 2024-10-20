@@ -11,8 +11,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import CustomSnackbar from './utils/CustomSnackbar';
 import { apiRequest } from "../../../services/api/apiRequestService";
-import { ProcessoAggregate } from '../domain/ProcessoAggregate'
-import { DadosPessoaisEntity, isDadosPessoaisFilled } from '../domain/DadosPessoaisEntity'
+import { ProcessoAggregate, isDadosPessoaisFilled } from '../domain/ProcessoAggregate'
 import { gerarPdfsTemplates } from "../../../services/pdf/gerarPDFsTemplates";
 import { gerarCertidoes } from "./utils/GerarCertidoes";
 
@@ -50,11 +49,11 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
   useEffect(() => {
     const handleFocusChange = (event: FocusEvent) => {
       if (formRef.current && !formRef.current.contains(event.target as Node)) {
-        if (isDadosPessoaisFilled(processoAggregate.dadosPessoais) && isDirty && isSessaoAberta) {
+        if (isDadosPessoaisFilled(processoAggregate) && isDirty && isSessaoAberta) {
           fecharSessaoPreenchida();
           setSnackbarOpen(true);
-          //gerarPdfsTemplates(processoAggregate, uuid, setPdfUrls, setProcessoAggregate);
-          //gerarCertidoes(processoAggregate, setPdfUrls, uuid, setProcessoAggregate);
+          gerarPdfsTemplates(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
+          gerarCertidoes(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
           setIsDirty(false);
         }
       }
@@ -69,7 +68,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    const previousValue = processoAggregate.dadosPessoais[name as keyof DadosPessoaisEntity];
+    const previousValue = processoAggregate[name as keyof ProcessoAggregate];
 
     if (previousValue !== value) {
       setIsDirty(true);
@@ -77,10 +76,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
 
     setProcessoAggregate({
       ...processoAggregate,
-      dadosPessoais: {
-        ...processoAggregate.dadosPessoais,
-        [name]: value,
-      },
+      [name]: value
     });
   };
 
@@ -89,10 +85,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
 
     setProcessoAggregate({
       ...processoAggregate,
-      dadosPessoais: {
-        ...processoAggregate.dadosPessoais,
-        [name]: value,
-      },
+      [name]: value
     });
 
     if (uuid) {
@@ -144,7 +137,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
               type="text"
               autoComplete="nomeCompleto"
               required
-              value={processoAggregate.dadosPessoais.nomeCompleto || ""}
+              value={processoAggregate.nomeCompleto || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
               inputRef={inputRef}
@@ -167,7 +160,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
               placeholder="000.000.000-00"
               autoComplete="cpf"
               required
-              value={processoAggregate.dadosPessoais.cpf || ""}
+              value={processoAggregate.cpf || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
@@ -183,7 +176,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
               placeholder="00.000.000-0"
               autoComplete="rg"
               required
-              value={processoAggregate.dadosPessoais.rg || ""}
+              value={processoAggregate.rg || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
@@ -199,7 +192,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
               placeholder="Brasileiro(a)"
               autoComplete="nacionalidade"
               required
-              value={processoAggregate.dadosPessoais.nacionalidade || ""}
+              value={processoAggregate.nacionalidade || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
@@ -215,7 +208,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
               placeholder="DD/MM/AAAA"
               autoComplete="dataNascimento"
               required
-              value={processoAggregate.dadosPessoais.dataNascimento || ""}
+              value={processoAggregate.dataNascimento || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
@@ -231,7 +224,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
               placeholder="Nome Completo da Mãe"
               autoComplete="nomeMae"
               required
-              value={processoAggregate.dadosPessoais.nomeMae || ""}
+              value={processoAggregate.nomeMae || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
@@ -247,7 +240,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
               placeholder="Nome Completo do Pai"
               autoComplete="nomePai"
               required
-              value={processoAggregate.dadosPessoais.nomePai || ""}
+              value={processoAggregate.nomePai || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
             />

@@ -1,6 +1,7 @@
 import { apiRequest } from '../api/apiRequestService';
 import { verificarCamposPreenchidos } from './utils/formValidator';
 import { buscarDocumentosPolling } from '../../pages/autorizacaoArma/sections/utils/BuscarDocumentosPolling';
+import { ProcessoAggregate } from '../../pages/autorizacaoArma/domain/ProcessoAggregate';
 
 const camposNecessarios = [
     'nomeCompleto',
@@ -15,29 +16,28 @@ const camposNecessarios = [
     'uf',
 ];
 
-export const gerarPdfsTemplates = async (
-    formData: { [key: string]: any },
+export const gerarPdfsTemplates = async (    
     uuid: string | null,
-    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
-    setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>
+    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null } }>>,
+    processoAggregate: ProcessoAggregate,
+    setProcessoAggregate: React.Dispatch<React.SetStateAction<ProcessoAggregate>>
 ) => {
-
-    if (!verificarCamposPreenchidos(formData, camposNecessarios)) {
-        console.log("Campos obrigatórios não preenchidos.");
-        return;
-    }
-
-    buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
-
-    const { endereco = {}, ...outrosDados } = formData;
+    const { endereco = {}, ...outrosDados } = processoAggregate;
 
     const formDataCombinado = {
         ...outrosDados,
         ...endereco,
-        uuid
+        uuid,
     };
 
-    console.log("GERANDO PDFS BASICOS");
+    if (!verificarCamposPreenchidos(formDataCombinado, camposNecessarios)) {
+        console.log('Campos obrigatórios não preenchidos.');
+        return;
+    }
+
+    buscarDocumentosPolling(setProcessoAggregate, setPdfUrls, uuid);
+
+    console.log('GERANDO PDFS BASICOS');
 
     try {
         const hoje = new Date();
@@ -48,15 +48,14 @@ export const gerarPdfsTemplates = async (
 
         const formDataComData = {
             ...formDataCombinado,
-            local_data: dataAtual
+            local_data: dataAtual,
         };
 
         await apiRequest({
-            tipo: "gerarPdfsBasicos",
+            tipo: 'gerarPdfsBasicos',
             data: formDataComData,
         });
-
     } catch (error) {
-        console.error("Erro ao chamar a API de geração de PDF:", error);
+        console.error('Erro ao chamar a API de geração de PDF:', error);
     }
 };

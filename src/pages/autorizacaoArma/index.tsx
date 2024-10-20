@@ -11,13 +11,11 @@ import { apiRequest } from "../../services/api/apiRequestService";
 import { validarStepper } from "./sections/utils/ValidarStepper";
 import { cancelarPoolingDocumentos } from "./sections/utils/BuscarDocumentosPolling";
 import { ProcessoAggregate } from './domain/ProcessoAggregate'
-import { DadosPessoaisEntity } from './domain/DadosPessoaisEntity'
 
 export default function Cadastro() {
   const [uuid, setUuid] = useState<string | null>(null);
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
-  const [processoAggregate, setProcessoAggregate] = useState<ProcessoAggregate>({
-    dadosPessoais: {},
+  const [processoAggregate, setProcessoAggregate] = useState<ProcessoAggregate>({    
     endereco: {},
   });
   const navigate = useNavigate();
@@ -50,9 +48,7 @@ export default function Cadastro() {
       ...prevFormData,
       ...processoAggregate,
     }));
-  }, [processoAggregate]);
-  
-  console.log("\n\nFormData:", formData, "Processo: ", processoAggregate, "\n\n\n") // TODO: remover
+  }, [processoAggregate]);  
 
   useEffect(() => {
     const step = validarStepper(formData);
@@ -248,9 +244,9 @@ export default function Cadastro() {
             visibilidadeSessao={sectionVisibility.endereco}
             alternarVisibilidadeSessao={() => alternarVisibilidadeSessao("endereco")}
             fecharSessaoPreenchida={() => fecharSessaoPreenchida("endereco")}
-            setFormData={setFormData}
-            setPdfUrls={setPdfUrls}
-            formData={formData}
+            processoAggregate={processoAggregate}
+            setProcessoAggregate={setProcessoAggregate}
+            setPdfUrls={setPdfUrls}            
             uuid={uuid}
             setActiveStep={setActiveStep}
           />

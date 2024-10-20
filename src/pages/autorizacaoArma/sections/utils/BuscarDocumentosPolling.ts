@@ -3,7 +3,7 @@ import { apiRequest } from "../../../../services/api/apiRequestService";
 let currentPollingIntervalId: number | NodeJS.Timeout | null = null;
 
 export const buscarDocumentosPolling = (
-    setFormData: (data: any) => void,
+    setFormData: (data: any) => void, //TODO: tipar corretamente
     setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
     uuid: string | null,
     checkInterval = 9000,

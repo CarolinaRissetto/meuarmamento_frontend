@@ -2,6 +2,7 @@ import { apiRequest } from '../api/apiRequestService';
 import { formatarDataParaBrasileiro } from './utils/formUtils';
 import { verificarCamposPreenchidos } from './utils/formValidator';
 import { buscarDocumentosPolling } from '../../pages/autorizacaoArma/sections/utils/BuscarDocumentosPolling';
+import { ProcessoAggregate } from '../../pages/autorizacaoArma/domain/ProcessoAggregate';
 
 const camposNecessarios = [
     'nomeCompleto',
@@ -17,14 +18,16 @@ const camposNecessarios = [
     'uf'
 ];
 
-export const gerarCertidaoJusticaEstadual = async (formData: { [key: string]: any },
-    setFormData: (data: any) => void,
-    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
-    uuid: string | null) => {
+export const gerarCertidaoJusticaEstadual = async (
+    uuid: string | null,
+    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,    
+    processoAggregate: ProcessoAggregate,
+    setProcessoAggregate: React.Dispatch<React.SetStateAction<ProcessoAggregate>>,
+) => {
     const sexo = "F";
     const estadoCivil = "1";
 
-    if (!verificarCamposPreenchidos(formData, camposNecessarios)) {
+    if (!verificarCamposPreenchidos(processoAggregate, camposNecessarios)) {
         console.log("Campos obrigatórios não preenchidos.");
         return;
     }
@@ -34,16 +37,15 @@ export const gerarCertidaoJusticaEstadual = async (formData: { [key: string]: an
         certidaoJusticaEstadual: { url: null, status: 'INICIADO' },
     }));
 
-    buscarDocumentosPolling(setFormData, setPdfUrls, uuid);
+    buscarDocumentosPolling(setProcessoAggregate, setPdfUrls, uuid);
+    
+    //TODO: retirar essa lógica de montagem da frase do frontend e levar pro backend
+    const endereco = `${processoAggregate.endereco.rua}, ${processoAggregate.endereco.numero}, ${processoAggregate.endereco.cidade} - ${processoAggregate.endereco.uf}`;    
 
-    console.log(formData)
-    const endereco = `${formData.endereco.rua}, ${formData.endereco.numero}, ${formData.endereco.cidade} - ${formData.endereco.uf}`;
-    console.log(endereco)
-
-    const dataFormatada = formatarDataParaBrasileiro(formData.dataNascimento).replaceAll("-", "/");
+    const dataFormatada = formatarDataParaBrasileiro(processoAggregate.dataNascimento!).replaceAll("-", "/");
 
     const formDataCombinado = {
-        ...formData,
+        ...processoAggregate,
         dataNascimento: dataFormatada,
         sexo,
         estadoCivil,
@@ -54,7 +56,6 @@ export const gerarCertidaoJusticaEstadual = async (formData: { [key: string]: an
     console.log("Gerando certidão justiça federal");
 
     try {
-
         const response = await apiRequest({
             tipo: "gerarCertidaoEstadual",
             data: formDataCombinado
