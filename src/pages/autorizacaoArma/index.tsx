@@ -14,7 +14,6 @@ import { ProcessoAggregate } from './domain/ProcessoAggregate'
 
 export default function Cadastro() {
   const [uuid, setUuid] = useState<string | null>(null);
-  const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const [processoAggregate, setProcessoAggregate] = useState<ProcessoAggregate>({    
     endereco: {},
   });
@@ -44,16 +43,9 @@ export default function Cadastro() {
   );
 
   useEffect(() => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      ...processoAggregate,
-    }));
-  }, [processoAggregate]);  
-
-  useEffect(() => {
-    const step = validarStepper(formData);
+    const step = validarStepper(processoAggregate);
     setActiveStep(step);
-  }, [formData]);
+  }, [processoAggregate]);
 
   const buscarDados = useCallback(async (uuid: string) => {
     const response = await apiRequest({
@@ -65,8 +57,8 @@ export default function Cadastro() {
 
     if (response.statusCode == 200) {
       try {
-        let data = JSON.parse(response);
-        setFormData(data);
+        let data = JSON.parse(response);        
+        setProcessoAggregate(data);
         setPdfUrls(data.documentos);
 
       } catch (error) {
@@ -112,7 +104,9 @@ export default function Cadastro() {
     const newUuid = nanoid(6);
     localStorage.setItem("user-uuid", newUuid);
     setUuid(newUuid);
-    setFormData({});
+    setProcessoAggregate({
+      endereco: {}
+    });  
     setPdfUrls({});
 
     urlParams.set("uuid", newUuid);

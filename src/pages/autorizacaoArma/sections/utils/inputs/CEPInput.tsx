@@ -10,6 +10,9 @@ interface CEPInputProps {
 }
 
 const validarCEP = (cep: string): boolean => {
+  if (cep == "")
+    return true;
+
   const regex = /^\d{5}-\d{3}$/;
   return regex.test(cep);
 };
