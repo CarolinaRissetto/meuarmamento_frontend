@@ -57,7 +57,7 @@ export default function Cadastro() {
 
     if (response.statusCode == 200) {
       try {
-        let data = JSON.parse(response);        
+        let data = response.body;
         setProcessoAggregate(data);
         setPdfUrls(data.documentos);
 

@@ -31,12 +31,10 @@ export const gerarCertidaoJusticaMilitar = async (
     }));
 
     buscarDocumentosPolling(setProcessoAggregate, setPdfUrls, uuid);
-
-    const dataFormatada = formatarDataParaBrasileiro(processoAggregate.dataNascimento!);
-
+    
     const formDataCombinado = {
         ...processoAggregate,
-        dataNascimento: dataFormatada,
+        dataNascimento: processoAggregate.dataNascimento,
         uuid
     }
 
