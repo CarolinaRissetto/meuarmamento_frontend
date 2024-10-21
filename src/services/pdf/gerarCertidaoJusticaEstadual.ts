@@ -37,20 +37,17 @@ export const gerarCertidaoJusticaEstadual = async (
         certidaoJusticaEstadual: { url: null, status: 'INICIADO' },
     }));
 
-    buscarDocumentosPolling(setProcessoAggregate, setPdfUrls, uuid);
-    
-    //TODO: retirar essa lógica de montagem da frase do frontend e levar pro backend
-    const endereco = `${processoAggregate.endereco.rua}, ${processoAggregate.endereco.numero}, ${processoAggregate.endereco.cidade} - ${processoAggregate.endereco.uf}`;    
-
-    //TODO remover, nao precisa mais
-    const dataFormatada = formatarDataParaBrasileiro(processoAggregate.dataNascimento!).replaceAll("-", "/");
+    buscarDocumentosPolling(setProcessoAggregate, setPdfUrls, uuid);    
 
     const formDataCombinado = {
         ...processoAggregate,
-        dataNascimento: dataFormatada,
+        dataNascimento: processoAggregate.dataNascimento,
         sexo,
         estadoCivil,
-        endereco,
+        rua: processoAggregate.endereco.rua,
+        numero: processoAggregate.endereco.numero,
+        cidade: processoAggregate.endereco.cidade,
+        uf: processoAggregate.endereco.uf,
         uuid
     }
 
