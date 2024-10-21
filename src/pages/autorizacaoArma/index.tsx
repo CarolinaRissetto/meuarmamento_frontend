@@ -101,12 +101,6 @@ export default function Cadastro() {
     buscarDadosEAtualizarEstado();
   }, [location.search, buscarDados, atualizaUuidUrlELocalStorage]);
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    const updatedFormData = { ...formData, [name]: value };
-    setFormData(updatedFormData);
-  };
-
   const handleNovoProcesso = () => {
     console.log("Botão de novo cadastro clicado");
 
@@ -144,22 +138,6 @@ export default function Cadastro() {
       ...prev,
       [section]: !prev[section as keyof typeof prev],
     }));
-  };
-
-  const handleInputBlur = (tipo: string) => async (event: React.FocusEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    const updatedFormData = { ...formData, [name]: value };
-    setFormData(updatedFormData);
-
-    if (uuid) {
-      await apiRequest({
-        tipo,
-        data: {
-          uuid,
-          ...updatedFormData,
-        },
-      });
-    }
   };
 
   const handleCopyClick = () => {
@@ -252,8 +230,6 @@ export default function Cadastro() {
             visibilidadeSessao={sectionVisibility.dadosPessoais}
             alternarVisibilidadeSessao={() => alternarVisibilidadeSessao("dadosPessoais")}
             fecharSessaoPreenchida={() => fecharSessaoPreenchida("dadosPessoais")}
-            handleInputChange={handleInputChange}
-            handleInputBlur={handleInputBlur("dadosPessoais")}
             formData={formData}
             setPdfUrls={setPdfUrls}
             uuid={uuid}

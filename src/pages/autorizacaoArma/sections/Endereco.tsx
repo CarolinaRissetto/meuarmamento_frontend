@@ -101,73 +101,29 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
         return true;
     };
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (formRef.current && !formRef.current.contains(event.target as Node)) {
-                if (isFormFilled() && dirty) {
-                    if (sessaoAberta) {
-                        fecharSessaoPreenchida();
-                        setSnackbarOpen(true);
-                        gerarPdfsTemplates(formData, uuid, setPdfUrls, setFormData);
-                        gerarCertidaoJusticaEstadual(formData, setFormData, setPdfUrls, uuid);
-                        setDirty(false)
-                    }
-                }
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dirty, formData, uuid]);
-
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = event.target;
-
-        const valorAnterior = formData[name as keyof typeof formData];
-
-        if (valorAnterior !== value) {
-            setDirty(true);
-        }
-
-        handleInputChange(event);
-    };
-
     const handleToggle = () => {
         alternarVisibilidadeSessao();
     };
 
+    useEffect(() => {
+        if (!dirty || !isFormFilled()) return;
+
+        const timer = setTimeout(() => {
+            const activeElement = document.activeElement;
+
+            if (activeElement instanceof HTMLElement) {
+                activeElement.blur();
+            }
+        }, 2000);
+
+        return () => clearTimeout(timer);
+    }, [formData, dirty]);
+
+
     const handleInputBlur = async (event: React.FocusEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
-        let updatedFormData = {
-            ...formData,
-            endereco: {
-                ...formData.endereco,
-                [name]: value,
-            }
-        };
 
-        if (name === "cep" && value.replace("-", "").length === 8) {
-            setLoading(true);
-            const endereco = await findCep(value);
-            setLoading(false);
-            if (endereco) {
-                updatedFormData = {
-                    ...updatedFormData,
-                    endereco: {
-                        ...updatedFormData.endereco,
-                        rua: endereco.logradouro || "",
-                        bairro: endereco.bairro || "",
-                        cidade: endereco.localidade || "",
-                        uf: endereco.uf || "",
-                        cep: endereco.cep || value,
-                    }
-                };
-            }
-        }
+        const updatedFormData = await buscarEnderecoPorCep(name, value, formData);
 
         setFormData(updatedFormData);
 
@@ -180,11 +136,53 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                 },
             }).catch(error => console.error(error));
         }
+
+        if (isFormFilled() && dirty) {
+            if (sessaoAberta) {
+                fecharSessaoPreenchida();
+                setSnackbarOpen(true);
+                gerarPdfsTemplates(formData, uuid, setPdfUrls, setFormData);
+                gerarCertidaoJusticaEstadual(formData, setFormData, setPdfUrls, uuid);
+                setDirty(false)
+            }
+        }
     };
 
+    const buscarEnderecoPorCep = async (name: string, value: string, formData: any) => {
+        if (name === "cep" && value.replace("-", "").length === 8) {
+            setLoading(true);
+            const endereco = await findCep(value);
+            setLoading(false);
+
+            if (endereco) {
+                const updatedFormData = {
+                    ...formData,
+                    endereco: {
+                        ...formData.endereco,
+                        rua: endereco.logradouro || "",
+                        bairro: endereco.bairro || "",
+                        cidade: endereco.localidade || "",
+                        uf: endereco.uf || "",
+                        cep: endereco.cep || value,
+                    }
+                };
+
+                return updatedFormData;
+            }
+        }
+
+        return formData;
+    };
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
+
+        const valorAnterior = formData[name as keyof typeof formData];
+
+        if (valorAnterior !== value) {
+            setDirty(true);
+        }
+
         const updatedFormData = {
             ...formData,
             endereco: {
@@ -192,6 +190,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                 [name]: value,
             }
         };
+
         setFormData(updatedFormData);
     };
 
@@ -214,7 +213,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                         </Typography>
                     </Grid>
                     <Grid item xs={1}>
-                        <IconButton onClick={handleToggle}>
+                        <IconButton>
                             {sessaoAberta ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                         </IconButton>
                     </Grid>
@@ -249,7 +248,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                                 type="number"
                                 autoComplete="num-addresses"
                                 value={(formData.endereco as unknown as { [key: string]: string })?.["quantosEnderecosMorou"] || ""}
-                                onChange={handleChange}
+                                onChange={handleInputChange}
                                 onBlur={handleInputBlur}
                             />
                         </FormGrid>
@@ -267,7 +266,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                                 placeholder="Cep"
                                 required
                                 value={(formData.endereco as unknown as { [key: string]: string })?.["cep"] || ""}
-                                onChange={handleChange}
+                                onChange={handleInputChange}
                                 onBlur={handleInputBlur}
                                 sx={{ flexGrow: 1 }}
                             />
@@ -286,7 +285,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             placeholder="Rua"
                             required
                             value={(formData.endereco as unknown as { [key: string]: string })?.["rua"] || ""}
-                            onChange={handleChange}
+                            onChange={handleInputChange}
                             onBlur={handleInputBlur}
                         />
                     </FormGrid>
@@ -302,7 +301,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             placeholder="Número"
                             required
                             value={(formData.endereco as unknown as { [key: string]: string })?.["numero"] || ""}
-                            onChange={handleChange}
+                            onChange={handleInputChange}
                             onBlur={handleInputBlur}
                         />
                     </FormGrid>
@@ -317,7 +316,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             placeholder="Complemento"
                             autoComplete="complemento"
                             value={(formData.endereco as unknown as { [key: string]: string })?.["complemento"] || ""}
-                            onChange={handleChange}
+                            onChange={handleInputChange}
                             onBlur={handleInputBlur}
                         />
                     </FormGrid>
@@ -333,7 +332,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             placeholder="Cidade"
                             required
                             value={(formData.endereco as unknown as { [key: string]: string })?.["cidade"] || ""}
-                            onChange={handleChange}
+                            onChange={handleInputChange}
                             onBlur={handleInputBlur}
                         />
                     </FormGrid>
@@ -349,7 +348,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             placeholder="Bairro"
                             required
                             value={(formData.endereco as unknown as { [key: string]: string })?.["bairro"] || ""}
-                            onChange={handleChange}
+                            onChange={handleInputChange}
                             onBlur={handleInputBlur}
                         />
                     </FormGrid>
@@ -365,7 +364,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             placeholder="UF"
                             required
                             value={(formData.endereco as unknown as { [key: string]: string })?.["uf"] || ""}
-                            onChange={handleChange}
+                            onChange={handleInputChange}
                             onBlur={handleInputBlur}
                         />
                     </FormGrid>
