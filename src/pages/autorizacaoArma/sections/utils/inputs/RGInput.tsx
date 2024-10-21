@@ -11,6 +11,8 @@ interface RGInputProps {
 
 const validarRG = (rg: string): boolean => {
   const rgClean = rg.replace(/[^\d]+/g, '');
+  if (rgClean.length === 0)
+    return true;
   return rgClean.length === 10;
 };
 

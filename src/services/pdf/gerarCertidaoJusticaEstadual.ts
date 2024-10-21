@@ -42,6 +42,7 @@ export const gerarCertidaoJusticaEstadual = async (
     //TODO: retirar essa lógica de montagem da frase do frontend e levar pro backend
     const endereco = `${processoAggregate.endereco.rua}, ${processoAggregate.endereco.numero}, ${processoAggregate.endereco.cidade} - ${processoAggregate.endereco.uf}`;    
 
+    //TODO remover, nao precisa mais
     const dataFormatada = formatarDataParaBrasileiro(processoAggregate.dataNascimento!).replaceAll("-", "/");
 
     const formDataCombinado = {

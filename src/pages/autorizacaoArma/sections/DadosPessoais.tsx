@@ -204,7 +204,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
               inputProps={{
                 mask: "00/00/0000",
                 name: "dataNascimento",
-                unmask: false, // Mantém as barras no valor
+                unmask: false, 
               }}
             />
           </Grid>
