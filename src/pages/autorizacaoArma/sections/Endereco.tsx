@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
     Box,
     Button,
@@ -97,9 +97,9 @@ const Endereco: React.FC<EnderecoProps> = ({
         setSessaoAberta(visibilidadeSessao);
     }, [visibilidadeSessao]);
 
-    const isFormFilled = () => {
+    const isFormFilled = useCallback(() => {
         return isEnderecoFilled(processoAggregate.endereco);
-    };
+    }, [processoAggregate.endereco]);
 
     useEffect(() => {
         if (!dirty || !isFormFilled()) return;
@@ -123,7 +123,7 @@ const Endereco: React.FC<EnderecoProps> = ({
         }, 2500);
 
         return () => clearTimeout(timer);
-    }, [processoAggregate, dirty, sessaoAberta, fecharSessaoPreenchida, gerarPdfsTemplates, gerarCertidaoJusticaEstadual, setPdfUrls, setProcessoAggregate, uuid, isFormFilled]);
+    }, [processoAggregate, dirty, sessaoAberta, fecharSessaoPreenchida, setPdfUrls, setProcessoAggregate, uuid, isFormFilled]);
 
     const handleInputBlur = async (event: React.FocusEvent<HTMLInputElement>) => {
         const { name, value } = event.target;

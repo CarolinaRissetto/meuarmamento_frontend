@@ -55,7 +55,7 @@ export default function Cadastro() {
       },
     });
 
-    if (response.statusCode == 200) {
+    if (response.statusCode === 200) {
       try {
         let data = response.body;
         setProcessoAggregate(data);

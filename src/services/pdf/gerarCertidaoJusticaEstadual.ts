@@ -1,5 +1,4 @@
 import { apiRequest } from '../api/apiRequestService';
-import { formatarDataParaBrasileiro } from './utils/formUtils';
 import { verificarCamposPreenchidos } from './utils/formValidator';
 import { buscarDocumentosPolling } from '../../pages/autorizacaoArma/sections/utils/BuscarDocumentosPolling';
 import { ProcessoAggregate } from '../../pages/autorizacaoArma/domain/ProcessoAggregate';

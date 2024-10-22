@@ -12,7 +12,7 @@ interface CPFInputProps {
 const validarCPF = (cpf: string): boolean => {
   cpf = cpf.replace(/[^\d]+/g, '');
 
-  if (cpf.length == 0)
+  if (cpf.length === 0)
     return true;
 
   if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) {

@@ -12,8 +12,8 @@ export const gerarCertidoes = async (
     try {
         const promises = [
             gerarCertidaoJusticaEstadual(uuid, setPdfUrls, processoAggregate, setProcessoAggregate),
-            gerarCertidaoJusticaMilitar(uuid, setPdfUrls, processoAggregate, setProcessoAggregate),,
-            gerarCertidaoJusticaFederal(uuid, setPdfUrls, processoAggregate, setProcessoAggregate),,
+            gerarCertidaoJusticaMilitar(uuid, setPdfUrls, processoAggregate, setProcessoAggregate),
+            gerarCertidaoJusticaFederal(uuid, setPdfUrls, processoAggregate, setProcessoAggregate),
         ];
 
         await Promise.all(promises);
