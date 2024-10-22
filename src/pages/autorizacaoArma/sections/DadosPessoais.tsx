@@ -1,5 +1,4 @@
-import * as React from "react";
-import { useState, useEffect, useRef, RefObject } from "react";
+import React, { useState, useEffect, useRef, RefObject } from "react";
 import {
   Collapse,
   FormLabel,
@@ -7,64 +6,58 @@ import {
   IconButton,
   OutlinedInput,
   Typography,
-  styled,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { gerarPdfsTemplates } from "../../../services/pdf/gerarPDFsTemplates";
-import { gerarCertidoes } from "./utils/GerarCertidoes";
 import CustomSnackbar from './utils/CustomSnackbar';
 import { apiRequest } from "../../../services/api/apiRequestService";
-
-const FormGrid = styled(Grid)(() => ({
-  display: "flex",
-  flexDirection: "column",
-}));
+import { ProcessoAggregate, isDadosPessoaisFilled } from '../domain/ProcessoAggregate';
+import { gerarPdfsTemplates } from "../../../services/pdf/gerarPDFsTemplates";
+import { gerarCertidoes } from "./utils/GerarCertidoes";
+import MaskInput from './utils/inputs/MaskInput';
+import CPFInput from './utils/inputs/CPFInput';
+import RGInput from './utils/inputs/RGInput';
 
 interface DadosPessoaisProps {
   visibilidadeSessao: boolean;
   alternarVisibilidadeSessao: () => void;
   fecharSessaoPreenchida: () => void;
-  formData: { [key: string]: string };
+  processoAggregate: ProcessoAggregate;
+  setProcessoAggregate: React.Dispatch<React.SetStateAction<ProcessoAggregate>>;
   setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>;
   uuid: string | null;
   setActiveStep: React.Dispatch<React.SetStateAction<number>>;
-  setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
   inputRef?: RefObject<HTMLInputElement>;
 }
 
-const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alternarVisibilidadeSessao, fecharSessaoPreenchida, formData, uuid, setPdfUrls, setFormData, inputRef }) => {
-  const [sessaoAberta, setSessaoAberta] = useState(visibilidadeSessao);
-  const [dirty, setDirty] = useState(false);
+const DadosPessoais: React.FC<DadosPessoaisProps> = ({
+  visibilidadeSessao,
+  alternarVisibilidadeSessao,
+  fecharSessaoPreenchida,
+  processoAggregate,
+  uuid,
+  setPdfUrls,
+  setProcessoAggregate,
+  inputRef
+}) => {
+  const [isSessaoAberta, setIsSessaoAberta] = useState(visibilidadeSessao);
+  const [isDirty, setIsDirty] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  const isFormFilled = () => {
-    const inputs = document.querySelectorAll("#dados-pessoais-form input[required]");
-    for (let i = 0; i < inputs.length; i++) {
-      if (!(inputs[i] as HTMLInputElement).value) {
-        return false;
-      }
-    }
-    return true;
-  };
-
   useEffect(() => {
-    setSessaoAberta(visibilidadeSessao);
+    setIsSessaoAberta(visibilidadeSessao);
   }, [visibilidadeSessao]);
 
   useEffect(() => {
-
     const handleFocusChange = (event: FocusEvent) => {
       if (formRef.current && !formRef.current.contains(event.target as Node)) {
-        if (isFormFilled() && dirty) {
-          if (sessaoAberta) {
-            fecharSessaoPreenchida();
-            setSnackbarOpen(true);
-            gerarPdfsTemplates(formData, uuid, setPdfUrls, setFormData);
-            gerarCertidoes(formData, setPdfUrls, uuid, setFormData);
-            setDirty(false)
-          }
+        if (isDadosPessoaisFilled(processoAggregate) && isDirty && isSessaoAberta) {
+          fecharSessaoPreenchida();
+          setSnackbarOpen(true);
+          gerarPdfsTemplates(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
+          gerarCertidoes(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
+          setIsDirty(false);
         }
       }
     };
@@ -74,40 +67,39 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
     return () => {
       document.removeEventListener("focusin", handleFocusChange);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dirty, formData, uuid]);
+  }, [isDirty, isSessaoAberta, processoAggregate, uuid, fecharSessaoPreenchida, setPdfUrls, setProcessoAggregate]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
+    const previousValue = processoAggregate[name as keyof ProcessoAggregate];
 
-    const valorAnterior = formData[name as keyof typeof formData];
-
-    if (valorAnterior !== value) {
-      setDirty(true);
+    if (previousValue !== value) {
+      setIsDirty(true);
     }
 
-    const updatedFormData = { ...formData, [name]: value };
-    setFormData(updatedFormData);
+    setProcessoAggregate({
+      ...processoAggregate,
+      [name]: value
+    });
   };
 
   const handleInputBlur = async (event: React.FocusEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    const updatedFormData = { ...formData, [name]: value };
-    setFormData(updatedFormData);
+
+    setProcessoAggregate({
+      ...processoAggregate,
+      [name]: value
+    });
 
     if (uuid) {
       await apiRequest({
         tipo: "dadosPessoais",
         data: {
           uuid,
-          ...updatedFormData,
+          ...processoAggregate,
         },
       });
     }
-  };
-
-  const handleToggle = () => {
-    alternarVisibilidadeSessao();
   };
 
   return (
@@ -122,7 +114,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
           cursor: 'pointer',
           padding: '10px',
         }}
-        onClick={handleToggle}
+        onClick={alternarVisibilidadeSessao}
       >
         <Grid item xs={11}>
           <Typography variant="h5" component="h2" color={"#1465C0"} align='center'>
@@ -131,13 +123,13 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
         </Grid>
         <Grid item xs={1}>
           <IconButton>
-            {sessaoAberta ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            {isSessaoAberta ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </IconButton>
         </Grid>
       </Grid>
-      <Collapse in={sessaoAberta}>
+      <Collapse in={isSessaoAberta}>
         <Grid container spacing={3} marginTop={"5px"} id="dados-pessoais-form" ref={formRef}>
-          <FormGrid item xs={12}>
+          <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column' }}>
             <FormLabel htmlFor="nomeCompleto" required>
               Nome completo
             </FormLabel>
@@ -148,51 +140,35 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
               type="text"
               autoComplete="nomeCompleto"
               required
-              value={formData["nomeCompleto"] || ""}
+              value={processoAggregate.nomeCompleto || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
               inputRef={inputRef}
               sx={{
                 backgroundColor: 'white',
                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#1976D2 !important', // Cor ao focar
+                  borderColor: '#1976D2 !important',
                 },
               }}
             />
-          </FormGrid>
-          <FormGrid item xs={12} md={6}>
-            <FormLabel htmlFor="cpf" required>
-              CPF
-            </FormLabel>
-            <OutlinedInput
-              id="cpf"
+          </Grid>
+          <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
+            <CPFInput
               name="cpf"
-              type="text"
-              placeholder="000.000.000-00"
-              autoComplete="cpf"
-              required
-              value={formData["cpf"] || ""}
+              value={processoAggregate.cpf || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
-          </FormGrid>
-          <FormGrid item xs={12} md={6}>
-            <FormLabel htmlFor="rg" required>
-              RG
-            </FormLabel>
-            <OutlinedInput
-              id="rg"
+          </Grid>
+          <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
+            <RGInput
               name="rg"
-              type="text"
-              placeholder="00.000.000-0"
-              autoComplete="rg"
-              required
-              value={formData["rg"] || ""}
+              value={processoAggregate.rg || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
-          </FormGrid>
-          <FormGrid item xs={12} md={6}>
+          </Grid>
+          <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
             <FormLabel htmlFor="nacionalidade" required>
               Nacionalidade
             </FormLabel>
@@ -203,28 +179,34 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
               placeholder="Brasileiro(a)"
               autoComplete="nacionalidade"
               required
-              value={formData["nacionalidade"] || ""}
+              value={processoAggregate.nacionalidade || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
-          </FormGrid>
-          <FormGrid item xs={12} md={6}>
+          </Grid>
+          <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
             <FormLabel htmlFor="dataNascimento" required>
               Data de Nascimento
             </FormLabel>
             <OutlinedInput
               id="dataNascimento"
               name="dataNascimento"
-              type="date"
+              type="text"
               placeholder="DD/MM/AAAA"
               autoComplete="dataNascimento"
               required
-              value={formData["dataNascimento"] || ""}
+              value={processoAggregate.dataNascimento || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
+              inputComponent={MaskInput as any}
+              inputProps={{
+                mask: "00/00/0000",
+                name: "dataNascimento",
+                unmask: false, 
+              }}
             />
-          </FormGrid>
-          <FormGrid item xs={12}>
+          </Grid>
+          <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column' }}>
             <FormLabel htmlFor="nomeMae" required>
               Nome Completo da Mãe
             </FormLabel>
@@ -235,13 +217,13 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
               placeholder="Nome Completo da Mãe"
               autoComplete="nomeMae"
               required
-              value={formData["nomeMae"] || ""}
+              value={processoAggregate.nomeMae || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
-          </FormGrid>
-          <FormGrid item xs={12}>
-            <FormLabel htmlFor="father-name" required>
+          </Grid>
+          <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column' }}>
+            <FormLabel htmlFor="nomePai" required>
               Nome Completo do Pai
             </FormLabel>
             <OutlinedInput
@@ -251,11 +233,11 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({ visibilidadeSessao, alter
               placeholder="Nome Completo do Pai"
               autoComplete="nomePai"
               required
-              value={formData["nomePai"] || ""}
+              value={processoAggregate.nomePai || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
-          </FormGrid>
+          </Grid>
         </Grid>
       </Collapse>
       <CustomSnackbar

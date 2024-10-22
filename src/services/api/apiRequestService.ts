@@ -19,6 +19,9 @@ export const apiRequest = async (data?: any) => {
         return response.data;
     } catch (error) {
         console.error(`There was an error`, error);
-        return null;
+        return { 
+            statusCode: 500, 
+            data: "Axios Error" 
+        };
     }
 };

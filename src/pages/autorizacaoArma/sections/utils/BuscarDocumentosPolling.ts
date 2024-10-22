@@ -3,7 +3,7 @@ import { apiRequest } from "../../../../services/api/apiRequestService";
 let currentPollingIntervalId: number | NodeJS.Timeout | null = null;
 
 export const buscarDocumentosPolling = (
-    setFormData: (data: any) => void,
+    setFormData: (data: any) => void, //TODO: tipar corretamente
     setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
     uuid: string | null,
     checkInterval = 9000,
@@ -21,7 +21,7 @@ export const buscarDocumentosPolling = (
         console.log(`Tentativa ${attempts} de ${maxAttempts}`);
 
         try {
-            const documentos = await buscarDocumentosEAtualizarLocalStorage(setFormData, setPdfUrls, uuid);
+            const documentos = await buscarDocumentos(setFormData, setPdfUrls, uuid);
 
             if (buscouTodosDocumentos(documentos)) {
                 console.log("Todos os 5 documentos foram obtidos. Parando o polling.");
@@ -44,7 +44,7 @@ export const cancelarPoolingDocumentos = () => {
     }
 };
 
-const buscarDocumentosEAtualizarLocalStorage = async (
+const buscarDocumentos = async (
     setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>,
     setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
     uuid: string | null

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
     Box,
     Button,
@@ -23,6 +23,8 @@ import { gerarPdfsTemplates } from "../../../services/pdf/gerarPDFsTemplates";
 import axios from "axios";
 import { gerarCertidaoJusticaEstadual } from "../../../services/pdf/gerarCertidaoJusticaEstadual";
 import CustomSnackbar from './utils/CustomSnackbar';
+import { ProcessoAggregate, isEnderecoFilled } from '../domain/ProcessoAggregate';
+import CEPInput from './utils/inputs/CEPInput';
 
 const spin = keyframes`
   from {
@@ -38,7 +40,7 @@ const FormGrid = styled(Grid)(() => ({
     flexDirection: "column",
 }));
 
-const findCep = async (cep: String) => {
+const findCep = async (cep: string) => {
     try {
         const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
         return response.data;
@@ -65,14 +67,22 @@ interface EnderecoProps {
     visibilidadeSessao: boolean;
     alternarVisibilidadeSessao: () => void;
     fecharSessaoPreenchida: () => void;
-    formData: { [key: string]: any };
-    setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
+    processoAggregate: ProcessoAggregate;
+    setProcessoAggregate: React.Dispatch<React.SetStateAction<ProcessoAggregate>>;
     setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>;
     uuid: string | null;
     setActiveStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibilidadeSessao, fecharSessaoPreenchida, formData, uuid, setFormData, setPdfUrls }) => {
+const Endereco: React.FC<EnderecoProps> = ({
+    visibilidadeSessao,
+    alternarVisibilidadeSessao,
+    fecharSessaoPreenchida,
+    processoAggregate,
+    setProcessoAggregate,
+    uuid,
+    setPdfUrls
+}) => {
     const [sessaoAberta, setSessaoAberta] = useState(visibilidadeSessao);
     const [sameAddress, setSameAddress] = useState('yes');
     const [dirty, setDirty] = useState(false);
@@ -80,30 +90,16 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
     const [, setFiles] = useState<{ [key: number]: File | null }>({});
-    const [loading, setLoading] = useState(false);
+    const [buscandoEndereco, setBuscandoEndereco] = useState(false);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
-
-    const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSameAddress((event.target as HTMLInputElement).value);
-    };
 
     useEffect(() => {
         setSessaoAberta(visibilidadeSessao);
     }, [visibilidadeSessao]);
 
-    const isFormFilled = () => {
-        const inputs = document.querySelectorAll("#endereco-form input[required]");
-        for (let i = 0; i < inputs.length; i++) {
-            if (!(inputs[i] as HTMLInputElement).value) {
-                return false;
-            }
-        }
-        return true;
-    };
-
-    const handleToggle = () => {
-        alternarVisibilidadeSessao();
-    };
+    const isFormFilled = useCallback(() => {
+        return isEnderecoFilled(processoAggregate.endereco);
+    }, [processoAggregate.endereco]);
 
     useEffect(() => {
         if (!dirty || !isFormFilled()) return;
@@ -114,51 +110,59 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
             if (activeElement instanceof HTMLElement) {
                 activeElement.blur();
             }
-        }, 2000);
+
+            if (isFormFilled()) {
+                if (sessaoAberta) {
+                    fecharSessaoPreenchida();
+                    setSnackbarOpen(true);
+                    gerarPdfsTemplates(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
+                    gerarCertidaoJusticaEstadual(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
+                    setDirty(false);
+                }
+            }
+        }, 2500);
 
         return () => clearTimeout(timer);
-    }, [formData, dirty]);
-
+    }, [processoAggregate, dirty, sessaoAberta, fecharSessaoPreenchida, setPdfUrls, setProcessoAggregate, uuid, isFormFilled]);
 
     const handleInputBlur = async (event: React.FocusEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
 
-        const updatedFormData = await buscarEnderecoPorCep(name, value, formData);
+        if (name === "cep" && !validarCEP(value)) {
+            return;
+        }
 
-        setFormData(updatedFormData);
+        const updatedProcessoAggregate = await buscarEnderecoPorCep(name, value, processoAggregate);
+
+        setProcessoAggregate(updatedProcessoAggregate);
 
         if (uuid) {
             apiRequest({
                 tipo: "endereco",
                 data: {
                     uuid,
-                    ...updatedFormData,
+                    ...updatedProcessoAggregate,
                 },
             }).catch(error => console.error(error));
         }
-
-        if (isFormFilled() && dirty) {
-            if (sessaoAberta) {
-                fecharSessaoPreenchida();
-                setSnackbarOpen(true);
-                gerarPdfsTemplates(formData, uuid, setPdfUrls, setFormData);
-                gerarCertidaoJusticaEstadual(formData, setFormData, setPdfUrls, uuid);
-                setDirty(false)
-            }
-        }
     };
 
-    const buscarEnderecoPorCep = async (name: string, value: string, formData: any) => {
-        if (name === "cep" && value.replace("-", "").length === 8) {
-            setLoading(true);
+    const validarCEP = (cep: string): boolean => {
+        const regex = /^\d{5}-\d{3}$/;
+        return regex.test(cep);
+    };
+
+    const buscarEnderecoPorCep = async (name: string, value: string, processoAggregate: ProcessoAggregate) => {
+        if (name === "cep" && validarCEP(value)) {
+            setBuscandoEndereco(true);
             const endereco = await findCep(value);
-            setLoading(false);
+            setBuscandoEndereco(false);
 
             if (endereco) {
-                const updatedFormData = {
-                    ...formData,
+                const updatedProcessoAggregate = {
+                    ...processoAggregate,
                     endereco: {
-                        ...formData.endereco,
+                        ...processoAggregate.endereco,
                         rua: endereco.logradouro || "",
                         bairro: endereco.bairro || "",
                         cidade: endereco.localidade || "",
@@ -167,31 +171,31 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                     }
                 };
 
-                return updatedFormData;
+                return updatedProcessoAggregate;
             }
         }
 
-        return formData;
+        return processoAggregate;
     };
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
 
-        const valorAnterior = formData[name as keyof typeof formData];
+        const previousValue = processoAggregate.endereco[name as keyof typeof processoAggregate.endereco];
 
-        if (valorAnterior !== value) {
+        if (previousValue !== value) {
             setDirty(true);
         }
 
-        const updatedFormData = {
-            ...formData,
+        const updatedProcessoAggregate = {
+            ...processoAggregate,
             endereco: {
-                ...formData.endereco,
+                ...processoAggregate.endereco,
                 [name]: value,
-            }
+            },
         };
 
-        setFormData(updatedFormData);
+        setProcessoAggregate(updatedProcessoAggregate);
     };
 
     return (
@@ -205,7 +209,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                         cursor: 'pointer',
                         padding: '10px',
                     }}
-                    onClick={handleToggle}
+                    onClick={alternarVisibilidadeSessao}
                 >
                     <Grid item xs={11}>
                         <Typography variant="h5" component="h2" color={"#1465C0"} align='center'>
@@ -231,7 +235,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             name="same-address"
                             defaultValue="yes"
                             value={sameAddress}
-                            onChange={handleRadioChange}
+                            onChange={(e) => setSameAddress((e.target as HTMLInputElement).value)}
                         >
                             <FormControlLabel value="yes" control={<Radio />} label="Sim" />
                             <FormControlLabel value="no" control={<Radio />} label="Não" />
@@ -244,33 +248,25 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             </FormLabel>
                             <OutlinedInput
                                 id="num-addresses"
-                                name="num-addresses"
+                                name="quantosEnderecosMorou"
                                 type="number"
                                 autoComplete="num-addresses"
-                                value={(formData.endereco as unknown as { [key: string]: string })?.["quantosEnderecosMorou"] || ""}
+                                value={processoAggregate.endereco.quantosEnderecosMorou || ""}
                                 onChange={handleInputChange}
                                 onBlur={handleInputBlur}
+                                disabled={buscandoEndereco}
                             />
                         </FormGrid>
                     )}
                     <FormGrid item xs={12} md={6}>
-                        <FormLabel htmlFor="cep" required style={{ marginTop: "22px" }}>
-                            CEP
-                        </FormLabel>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <OutlinedInput
-                                id="cep"
+                            <CEPInput
                                 name="cep"
-                                type="text"
-                                autoComplete="cep"
-                                placeholder="Cep"
-                                required
-                                value={(formData.endereco as unknown as { [key: string]: string })?.["cep"] || ""}
+                                value={processoAggregate.endereco.cep || ""}
                                 onChange={handleInputChange}
                                 onBlur={handleInputBlur}
-                                sx={{ flexGrow: 1 }}
                             />
-                            <RefreshIcon sx={{ visibility: loading ? 'visible' : 'hidden', animation: `${spin} 0.8s linear infinite` }} />
+                            <RefreshIcon sx={{ visibility: buscandoEndereco ? 'visible' : 'hidden', animation: `${spin} 0.8s linear infinite` }} />
                         </Box>
                     </FormGrid>
                     <FormGrid item xs={12}>
@@ -284,9 +280,10 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             autoComplete="rua"
                             placeholder="Rua"
                             required
-                            value={(formData.endereco as unknown as { [key: string]: string })?.["rua"] || ""}
+                            value={processoAggregate.endereco.rua || ""}
                             onChange={handleInputChange}
                             onBlur={handleInputBlur}
+                            disabled={buscandoEndereco}
                         />
                     </FormGrid>
                     <FormGrid item xs={12} md={2}>
@@ -300,9 +297,10 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             autoComplete="numero"
                             placeholder="Número"
                             required
-                            value={(formData.endereco as unknown as { [key: string]: string })?.["numero"] || ""}
+                            value={processoAggregate.endereco.numero || ""}
                             onChange={handleInputChange}
                             onBlur={handleInputBlur}
+                            disabled={buscandoEndereco}
                         />
                     </FormGrid>
                     <FormGrid item xs={12} md={4}>
@@ -315,9 +313,10 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             type="text"
                             placeholder="Complemento"
                             autoComplete="complemento"
-                            value={(formData.endereco as unknown as { [key: string]: string })?.["complemento"] || ""}
+                            value={processoAggregate.endereco.complemento || ""}
                             onChange={handleInputChange}
                             onBlur={handleInputBlur}
+                            disabled={buscandoEndereco}
                         />
                     </FormGrid>
                     <FormGrid item xs={12} md={6}>
@@ -331,9 +330,10 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             autoComplete="cidade"
                             placeholder="Cidade"
                             required
-                            value={(formData.endereco as unknown as { [key: string]: string })?.["cidade"] || ""}
+                            value={processoAggregate.endereco.cidade || ""}
                             onChange={handleInputChange}
                             onBlur={handleInputBlur}
+                            disabled={buscandoEndereco}
                         />
                     </FormGrid>
                     <FormGrid item xs={12} md={6}>
@@ -347,9 +347,10 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             autoComplete="bairro"
                             placeholder="Bairro"
                             required
-                            value={(formData.endereco as unknown as { [key: string]: string })?.["bairro"] || ""}
+                            value={processoAggregate.endereco.bairro || ""}
                             onChange={handleInputChange}
                             onBlur={handleInputBlur}
+                            disabled={buscandoEndereco}
                         />
                     </FormGrid>
                     <FormGrid item xs={12} md={6}>
@@ -363,9 +364,10 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                             autoComplete="uf"
                             placeholder="UF"
                             required
-                            value={(formData.endereco as unknown as { [key: string]: string })?.["uf"] || ""}
+                            value={processoAggregate.endereco.uf || ""}
                             onChange={handleInputChange}
                             onBlur={handleInputBlur}
+                            disabled={buscandoEndereco}
                         />
                     </FormGrid>
                     <Grid item xs={12}>
@@ -379,6 +381,7 @@ const Endereco: React.FC<EnderecoProps> = ({ visibilidadeSessao, alternarVisibil
                         <br />
                         {years.map((year) => (
                             <Button
+                                key={year}
                                 variant="contained"
                                 component="label"
                                 sx={{ mr: 1, marginTop: '5px' }}
