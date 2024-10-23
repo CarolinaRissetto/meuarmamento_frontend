@@ -14,7 +14,9 @@ const camposNecessarios = [
     'numero',
     'cidade',
     'bairro',
-    'uf'
+    'uf',
+    'sexo',
+    'estadoCivil'
 ];
 
 export const gerarCertidaoJusticaEstadual = async (
@@ -23,8 +25,6 @@ export const gerarCertidaoJusticaEstadual = async (
     processoAggregate: ProcessoAggregate,
     setProcessoAggregate: React.Dispatch<React.SetStateAction<ProcessoAggregate>>,
 ) => {
-    const sexo = "F";
-    const estadoCivil = "1";
 
     if (!verificarCamposPreenchidos(processoAggregate, camposNecessarios)) {
         console.log("Campos obrigatórios não preenchidos.");
@@ -41,8 +41,8 @@ export const gerarCertidaoJusticaEstadual = async (
     const formDataCombinado = {
         ...processoAggregate,
         dataNascimento: processoAggregate.dataNascimento,
-        sexo,
-        estadoCivil,
+        sexo: processoAggregate.sexo,
+        estadoCivil: processoAggregate.estadoCivil,
         rua: processoAggregate.endereco.rua,
         numero: processoAggregate.endereco.numero,
         cidade: processoAggregate.endereco.cidade,
