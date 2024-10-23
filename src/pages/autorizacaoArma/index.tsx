@@ -103,6 +103,17 @@ export default function Cadastro() {
   const handleNovoProcesso = () => {
     console.log("Botão de novo cadastro clicado");
 
+    const leadData = localStorage.getItem('leadData');
+    const parsedLead = leadData ? JSON.parse(leadData) : {};
+
+    apiRequest({
+      tipo: "salvarLead",
+      data: {
+        uuid,
+        ...parsedLead
+      },
+    });
+
     cancelarPoolingDocumentos();
 
     const newUuid = nanoid(6);

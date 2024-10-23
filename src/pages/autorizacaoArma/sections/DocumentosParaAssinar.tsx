@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, MouseEvent } from "react";
 import Link from "@mui/material/Link";
 import DownloadIcon from "@mui/icons-material/Download";
 import WarningIcon from '@mui/icons-material/Warning';
@@ -13,6 +13,8 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { ModalColetaLead } from "../../../components/modalLead/ModalColetaLead";
+import { apiRequest } from "../../../services/api/apiRequestService";
 
 const translations: { [key: string]: string } = {
   declaracaoIdoneidade: "8. Declaração não estar RESP INQ POL ou PROC CRIMINAL",
@@ -34,6 +36,47 @@ export default function DocumentosParaAssinar({
   fullView?: boolean;
 }) {
   const missingFiles = Object.keys(translations).filter((key) => !documentos[key]);
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [pendingDownload, setPendingDownload] = useState<string | null>(null);
+
+  const leadData = localStorage.getItem('leadData');
+
+  const handleDownloadClick = (e: MouseEvent<HTMLAnchorElement>, url: string | null) => {
+    if (!leadData && url) {
+      e.preventDefault();
+      setPendingDownload(url);
+      setModalOpen(true);
+    }
+  };
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+    setPendingDownload(null);
+  };
+
+  const handleLeadSubmit = (data: { nome: string; telefone: string }) => {
+    console.log("Dados do Lead:", data);
+
+    localStorage.setItem('leadData', JSON.stringify(data));
+
+    const uuid = localStorage.getItem('user-uuid');
+
+    apiRequest({
+      tipo: "salvarLead",
+      data: {
+        uuid,
+        ...data
+      },
+    });
+
+    setModalOpen(false);
+
+    if (pendingDownload) {
+      window.open(pendingDownload, '_blank');
+      setPendingDownload(null);
+    }
+  };
 
   return (
     <div>
@@ -109,6 +152,7 @@ export default function DocumentosParaAssinar({
                     target="_blank"
                     underline="hover"
                     sx={{ color: '#1976d2', cursor: 'pointer' }}
+                    onClick={(e) => handleDownloadClick(e, documentos[arquivo].url)}
                   >
                     <ListItemText>
                       <Typography sx={{ fontSize: fullView ? "1rem" : "0.85rem" }}>
@@ -144,6 +188,11 @@ export default function DocumentosParaAssinar({
           </div>
         )
       }
+      <ModalColetaLead
+        modalOpen={modalOpen}
+        handleModalClose={handleModalClose}
+        onSubmit={handleLeadSubmit}
+      />
     </div >
   );
 }
