@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Button, Box, Grid, Typography, Card, CardActions, CardContent, useMediaQuery } from "@mui/material";
+import { Button, Box, Grid, Typography, Card, CardActions, CardContent, useMediaQuery, Backdrop, CircularProgress } from "@mui/material";
 import { nanoid } from "nanoid";
 import DadosPessoais from "./sections/DadosPessoais";
 import Endereco from "./sections/Endereco";
@@ -14,7 +14,7 @@ import { ProcessoAggregate } from './domain/ProcessoAggregate'
 
 export default function Cadastro() {
   const [uuid, setUuid] = useState<string | null>(null);
-  const [processoAggregate, setProcessoAggregate] = useState<ProcessoAggregate>({    
+  const [processoAggregate, setProcessoAggregate] = useState<ProcessoAggregate>({
     endereco: {},
   });
   const navigate = useNavigate();
@@ -29,6 +29,7 @@ export default function Cadastro() {
   const [buttonText, setButtonText] = useState("Clique para copiar sua url");
   const [activeStep, setActiveStep] = React.useState<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [carregandoDadosIniciais, setCarregandoDadosIniciais] = useState(true);
 
   const atualizaUuidUrlELocalStorage = useCallback(
     (uuid: string) => {
@@ -58,9 +59,12 @@ export default function Cadastro() {
     if (response.statusCode === 200) {
       try {
         let data = response.body;
-        setProcessoAggregate(data);
+        setProcessoAggregate({
+          endereco: data.endereco ?? {},
+          ...data
+        });
         setPdfUrls(data.documentos);
-
+        setCarregandoDadosIniciais(false);
       } catch (error) {
         console.error("Erro ao fazer o parse do JSON:", error);
         return;
@@ -106,7 +110,7 @@ export default function Cadastro() {
     setUuid(newUuid);
     setProcessoAggregate({
       endereco: {}
-    });  
+    });
     setPdfUrls({});
 
     urlParams.set("uuid", newUuid);
@@ -151,7 +155,7 @@ export default function Cadastro() {
 
   const isScreenSmall = useMediaQuery('(max-width:1500px)');
   const isExtraSmallScreen = useMediaQuery('(max-width:899px)');
-  const buttonRef = useRef(null);  
+  const buttonRef = useRef(null);
   const steps = ['Dados pessoais', 'Endereço', 'Documentos já concluídos'];
 
   const stepsWithContent = [
@@ -171,160 +175,169 @@ export default function Cadastro() {
   ];
 
   return (
-    <Grid
-      container
-      sx={{
-        minHeight: "100vh",
-        paddingTop: { xs: "0px", sm: "0px", md: "145px" },
-
-        "@media (max-width: 1087px) and (min-width: 899px)": {
-          paddingTop: "175px",
-        },
-      }}
-    >
-
-      <SideBar
-        activeStep={activeStep}
-        steps={stepsWithContent}
-      />
+    <>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={carregandoDadosIniciais}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
 
       <Grid
-        item
-        sm={12}
-        md={7}
-        lg={8}
+        container
         sx={{
-          display: "flex",
-          paddingTop: '0 !important',
-          flexDirection: "column",
-          maxWidth: "auto",
-          width: "100%",
-          maxHeight: { xs: "100vh", md: "85vh" },
-          backgroundColor: "#F3F0EE",
-          overflowY: "scroll",
-          alignItems: "start",
-          pt: { xs: 2, sm: 2 },
-          px: { xs: 2, sm: 10 },
-          gap: { xs: 4, md: 8 },
+          minHeight: "100vh",
+          paddingTop: { xs: "0px", sm: "0px", md: "145px" },
+
+          "@media (max-width: 1087px) and (min-width: 899px)": {
+            paddingTop: "175px",
+          },
         }}
       >
-        <Box
-          sx={{
-            flexGrow: 1,
-            width: "100%",
-            maxWidth: { sm: "100%", md: 600 },
-          }}
-        >
 
-          {isExtraSmallScreen && (
+        <SideBar
+          activeStep={activeStep}
+          steps={stepsWithContent}
+        />
 
-            <StepperMobile activeStep={activeStep} steps={steps} />
-
-          )}
-          
-          <DadosPessoais
-            visibilidadeSessao={sectionVisibility.dadosPessoais}
-            alternarVisibilidadeSessao={() => alternarVisibilidadeSessao("dadosPessoais")}
-            fecharSessaoPreenchida={() => fecharSessaoPreenchida("dadosPessoais")}
-            processoAggregate={processoAggregate}
-            setProcessoAggregate={setProcessoAggregate}
-            setPdfUrls={setPdfUrls}
-            uuid={uuid}
-            setActiveStep={setActiveStep}
-            inputRef={inputRef}
-          />
-
-          <Endereco
-            visibilidadeSessao={sectionVisibility.endereco}
-            alternarVisibilidadeSessao={() => alternarVisibilidadeSessao("endereco")}
-            fecharSessaoPreenchida={() => fecharSessaoPreenchida("endereco")}
-            processoAggregate={processoAggregate}
-            setProcessoAggregate={setProcessoAggregate}
-            setPdfUrls={setPdfUrls}            
-            uuid={uuid}
-            setActiveStep={setActiveStep}
-          />
-
-          <Grid item xs={12} sx={{ padding: '10px', paddingBottom: 0 }}>
-
-            <Typography variant="h5" component="h2" color={"#1465C0"} align='center'>
-              Seus documentos
-            </Typography>
-
-            <DocumentosParaAssinar urls={pdfUrls} />
-
-          </Grid>
-        </Box>
-
-        <Box
+        <Grid
+          item
+          sm={12}
+          md={7}
+          lg={8}
           sx={{
             display: "flex",
-            justifyContent: "space-between",
-            width: "55%",
-            marginBottom: {
-              xs: "70%",
-              sm: "30%",
-              md: "30%",
-              lg: "10%",
-              xl: "10%",
-            },
+            paddingTop: '0 !important',
+            flexDirection: "column",
+            maxWidth: "auto",
+            width: "100%",
+            maxHeight: { xs: "100vh", md: "85vh" },
+            backgroundColor: "#F3F0EE",
+            overflowY: "scroll",
+            alignItems: "start",
+            pt: { xs: 2, sm: 2 },
+            px: { xs: 2, sm: 10 },
+            gap: { xs: 4, md: 8 },
           }}
         >
-          <Button
-            ref={buttonRef}
-            onClick={(event) => {
-              event.stopPropagation(); // Impede que o clique seja capturado como clique fora
-              handleNovoProcesso();
-            }}
-            variant="contained"
+          <Box
             sx={{
-              width: { xs: "100%", sm: "fit-content" },
-              mt: 2,
+              flexGrow: 1,
+              width: "100%",
+              maxWidth: { sm: "100%", md: 600 },
             }}
           >
-            Novo Processo
-          </Button>
-        </Box>
 
-        <Box
-          sx={{
-            width: "275px",
-            position: "fixed",
-            top: "20%",
-            right: "2%",
-            zIndex: 2000,
-            paddingTop: { xs: "90px", sm: "55px", md: "0%", lg: "0%" },
-          }}
-        >
+            {isExtraSmallScreen && (
 
-          {isScreenSmall && !isExtraSmallScreen ? (
-            <Button size="small" onClick={handleCopyClick} sx={{
-              backgroundColor: 'white',
-              marginLeft: 'auto',
-              display: 'block',
-              width: '120px',
-            }}>{buttonText}</Button>
+              <StepperMobile activeStep={activeStep} steps={steps} />
 
-          ) : !isScreenSmall ? (
-            < Card sx={{ minWidth: 275 }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                  <Typography padding={2}>
-                    Salve seu formulário
+            )}
+
+            <DadosPessoais
+              visibilidadeSessao={sectionVisibility.dadosPessoais}
+              alternarVisibilidadeSessao={() => alternarVisibilidadeSessao("dadosPessoais")}
+              fecharSessaoPreenchida={() => fecharSessaoPreenchida("dadosPessoais")}
+              processoAggregate={processoAggregate}
+              setProcessoAggregate={setProcessoAggregate}
+              setPdfUrls={setPdfUrls}
+              uuid={uuid}
+              setActiveStep={setActiveStep}
+              inputRef={inputRef}
+            />
+
+            <Endereco
+              visibilidadeSessao={sectionVisibility.endereco}
+              alternarVisibilidadeSessao={() => alternarVisibilidadeSessao("endereco")}
+              fecharSessaoPreenchida={() => fecharSessaoPreenchida("endereco")}
+              processoAggregate={processoAggregate}
+              setProcessoAggregate={setProcessoAggregate}
+              setPdfUrls={setPdfUrls}
+              uuid={uuid}
+              setActiveStep={setActiveStep}
+            />
+
+            <Grid item xs={12} sx={{ padding: '10px', paddingBottom: 0 }}>
+
+              <Typography variant="h5" component="h2" color={"#1465C0"} align='center'>
+                Seus documentos
+              </Typography>
+
+              <DocumentosParaAssinar urls={pdfUrls} />
+
+            </Grid>
+          </Box>
+
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              width: "55%",
+              marginBottom: {
+                xs: "70%",
+                sm: "30%",
+                md: "30%",
+                lg: "10%",
+                xl: "10%",
+              },
+            }}
+          >
+            <Button
+              ref={buttonRef}
+              onClick={(event) => {
+                event.stopPropagation(); // Impede que o clique seja capturado como clique fora
+                handleNovoProcesso();
+              }}
+              variant="contained"
+              sx={{
+                width: { xs: "100%", sm: "fit-content" },
+                mt: 2,
+              }}
+            >
+              Novo Processo
+            </Button>
+          </Box>
+
+          <Box
+            sx={{
+              width: "275px",
+              position: "fixed",
+              top: "20%",
+              right: "2%",
+              zIndex: 2000,
+              paddingTop: { xs: "90px", sm: "55px", md: "0%", lg: "0%" },
+            }}
+          >
+
+            {isScreenSmall && !isExtraSmallScreen ? (
+              <Button size="small" onClick={handleCopyClick} sx={{
+                backgroundColor: 'white',
+                marginLeft: 'auto',
+                display: 'block',
+                width: '120px',
+              }}>{buttonText}</Button>
+
+            ) : !isScreenSmall ? (
+              < Card sx={{ minWidth: 275 }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <Typography padding={2}>
+                      Salve seu formulário
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Copie sua url para retornar ao seu cadastro quando quiser.
                   </Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary">
-                  Copie sua url para retornar ao seu cadastro quando quiser.
-                </Typography>
-              </CardContent>
-              <CardActions sx={{ justifyContent: "center" }}>
-                <Button size="small" onClick={handleCopyClick}>{buttonText}</Button>
-              </CardActions>
-            </Card>
-          ) : null}
-        </Box>
+                </CardContent>
+                <CardActions sx={{ justifyContent: "center" }}>
+                  <Button size="small" onClick={handleCopyClick}>{buttonText}</Button>
+                </CardActions>
+              </Card>
+            ) : null}
+          </Box>
 
-      </Grid>
-    </Grid >
+        </Grid>
+      </Grid >
+    </>
   );
 }

@@ -110,16 +110,6 @@ const Endereco: React.FC<EnderecoProps> = ({
             if (activeElement instanceof HTMLElement) {
                 activeElement.blur();
             }
-
-            if (isFormFilled()) {
-                if (sessaoAberta) {
-                    fecharSessaoPreenchida();
-                    setSnackbarOpen(true);
-                    gerarPdfsTemplates(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
-                    gerarCertidaoJusticaEstadual(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
-                    setDirty(false);
-                }
-            }
         }, 2500);
 
         return () => clearTimeout(timer);
@@ -144,6 +134,16 @@ const Endereco: React.FC<EnderecoProps> = ({
                     ...updatedProcessoAggregate,
                 },
             }).catch(error => console.error(error));
+        }
+
+        if (isFormFilled()) {
+            if (sessaoAberta) {
+                fecharSessaoPreenchida();
+                setSnackbarOpen(true);
+                gerarPdfsTemplates(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
+                gerarCertidaoJusticaEstadual(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
+                setDirty(false);
+            }
         }
     };
 
