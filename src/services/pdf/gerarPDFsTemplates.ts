@@ -16,7 +16,12 @@ const camposNecessarios = [
     'uf',
 ];
 
-export const gerarPdfsTemplates = async (    
+const meses = [
+    'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+    'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+];
+
+export const gerarPdfsTemplates = async (
     uuid: string | null,
     setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null } }>>,
     processoAggregate: ProcessoAggregate,
@@ -42,7 +47,7 @@ export const gerarPdfsTemplates = async (
     try {
         const hoje = new Date();
         const dia = hoje.getDate().toString().padStart(2, '0');
-        const mes = (hoje.getMonth() + 1).toString().padStart(2, '0');
+        const mes = meses[hoje.getMonth()]; 
         const ano = hoje.getFullYear();
         const dataAtual = `${formDataCombinado.cidade}, ${dia} de ${mes} de ${ano}`;
 
