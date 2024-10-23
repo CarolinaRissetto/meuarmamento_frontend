@@ -8,11 +8,13 @@ export interface ProcessoAggregate {
     dataNascimento?: string;
     nomeMae?: string;
     nomePai?: string;
+    sexo?: 'feminino' | 'masculino';
+    estadoCivil?: 'solteiro(a)' | 'casado(a)' | 'divorciado(a)';
 
     endereco: EnderecoEntity;
-    
+
     //ultimosEnderecosComprovante: List<EnderecoComprovanteEntity>;
-    
+
     //documentos: List<Documentos>;
 }
 
@@ -24,8 +26,10 @@ export const isDadosPessoaisFilled = (data: ProcessoAggregate): boolean => {
         data.nacionalidade != null && data.nacionalidade.trim() !== '' &&
         data.dataNascimento != null && data.dataNascimento.trim() !== '' &&
         data.nomeMae != null && data.nomeMae.trim() !== '' &&
-        data.nomePai != null && data.nomePai.trim() !== ''
-    );  
+        data.nomePai != null && data.nomePai.trim() !== '' &&
+        data.sexo != null &&
+        data.estadoCivil != null
+    );
 };
 
 export const isEnderecoFilled = (data: EnderecoEntity): boolean => {

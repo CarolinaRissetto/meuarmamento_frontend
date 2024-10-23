@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef, RefObject } from "react";
 import {
   Collapse,
+  FormControl,
   FormLabel,
   Grid,
   IconButton,
+  MenuItem,
   OutlinedInput,
+  Select,
   Typography,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -17,6 +20,8 @@ import { gerarCertidoes } from "./utils/GerarCertidoes";
 import MaskInput from './utils/inputs/MaskInput';
 import CPFInput from './utils/inputs/CPFInput';
 import RGInput from './utils/inputs/RGInput';
+import { SelectChangeEvent } from '@mui/material/Select';
+
 
 interface DadosPessoaisProps {
   visibilidadeSessao: boolean;
@@ -71,6 +76,32 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
+
+    if (typeof name !== 'string') {
+      console.error("O atributo 'name' está ausente ou não é uma string.");
+      return;
+    }
+
+    const previousValue = processoAggregate[name as keyof ProcessoAggregate];
+
+    if (previousValue !== value) {
+      setIsDirty(true);
+    }
+
+    setProcessoAggregate({
+      ...processoAggregate,
+      [name]: value
+    });
+  };
+
+  const handleSelectChange = (event: SelectChangeEvent<string>) => {
+    const { name, value } = event.target;
+
+    if (typeof name !== 'string') {
+      console.error("O atributo 'name' está ausente ou não é uma string.");
+      return;
+    }
+
     const previousValue = processoAggregate[name as keyof ProcessoAggregate];
 
     if (previousValue !== value) {
@@ -202,9 +233,71 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
               inputProps={{
                 mask: "00/00/0000",
                 name: "dataNascimento",
-                unmask: false, 
+                unmask: false,
               }}
             />
+          </Grid>
+          <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
+            <FormLabel htmlFor="sexo" required>
+              Sexo
+            </FormLabel>
+            <FormControl fullWidth required>
+              <Select
+                displayEmpty
+                labelId="sexo-label"
+                id="sexo"
+                name="sexo"
+                placeholder="Selecione"
+                value={processoAggregate.sexo || ""}
+                label="Sexo"
+                required
+                onChange={handleSelectChange}
+                onBlur={handleInputBlur}
+                sx={{
+                  backgroundColor: 'white',
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#1976D2 !important',
+                  },
+                }}
+              >
+                <MenuItem value="" disabled>
+                  <em style={{ color: '#aaa' }}>Selecione</em>
+                </MenuItem>
+                <MenuItem value="feminino">Feminino</MenuItem>
+                <MenuItem value="masculino">Masculino</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
+            <FormLabel htmlFor="estadoCivil" required>
+              Estado Civil
+            </FormLabel>
+            <FormControl fullWidth required>
+              <Select
+                displayEmpty
+                labelId="estadoCivil-label"
+                id="estadoCivil"
+                name="estadoCivil"
+                required
+                value={processoAggregate.estadoCivil || ""}
+                label="Estado Civil"
+                onChange={handleSelectChange}
+                onBlur={handleInputBlur}
+                sx={{
+                  backgroundColor: 'white',
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#1976D2 !important',
+                  },
+                }}
+              >
+                <MenuItem value="" disabled>
+                  <em style={{ color: '#aaa' }}>Selecione</em>
+                </MenuItem>
+                <MenuItem value="solteiro(a)">Solteiro(a)</MenuItem>
+                <MenuItem value="casado(a)">Casado(a)</MenuItem>
+                <MenuItem value="divorciado(a)">Divorciado(a)</MenuItem>
+              </Select>
+            </FormControl>
           </Grid>
           <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column' }}>
             <FormLabel htmlFor="nomeMae" required>
