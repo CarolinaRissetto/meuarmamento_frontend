@@ -81,7 +81,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
     return () => {
       document.removeEventListener("focusin", handleFocusChange);
     };
-  }, [isDirty, isSessaoAberta, processoAggregate, uuid, fecharSessaoPreenchida, setPdfUrls, setProcessoAggregate]);
+  }, [isDirty, isSessaoAberta, processoAggregate, uuid, fecharSessaoPreenchida, setPdfUrls, setProcessoAggregate, documentosSessaoRef]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
