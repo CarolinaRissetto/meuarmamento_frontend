@@ -10,11 +10,7 @@ import {
     FormLabel,
 } from '@mui/material';
 import TelefoneInput from '../../pages/autorizacaoArma/sections/utils/inputs/TelefoneInput';
-
-interface LeadData {
-    nome: string;
-    telefone: string;
-}
+import { LeadData } from '../../pages/autorizacaoArma/domain/LeadData';
 
 interface ModalColetaLeadProps {
     modalOpen: boolean;

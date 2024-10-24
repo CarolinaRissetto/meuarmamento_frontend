@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { ModalColetaLead } from "../../../components/modalLead/ModalColetaLead";
 import { apiRequest } from "../../../services/api/apiRequestService";
+import { LeadData } from "../domain/LeadData";
 
 const translations: { [key: string]: string } = {
   declaracaoIdoneidade: "8. Declaração não estar RESP INQ POL ou PROC CRIMINAL",
@@ -55,7 +56,7 @@ export default function DocumentosParaAssinar({
     setPendingDownload(null);
   };
 
-  const handleLeadSubmit = (data: { nome: string; telefone: string }) => {
+  const handleLeadSubmit = (data: LeadData) => {
     console.log("Dados do Lead:", data);
 
     localStorage.setItem('leadData', JSON.stringify(data));
