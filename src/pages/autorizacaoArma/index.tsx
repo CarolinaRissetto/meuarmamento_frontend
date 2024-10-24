@@ -28,8 +28,9 @@ export default function Cadastro() {
   const [pdfUrls, setPdfUrls] = useState<{ [key: string]: { url: string | null; status: string | null; }; }>({});
   const [buttonText, setButtonText] = useState("Clique para copiar sua url");
   const [activeStep, setActiveStep] = React.useState<number>(0);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const [carregandoDadosIniciais, setCarregandoDadosIniciais] = useState(true);
+  const documentosSessaoRef = useRef<HTMLDivElement>(null);
 
   const atualizaUuidUrlELocalStorage = useCallback(
     (uuid: string) => {
@@ -133,8 +134,8 @@ export default function Cadastro() {
       endereco: true,
     }));
 
-    if (inputRef.current) {
-      inputRef.current.focus();
+    if (nameInputRef.current) {
+      nameInputRef.current.focus();
     }
   };
 
@@ -245,17 +246,18 @@ export default function Cadastro() {
 
             )}
 
-            <DadosPessoais
-              visibilidadeSessao={sectionVisibility.dadosPessoais}
-              alternarVisibilidadeSessao={() => alternarVisibilidadeSessao("dadosPessoais")}
-              fecharSessaoPreenchida={() => fecharSessaoPreenchida("dadosPessoais")}
-              processoAggregate={processoAggregate}
-              setProcessoAggregate={setProcessoAggregate}
-              setPdfUrls={setPdfUrls}
-              uuid={uuid}
-              setActiveStep={setActiveStep}
-              inputRef={inputRef}
-            />
+              <DadosPessoais
+                visibilidadeSessao={sectionVisibility.dadosPessoais}
+                alternarVisibilidadeSessao={() => alternarVisibilidadeSessao("dadosPessoais")}
+                fecharSessaoPreenchida={() => fecharSessaoPreenchida("dadosPessoais")}
+                processoAggregate={processoAggregate}
+                setProcessoAggregate={setProcessoAggregate}
+                setPdfUrls={setPdfUrls}
+                uuid={uuid}
+                setActiveStep={setActiveStep}
+                inputRef={nameInputRef}
+                documentosSessaoRef={documentosSessaoRef}
+              />
 
             <Endereco
               visibilidadeSessao={sectionVisibility.endereco}
@@ -268,7 +270,7 @@ export default function Cadastro() {
               setActiveStep={setActiveStep}
             />
 
-            <Grid item xs={12} sx={{ padding: '10px', paddingBottom: 0 }}>
+            <Grid ref={documentosSessaoRef} item xs={12} sx={{ padding: '10px', paddingBottom: 0 }}>
 
               <Typography variant="h5" component="h2" color={"#1465C0"} align='center'>
                 Seus documentos

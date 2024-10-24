@@ -33,6 +33,7 @@ interface DadosPessoaisProps {
   uuid: string | null;
   setActiveStep: React.Dispatch<React.SetStateAction<number>>;
   inputRef?: RefObject<HTMLInputElement>;
+  documentosSessaoRef: RefObject<HTMLDivElement>;
 }
 
 const DadosPessoais: React.FC<DadosPessoaisProps> = ({
@@ -43,11 +44,12 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
   uuid,
   setPdfUrls,
   setProcessoAggregate,
-  inputRef
+  inputRef,
+  documentosSessaoRef
 }) => {
   const [isSessaoAberta, setIsSessaoAberta] = useState(visibilidadeSessao);
   const [isDirty, setIsDirty] = useState(false);
-  const formRef = useRef<HTMLDivElement>(null);
+  const dadosPessoaisRef = useRef<HTMLDivElement>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
@@ -56,7 +58,14 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
 
   useEffect(() => {
     const handleFocusChange = (event: FocusEvent) => {
-      if (formRef.current && !formRef.current.contains(event.target as Node)) {
+
+
+      if (
+        dadosPessoaisRef.current &&
+        !dadosPessoaisRef.current.contains(event.target as Node) &&
+        documentosSessaoRef.current &&
+        !documentosSessaoRef.current.contains(event.target as Node)
+      ) {
         if (isDadosPessoaisFilled(processoAggregate) && isDirty && isSessaoAberta) {
           fecharSessaoPreenchida();
           setSnackbarOpen(true);
@@ -159,7 +168,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
         </Grid>
       </Grid>
       <Collapse in={isSessaoAberta}>
-        <Grid container spacing={3} marginTop={"5px"} id="dados-pessoais-form" ref={formRef}>
+        <Grid container spacing={3} marginTop={"5px"} id="dados-pessoais-form" ref={dadosPessoaisRef}>
           <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column' }}>
             <FormLabel htmlFor="nomeCompleto" required>
               Nome completo
