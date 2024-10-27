@@ -157,7 +157,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
         onClick={alternarVisibilidadeSessao}
       >
         <Grid item xs={11}>
-          <Typography variant="h5" component="h2" color={"#1465C0"} align='center'>
+          <Typography variant="h5" component="h2" color={"#211f50"} align='center'>
             Dados Pessoais
           </Typography>
         </Grid>
@@ -272,8 +272,8 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
                 <MenuItem value="" disabled>
                   <em style={{ color: '#aaa' }}>Selecione</em>
                 </MenuItem>
-                <MenuItem value="feminino">Feminino</MenuItem>
                 <MenuItem value="masculino">Masculino</MenuItem>
+                <MenuItem value="feminino">Feminino</MenuItem>                
               </Select>
             </FormControl>
           </Grid>

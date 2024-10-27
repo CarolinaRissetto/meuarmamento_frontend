@@ -92,6 +92,9 @@ const Endereco: React.FC<EnderecoProps> = ({
     const [, setFiles] = useState<{ [key: number]: File | null }>({});
     const [buscandoEndereco, setBuscandoEndereco] = useState(false);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const numeroInputRef = useRef<HTMLInputElement>(null);
+    const ruaInputRef = useRef<HTMLInputElement>(null);
+    const [focusField, setFocusField] = useState<string | null>(null);
 
     useEffect(() => {
         setSessaoAberta(visibilidadeSessao);
@@ -114,6 +117,16 @@ const Endereco: React.FC<EnderecoProps> = ({
 
         return () => clearTimeout(timer);
     }, [processoAggregate, dirty, sessaoAberta, fecharSessaoPreenchida, setPdfUrls, setProcessoAggregate, uuid, isFormFilled]);
+
+    useEffect(() => {
+        if (focusField === 'numero' && numeroInputRef.current) {
+            numeroInputRef.current.focus();
+            setFocusField(null);
+        } else if (focusField === 'rua' && ruaInputRef.current) {
+            ruaInputRef.current.focus();
+            setFocusField(null);
+        }
+    }, [focusField]);
 
     const handleInputBlur = async (event: React.FocusEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
@@ -171,6 +184,11 @@ const Endereco: React.FC<EnderecoProps> = ({
                     }
                 };
 
+                if (endereco.logradouro) {
+                    setFocusField('numero');
+                } else {
+                    setFocusField('rua');
+                }
                 return updatedProcessoAggregate;
             }
         }
@@ -212,7 +230,7 @@ const Endereco: React.FC<EnderecoProps> = ({
                     onClick={alternarVisibilidadeSessao}
                 >
                     <Grid item xs={11}>
-                        <Typography variant="h5" component="h2" color={"#1465C0"} align='center'>
+                        <Typography variant="h5" component="h2" color={"#211f50"} align='center'>
                             Endereço
                         </Typography>
                     </Grid>
@@ -284,6 +302,7 @@ const Endereco: React.FC<EnderecoProps> = ({
                             onChange={handleInputChange}
                             onBlur={handleInputBlur}
                             disabled={buscandoEndereco}
+                            inputRef={ruaInputRef}
                         />
                     </FormGrid>
                     <FormGrid item xs={12} md={2}>
@@ -301,6 +320,7 @@ const Endereco: React.FC<EnderecoProps> = ({
                             onChange={handleInputChange}
                             onBlur={handleInputBlur}
                             disabled={buscandoEndereco}
+                            inputRef={numeroInputRef}
                         />
                     </FormGrid>
                     <FormGrid item xs={12} md={4}>

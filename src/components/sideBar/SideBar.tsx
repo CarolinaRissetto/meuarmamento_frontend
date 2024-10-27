@@ -65,21 +65,6 @@ const SideBar: React.FC<SideBarProps> = ({ activeStep, steps }) => {
           R$ 0,00
         </Box>
       </Typography>
-
-      <Box
-        sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}
-      >
-        <Button
-          onClick={handleButtonComoFunciona}
-          variant="contained"
-          color="primary"
-          href="#"
-          startIcon={<PlayArrowIcon />}
-          sx={{ marginTop: "20px" }}
-        >
-          Como funciona
-        </Button>
-      </Box>
     </Grid>
   );
 };
