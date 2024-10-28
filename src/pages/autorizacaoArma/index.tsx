@@ -11,6 +11,7 @@ import { apiRequest } from "../../services/api/apiRequestService";
 import { validarStepper } from "./sections/utils/ValidarStepper";
 import { cancelarPoolingDocumentos } from "./sections/utils/BuscarDocumentosPolling";
 import { ProcessoAggregate } from './domain/ProcessoAggregate'
+import CustomSnackbar from './sections/utils/CustomSnackbar';
 
 export default function Cadastro() {
   const [uuid, setUuid] = useState<string | null>(null);
@@ -31,6 +32,7 @@ export default function Cadastro() {
   const nameInputRef = useRef<HTMLInputElement>(null);
   const [carregandoDadosIniciais, setCarregandoDadosIniciais] = useState(true);
   const documentosSessaoRef = useRef<HTMLDivElement>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const atualizaUuidUrlELocalStorage = useCallback(
     (uuid: string) => {
@@ -44,11 +46,6 @@ export default function Cadastro() {
     [navigate, location]
   );
 
-  useEffect(() => {
-    const step = validarStepper(processoAggregate);
-    setActiveStep(step);
-  }, [processoAggregate]);
-
   const buscarDados = useCallback(async (uuid: string) => {
     const response = await apiRequest({
       tipo: "buscaDados",
@@ -60,19 +57,27 @@ export default function Cadastro() {
     if (response.statusCode === 200) {
       try {
         let data = response.body;
-        setProcessoAggregate({
+        const objetoRetornado = {
           endereco: data.endereco ?? {},
           ...data
+        }
+        setProcessoAggregate({
+          ...objetoRetornado
         });
         setPdfUrls(data.documentos);
-        setCarregandoDadosIniciais(false);
+        
+        const step = validarStepper(objetoRetornado);
+        setActiveStep(step);
       } catch (error) {
         console.error("Erro ao fazer o parse do JSON:", error);
-        return;
-      }
+        setSnackbarOpen(true);
+      }      
     } else {
       console.error("Erro ao buscar dados:", response?.message || "Erro desconhecido");
+      setSnackbarOpen(true);
     }
+
+    setCarregandoDadosIniciais(false);
   }, []);
 
   useEffect(() => {
@@ -140,6 +145,9 @@ export default function Cadastro() {
   };
 
   const fecharSessaoPreenchida = async (section: string) => {
+    const step = validarStepper(processoAggregate);
+    setActiveStep(step);
+    
     setSectionVisibility((prev) => ({
       ...prev,
       [section]: false,
@@ -168,20 +176,20 @@ export default function Cadastro() {
   const isScreenSmall = useMediaQuery('(max-width:1500px)');
   const isExtraSmallScreen = useMediaQuery('(max-width:899px)');
   const buttonRef = useRef(null);
-  const steps = ['Dados pessoais', 'Endereço', 'Documentos já concluídos'];
+  const steps = ['Dados pessoais', 'Endereço', 'Documentos concluídos'];
 
   const stepsWithContent = [
     {
       label: 'Dados pessoais',
-      description: 'Primeira etapa necessária para geração de diversos documentos',
+      description: 'Preencha seus dados básicos para que possamos gerar os primeiros documentos para você. Nessa etapa iremos gerar 2 documentos',
     },
     {
       label: 'Endereço',
-      description: 'Dados referentes ao seu endereço',
+      description: 'Excelente! Agora, informe os dados de endereço. Utilizaremos ferramentas oficiais do governo para automatizar esse processo e gerar mais três documentos',
     },
     {
-      label: 'Documentos já concluídos',
-      description: 'Veja os documentos que já foram gerados.',
+      label: 'Documentos prontos',
+      description: 'Aguarde alguns segundos para a finalização dos seus documentos e faça o download abaixo 👇',
       content: <DocumentosParaAssinar urls={pdfUrls} fullView={false} />
     }
   ];
@@ -200,10 +208,6 @@ export default function Cadastro() {
         sx={{
           minHeight: "100vh",
           paddingTop: { xs: "0px", sm: "0px", md: "145px" },
-
-          "@media (max-width: 1087px) and (min-width: 899px)": {
-            paddingTop: "175px",
-          },
         }}
       >
 
@@ -236,7 +240,7 @@ export default function Cadastro() {
             sx={{
               flexGrow: 1,
               width: "100%",
-              maxWidth: { sm: "100%", md: 600 },
+              maxWidth: { sm: "100%", md: 720 },
             }}
           >
 
@@ -272,7 +276,7 @@ export default function Cadastro() {
 
             <Grid ref={documentosSessaoRef} item xs={12} sx={{ padding: '10px', paddingBottom: 0 }}>
 
-              <Typography variant="h5" component="h2" color={"#1465C0"} align='center'>
+              <Typography variant="h5" component="h2" color={"#211f50"} align='center'>
                 Seus documentos
               </Typography>
 
@@ -307,7 +311,7 @@ export default function Cadastro() {
                 mt: 2,
               }}
             >
-              Novo Processo
+              Iniciar um novo processo
             </Button>
           </Box>
 
@@ -315,7 +319,7 @@ export default function Cadastro() {
             sx={{
               width: "275px",
               position: "fixed",
-              top: "20%",
+              top: "170px",
               right: "2%",
               zIndex: 2000,
               paddingTop: { xs: "90px", sm: "55px", md: "0%", lg: "0%" },
@@ -331,7 +335,7 @@ export default function Cadastro() {
               }}>{buttonText}</Button>
 
             ) : !isScreenSmall ? (
-              < Card sx={{ minWidth: 275 }}>
+              <Card sx={{ minWidth: 275 }}>
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <Typography padding={2}>
@@ -348,7 +352,12 @@ export default function Cadastro() {
               </Card>
             ) : null}
           </Box>
-
+          <CustomSnackbar
+            snackbarOpen={snackbarOpen}
+            setSnackbarOpen={setSnackbarOpen}
+            message="Ocorreu um erro ao buscar dados desse processo"
+            severity="error"
+          />
         </Grid>
       </Grid >
     </>
