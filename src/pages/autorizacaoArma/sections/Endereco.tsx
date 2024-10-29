@@ -111,7 +111,7 @@ const Endereco: React.FC<EnderecoProps> = ({
     }, [carregandoDadosIniciais]);
 
     useEffect(() => {
-        if (dirty && isEnderecoFilled(processoAggregate.endereco) && sessaoAberta) {
+        if ( isEnderecoFilled(processoAggregate.endereco) && dirty && sessaoAberta && hasMounted.current) {
 
             if (timerRef.current) {
                 clearTimeout(timerRef.current);
