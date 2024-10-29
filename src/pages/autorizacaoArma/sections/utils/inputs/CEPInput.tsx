@@ -44,7 +44,7 @@ const CEPInput: React.FC<CEPInputProps> = ({ name, value, onChange, onBlur }) =>
         inputProps={{
           mask: "00000-000",
           name: name,
-          unmask: true,
+          unmask: false,
           value: value || "",
         }}
       />
