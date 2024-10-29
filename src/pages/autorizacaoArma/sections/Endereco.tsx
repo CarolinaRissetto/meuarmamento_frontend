@@ -222,8 +222,10 @@ const Endereco: React.FC<EnderecoProps> = ({
                 <Grid container alignItems="center"
                     sx={{
                         borderColor: 'primary.light',
-                        '&:hover': { background: '#E3DFDC' },
-                        borderRadius: "5px",
+                        background: 'primary.light',
+                        '&:hover': {
+                            background: '#E3DFDC',
+                        }, borderRadius: "5px",
                         cursor: 'pointer',
                         padding: '10px',
                     }}
