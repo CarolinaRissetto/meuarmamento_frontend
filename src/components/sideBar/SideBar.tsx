@@ -3,10 +3,7 @@ import {
   Grid,
   Box,
   Typography,
-  Button
 } from "@mui/material";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import axios from 'axios';
 import StepperDesktop from '../stepper/StepperDesktop'
 
 interface StepContentProps {
@@ -21,16 +18,6 @@ interface SideBarProps {
 }
 
 const SideBar: React.FC<SideBarProps> = ({ activeStep, steps }) => {
-
-  const handleButtonComoFunciona = async () => {
-    try {
-      const response = await axios.get('https://jd5ueykib6.execute-api.us-east-1.amazonaws.com/default/testeFunction');
-      console.log(response.data);
-      alert(response.data.message);
-    } catch (error) {
-      console.error("There was an error!", error);
-    }
-  };
 
   return (
     <Grid
