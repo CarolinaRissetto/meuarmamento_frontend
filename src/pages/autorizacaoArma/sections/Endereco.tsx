@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
     Box,
     Button,
@@ -72,6 +72,7 @@ interface EnderecoProps {
     setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>;
     uuid: string | null;
     setActiveStep: React.Dispatch<React.SetStateAction<number>>;
+    carregandoDadosIniciais: boolean;
 }
 
 const Endereco: React.FC<EnderecoProps> = ({
@@ -81,7 +82,8 @@ const Endereco: React.FC<EnderecoProps> = ({
     processoAggregate,
     setProcessoAggregate,
     uuid,
-    setPdfUrls
+    setPdfUrls,
+    carregandoDadosIniciais
 }) => {
     const [sessaoAberta, setSessaoAberta] = useState(visibilidadeSessao);
     const [sameAddress, setSameAddress] = useState('yes');
@@ -95,28 +97,35 @@ const Endereco: React.FC<EnderecoProps> = ({
     const numeroInputRef = useRef<HTMLInputElement>(null);
     const ruaInputRef = useRef<HTMLInputElement>(null);
     const [focusField, setFocusField] = useState<string | null>(null);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const hasMounted = useRef(false);
 
     useEffect(() => {
         setSessaoAberta(visibilidadeSessao);
     }, [visibilidadeSessao]);
 
-    const isFormFilled = useCallback(() => {
-        return isEnderecoFilled(processoAggregate.endereco);
-    }, [processoAggregate.endereco]);
+    useEffect(() => {
+        if (!carregandoDadosIniciais) {
+            hasMounted.current = true;
+        }
+    }, [carregandoDadosIniciais]);
 
     useEffect(() => {
-        if (!dirty || !isFormFilled()) return;
+        if ( isEnderecoFilled(processoAggregate.endereco) && dirty && sessaoAberta && hasMounted.current) {
 
-        const timer = setTimeout(() => {
-            const activeElement = document.activeElement;
-
-            if (activeElement instanceof HTMLElement) {
-                activeElement.blur();
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
             }
-        }, 2500);
 
-        return () => clearTimeout(timer);
-    }, [processoAggregate, dirty, sessaoAberta, fecharSessaoPreenchida, setPdfUrls, setProcessoAggregate, uuid, isFormFilled]);
+            timerRef.current = setTimeout(() => {
+                fecharSessaoPreenchida();
+                setSnackbarOpen(true);
+                gerarPdfsTemplates(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
+                gerarCertidaoJusticaEstadual(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
+                setDirty(false);
+            }, 2500);
+        }
+    }, [processoAggregate, dirty, sessaoAberta, fecharSessaoPreenchida, setPdfUrls, setProcessoAggregate, uuid]);
 
     useEffect(() => {
         if (focusField === 'numero' && numeroInputRef.current) {
@@ -147,16 +156,6 @@ const Endereco: React.FC<EnderecoProps> = ({
                     ...updatedProcessoAggregate,
                 },
             }).catch(error => console.error(error));
-        }
-
-        if (isFormFilled()) {
-            if (sessaoAberta) {
-                fecharSessaoPreenchida();
-                setSnackbarOpen(true);
-                gerarPdfsTemplates(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
-                gerarCertidaoJusticaEstadual(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
-                setDirty(false);
-            }
         }
     };
 
@@ -201,7 +200,7 @@ const Endereco: React.FC<EnderecoProps> = ({
 
         const previousValue = processoAggregate.endereco[name as keyof typeof processoAggregate.endereco];
 
-        if (previousValue !== value) {
+        if (previousValue !== value && hasMounted.current) {
             setDirty(true);
         }
 

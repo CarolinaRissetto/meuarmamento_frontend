@@ -22,7 +22,6 @@ import CPFInput from './utils/inputs/CPFInput';
 import RGInput from './utils/inputs/RGInput';
 import { SelectChangeEvent } from '@mui/material/Select';
 
-
 interface DadosPessoaisProps {
   visibilidadeSessao: boolean;
   alternarVisibilidadeSessao: () => void;
@@ -33,7 +32,7 @@ interface DadosPessoaisProps {
   uuid: string | null;
   setActiveStep: React.Dispatch<React.SetStateAction<number>>;
   inputRef?: RefObject<HTMLInputElement>;
-  documentosSessaoRef: RefObject<HTMLDivElement>;
+  carregandoDadosIniciais: boolean;
 }
 
 const DadosPessoais: React.FC<DadosPessoaisProps> = ({
@@ -45,43 +44,40 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
   setPdfUrls,
   setProcessoAggregate,
   inputRef,
-  documentosSessaoRef
+  carregandoDadosIniciais
 }) => {
   const [isSessaoAberta, setIsSessaoAberta] = useState(visibilidadeSessao);
   const [isDirty, setIsDirty] = useState(false);
-  const dadosPessoaisRef = useRef<HTMLDivElement>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const hasMounted = useRef(false);
 
   useEffect(() => {
     setIsSessaoAberta(visibilidadeSessao);
   }, [visibilidadeSessao]);
 
   useEffect(() => {
-    const handleFocusChange = (event: FocusEvent) => {
+    if (!carregandoDadosIniciais) {
+      hasMounted.current = true;
+    }
+  }, [carregandoDadosIniciais]);
 
+  useEffect(() => {
+    if (isDadosPessoaisFilled(processoAggregate) && isDirty && isSessaoAberta && hasMounted.current) {
 
-      if (
-        dadosPessoaisRef.current &&
-        !dadosPessoaisRef.current.contains(event.target as Node) &&
-        documentosSessaoRef.current &&
-        !documentosSessaoRef.current.contains(event.target as Node)
-      ) {
-        if (isDadosPessoaisFilled(processoAggregate) && isDirty && isSessaoAberta) {
-          fecharSessaoPreenchida();
-          setSnackbarOpen(true);
-          gerarPdfsTemplates(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
-          gerarCertidoes(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
-          setIsDirty(false);
-        }
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
       }
-    };
 
-    document.addEventListener("focusin", handleFocusChange);
-
-    return () => {
-      document.removeEventListener("focusin", handleFocusChange);
-    };
-  }, [isDirty, isSessaoAberta, processoAggregate, uuid, fecharSessaoPreenchida, setPdfUrls, setProcessoAggregate, documentosSessaoRef]);
+      timerRef.current = setTimeout(() => {
+        fecharSessaoPreenchida();
+        setSnackbarOpen(true);
+        gerarPdfsTemplates(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
+        gerarCertidoes(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
+        setIsDirty(false);
+      }, 3000)
+    }
+  }, [isDirty, isSessaoAberta, processoAggregate, uuid, fecharSessaoPreenchida, setPdfUrls, setProcessoAggregate]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -93,7 +89,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
 
     const previousValue = processoAggregate[name as keyof ProcessoAggregate];
 
-    if (previousValue !== value) {
+    if (previousValue !== value && hasMounted.current) {
       setIsDirty(true);
     }
 
@@ -113,7 +109,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
 
     const previousValue = processoAggregate[name as keyof ProcessoAggregate];
 
-    if (previousValue !== value) {
+    if (previousValue !== value && hasMounted.current) {
       setIsDirty(true);
     }
 
@@ -171,7 +167,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
         </Grid>
       </Grid>
       <Collapse in={isSessaoAberta}>
-        <Grid container spacing={3} marginTop={"5px"} id="dados-pessoais-form" ref={dadosPessoaisRef}>
+        <Grid container spacing={3} marginTop={"5px"} id="dados-pessoais-form">
           <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column' }}>
             <FormLabel htmlFor="nomeCompleto" required>
               Nome completo
