@@ -66,11 +66,14 @@ export default function Cadastro() {
         });
         setPdfUrls(data.documentos);
 
+
         const step = validarStepper(objetoRetornado);
         setActiveStep(step);
       } catch (error) {
         console.error("Erro ao fazer o parse do JSON:", error);
         setSnackbarOpen(true);
+      }
+    } else if (response.statusCode !== 404) {
       }
     } else {
       console.error("Erro ao buscar dados:", response?.message || "Erro desconhecido");
@@ -324,6 +327,7 @@ export default function Cadastro() {
               right: "2%",
               zIndex: 2000,
               paddingTop: { xs: "90px", sm: "55px", md: "0%", lg: "0%" },
+              display: isExtraSmallScreen ? "none" : "block" 
             }}
           >
 
