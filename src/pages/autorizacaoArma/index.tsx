@@ -65,14 +65,14 @@ export default function Cadastro() {
           ...objetoRetornado
         });
         setPdfUrls(data.documentos);
-        
+
         const step = validarStepper(objetoRetornado);
         setActiveStep(step);
       } catch (error) {
         console.error("Erro ao fazer o parse do JSON:", error);
         setSnackbarOpen(true);
-      }      
-    } else {
+      }
+    } else if (response.statusCode !== 404) {
       console.error("Erro ao buscar dados:", response?.message || "Erro desconhecido");
       setSnackbarOpen(true);
     }
@@ -147,7 +147,7 @@ export default function Cadastro() {
   const fecharSessaoPreenchida = async (section: string) => {
     const step = validarStepper(processoAggregate);
     setActiveStep(step);
-    
+
     setSectionVisibility((prev) => ({
       ...prev,
       [section]: false,
@@ -250,18 +250,18 @@ export default function Cadastro() {
 
             )}
 
-              <DadosPessoais
-                visibilidadeSessao={sectionVisibility.dadosPessoais}
-                alternarVisibilidadeSessao={() => alternarVisibilidadeSessao("dadosPessoais")}
-                fecharSessaoPreenchida={() => fecharSessaoPreenchida("dadosPessoais")}
-                processoAggregate={processoAggregate}
-                setProcessoAggregate={setProcessoAggregate}
-                setPdfUrls={setPdfUrls}
-                uuid={uuid}
-                setActiveStep={setActiveStep}
-                inputRef={nameInputRef}
-                documentosSessaoRef={documentosSessaoRef}
-              />
+            <DadosPessoais
+              visibilidadeSessao={sectionVisibility.dadosPessoais}
+              alternarVisibilidadeSessao={() => alternarVisibilidadeSessao("dadosPessoais")}
+              fecharSessaoPreenchida={() => fecharSessaoPreenchida("dadosPessoais")}
+              processoAggregate={processoAggregate}
+              setProcessoAggregate={setProcessoAggregate}
+              setPdfUrls={setPdfUrls}
+              uuid={uuid}
+              setActiveStep={setActiveStep}
+              inputRef={nameInputRef}
+              documentosSessaoRef={documentosSessaoRef}
+            />
 
             <Endereco
               visibilidadeSessao={sectionVisibility.endereco}
@@ -323,6 +323,7 @@ export default function Cadastro() {
               right: "2%",
               zIndex: 2000,
               paddingTop: { xs: "90px", sm: "55px", md: "0%", lg: "0%" },
+              display: isExtraSmallScreen ? "none" : "block" 
             }}
           >
 

@@ -149,7 +149,10 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
         alignItems="center"
         sx={{
           borderColor: 'primary.light',
-          '&:hover': { background: '#E3DFDC' },
+          background: 'primary.light',
+          '&:hover': {
+            background: '#E3DFDC',
+          },
           borderRadius: "5px",
           cursor: 'pointer',
           padding: '10px',
@@ -273,7 +276,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
                   <em style={{ color: '#aaa' }}>Selecione</em>
                 </MenuItem>
                 <MenuItem value="masculino">Masculino</MenuItem>
-                <MenuItem value="feminino">Feminino</MenuItem>                
+                <MenuItem value="feminino">Feminino</MenuItem>
               </Select>
             </FormControl>
           </Grid>

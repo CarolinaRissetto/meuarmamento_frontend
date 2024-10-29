@@ -18,6 +18,8 @@ function HeaderMobile() {
     null
   );
 
+  const [isCopied, setIsCopied] = React.useState(false);
+
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
   };
@@ -25,6 +27,14 @@ function HeaderMobile() {
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
+
+  const handleCopyClick = () => {
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 3000);
+      })
+  }
 
   return (
     <AppBar
@@ -118,10 +128,10 @@ function HeaderMobile() {
                 </Typography>
               </MenuItem>
 
-              <MenuItem onClick={handleCloseNavMenu}>
+              <MenuItem onClick={handleCopyClick}>
                 <FileCopyIcon sx={{ marginRight: 1, color: "#211f50" }} />
                 <Typography sx={{ textAlign: "center", color: "#211f50" }}>
-                  Copiar URL
+                  {isCopied ? "Copiado" : "Copiar URL"}
                 </Typography>
               </MenuItem>
             </Menu>
