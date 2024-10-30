@@ -111,7 +111,7 @@ function HeaderMobile() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={handleCloseNavMenu}
-                sx={{ textDecoration: "none", color: "#211f50" }}
+                sx={{ display: 'none', textDecoration: "none", color: "#211f50" }}
               >
                 <AssignmentTurnedInIcon
                   sx={{ marginRight: 1, color: "#211f50" }}
@@ -121,7 +121,9 @@ function HeaderMobile() {
                 </Typography>
               </MenuItem>
 
-              <MenuItem onClick={handleCloseNavMenu}>
+              <MenuItem onClick={handleCloseNavMenu}
+                sx={{ display: 'none' }}
+              >
                 <HomeIcon sx={{ marginRight: 1, color: "#211f50" }} />
                 <Typography sx={{ textAlign: "center", color: "#211f50" }}>
                   Página Inicial

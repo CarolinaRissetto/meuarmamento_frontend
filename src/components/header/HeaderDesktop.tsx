@@ -46,7 +46,7 @@ const HeaderDesktop: React.FC = () => {
             sx={{
               fontFamily: "Raleway, sans-serif",
               fontWeight: "bold",
-              color: "#211f50",              
+              color: "#211f50",
               minWidth: "330px",
               display: { xs: "none", lg: "block" }
             }}
@@ -80,6 +80,7 @@ const HeaderDesktop: React.FC = () => {
             rel="noopener noreferrer"
             startIcon={<AssignmentTurnedInIcon sx={{ marginRight: 1, color: "#211f50" }} />}
             sx={{
+              visibility: "hidden",
               color: "#211f50",
               marginRight: { md: "35px" },
               marginBottom: { xs: "8px", md: 0 },
@@ -91,7 +92,7 @@ const HeaderDesktop: React.FC = () => {
           <Button
             color="inherit"
             startIcon={<HomeIcon sx={{ marginRight: 1, color: "#211f50" }} />}
-            sx={{ color: "#211f50", marginRight: { md: "20px" } }}
+            sx={{ visibility: "hidden", color: "#211f50", marginRight: { md: "20px" } }}
           >
             Página Inicial
           </Button>
