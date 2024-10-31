@@ -75,7 +75,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
         gerarPdfsTemplates(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
         gerarCertidoes(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
         setIsDirty(false);
-      }, 3000)
+      }, 2500)
     }
   }, [isDirty, isSessaoAberta, processoAggregate, uuid, fecharSessaoPreenchida, setPdfUrls, setProcessoAggregate]);
 
