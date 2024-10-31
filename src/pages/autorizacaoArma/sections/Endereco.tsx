@@ -391,7 +391,7 @@ const Endereco: React.FC<EnderecoProps> = ({
                             disabled={buscandoEndereco}
                         />
                     </FormGrid>
-                    <Grid item xs={12}>
+                    <Grid item xs={12} sx={{ display: "none"}}>
                         <Typography sx={{ color: 'text.secondary', mt: 0.5 }}>
                             Caso queira que preparemos o documento
                             <Typography variant="overline" sx={{ pl: 1, color: 'text.primary', fontWeight: "bold" }}>
