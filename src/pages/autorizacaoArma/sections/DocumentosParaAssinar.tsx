@@ -105,8 +105,11 @@ export default function DocumentosParaAssinar({
                     {fullView && (
                       <ListItemIcon sx={{ minWidth: 30 }}>
                         <Tooltip
-                          title="Preencha o formulário acima para que a automação possa ser iniciada"
-                          arrow
+                          title={
+                            arquivo === "certidaoJusticaEstadual"
+                              ? "Esse documento ainda não está disponível, estamos trabalhando nele"
+                              : "Preencha o formulário acima para que a automação possa ser iniciada"
+                          } arrow
                         >
                           <FileDownloadOffIcon />
                         </Tooltip>
@@ -211,7 +214,7 @@ export default function DocumentosParaAssinar({
               </ListItem>
             );
           })}
-      </List>      
+      </List>
       <ModalColetaLead
         modalOpen={modalOpen}
         handleModalClose={handleModalClose}
