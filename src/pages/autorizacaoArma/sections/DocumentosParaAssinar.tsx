@@ -170,7 +170,11 @@ export default function DocumentosParaAssinar({
                         case "ERRO":
                           return (
                             <Tooltip
-                              title="Ocorreu um erro ao gerar o arquivo :("
+                              title={
+                                arquivo === "certidaoJusticaEstadual"
+                                  ? "Esse documento ainda não está disponível, estamos trabalhando nele"
+                                  : "Ocorreu um erro ao gerar o arquivo :("
+                              }
                               arrow
                             >
                               <WarningIcon sx={{ color: "#fe9513" }} />
