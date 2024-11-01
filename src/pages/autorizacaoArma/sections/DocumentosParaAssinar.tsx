@@ -5,6 +5,7 @@ import WarningIcon from "@mui/icons-material/Warning";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassBottom";
 import FileDownloadOffIcon from "@mui/icons-material/FileDownloadOff";
 import {
+  Button,
   CircularProgress,
   List,
   ListItem,
@@ -16,6 +17,9 @@ import {
 import { ModalColetaLead } from "../../../components/modalLead/ModalColetaLead";
 import { apiRequest } from "../../../services/api/apiRequestService";
 import { LeadData } from "../domain/LeadData";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
+import FolderZipIcon from '@mui/icons-material/FolderZip';
 
 const translations: { [key: string]: string } = {
   declaracaoIdoneidade: "8. Declaração não estar RESP INQ POL ou PROC CRIMINAL",
@@ -33,9 +37,11 @@ function translateFileNames(arquivo: string): string {
 export default function DocumentosParaAssinar({
   urls: documentos = {},
   fullView = true,
+  setActiveStep,
 }: {
   urls: { [key: string]: { url: string | null; status: string | null } };
   fullView?: boolean;
+  setActiveStep: React.Dispatch<React.SetStateAction<number>>;
 }) {
   const missingFiles = Object.keys(translations).filter(
     (key) => !documentos[key]
@@ -85,6 +91,32 @@ export default function DocumentosParaAssinar({
     }
   };
 
+  const downloadAllDocuments = async () => {
+    const zip = new JSZip();
+    const leadDataParsed = leadData ? JSON.parse(leadData) : { nome: "Cliente" };
+    const nomeCliente = leadDataParsed.nome.replace(/\s+/g, "");
+    const nomeProcesso = "AquisicaoArmasDeFogo";
+    const zipFileName = `${nomeCliente}_${nomeProcesso}.zip`;
+
+    await Promise.all(
+      Object.entries(documentos).map(async ([, { url, status }]) => {
+        if (status === "CONCLUIDO" && url) {
+          const response = await fetch(url);
+          const blob = await response.blob();
+
+          const nomeArquivo = url.split("/").pop()?.split("?")[0];
+
+          if (nomeArquivo) {
+            zip.file(nomeArquivo, blob);
+          }
+        }
+      })
+    );
+
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    saveAs(zipBlob, zipFileName);
+  };
+
   return (
     <div>
       {fullView && (
@@ -105,11 +137,8 @@ export default function DocumentosParaAssinar({
                     {fullView && (
                       <ListItemIcon sx={{ minWidth: 30 }}>
                         <Tooltip
-                          title={
-                            arquivo === "certidaoJusticaEstadual"
-                              ? "Esse documento ainda não está disponível, estamos trabalhando nele"
-                              : "Preencha o formulário acima para que a automação possa ser iniciada"
-                          } arrow
+                          title={"Preencha o formulário acima para que a automação possa ser iniciada"}
+                          arrow
                         >
                           <FileDownloadOffIcon />
                         </Tooltip>
@@ -215,6 +244,20 @@ export default function DocumentosParaAssinar({
             );
           })}
       </List>
+      {fullView && (
+        <Button
+          variant="contained"
+          startIcon={<FolderZipIcon />}
+          onClick={downloadAllDocuments}
+          sx={{
+            margin: "15px",
+            padding: "10px 20px",
+            minWidth: "250px",
+          }}
+        >
+          Baixe todos documentos juntos
+        </Button>
+      )}
       <ModalColetaLead
         modalOpen={modalOpen}
         handleModalClose={handleModalClose}

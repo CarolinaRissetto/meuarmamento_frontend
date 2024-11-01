@@ -4,7 +4,8 @@ import { buscarDocumentosPolling } from '../../pages/autorizacaoArma/sections/ut
 import { ProcessoAggregate } from '../../pages/autorizacaoArma/domain/ProcessoAggregate';
 
 const camposNecessarios = [
-    'cpf'
+    'cpf',
+    'nomeCompleto'
 ];
 
 export const gerarCertidaoJusticaFederal = async (

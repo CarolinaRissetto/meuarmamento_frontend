@@ -12,6 +12,7 @@ import { validarStepper } from "./sections/utils/ValidarStepper";
 import { cancelarPoolingDocumentos } from "./sections/utils/BuscarDocumentosPolling";
 import { ProcessoAggregate } from './domain/ProcessoAggregate'
 import CustomSnackbar from './sections/utils/CustomSnackbar';
+import AddIcon from "@mui/icons-material/AddCircleOutline"; // Ícone para o botão "Iniciar Novo Processo"
 
 export default function Cadastro() {
   const [uuid, setUuid] = useState<string | null>(null);
@@ -191,7 +192,8 @@ export default function Cadastro() {
     {
       label: 'Documentos prontos',
       description: 'Aguarde alguns segundos para a finalização dos seus documentos e faça o download abaixo 👇',
-      content: <DocumentosParaAssinar urls={pdfUrls} fullView={false} />
+      content: <DocumentosParaAssinar urls={pdfUrls} fullView={false} setActiveStep={setActiveStep}
+      />
     }
   ];
 
@@ -282,7 +284,10 @@ export default function Cadastro() {
                 Seus documentos
               </Typography>
 
-              <DocumentosParaAssinar urls={pdfUrls} />
+              <DocumentosParaAssinar
+                urls={pdfUrls}
+                setActiveStep={setActiveStep}
+              />
 
             </Grid>
           </Box>
@@ -303,14 +308,15 @@ export default function Cadastro() {
           >
             <Button
               ref={buttonRef}
-              onClick={(event) => {
-                event.stopPropagation(); // Impede que o clique seja capturado como clique fora
+              onClick={() => {
                 handleNovoProcesso();
               }}
+              startIcon={<AddIcon />}
               variant="contained"
               sx={{
-                width: { xs: "100%", sm: "fit-content" },
-                mt: 2,
+                margin: "0 15px 15px 25px",
+                padding: "10px 20px",
+                minWidth: "250px",
               }}
             >
               Iniciar um novo processo
