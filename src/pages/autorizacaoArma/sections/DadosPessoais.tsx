@@ -17,10 +17,9 @@ import { apiRequest } from "../../../services/api/apiRequestService";
 import { ProcessoAggregate, isDadosPessoaisFilled } from '../domain/ProcessoAggregate';
 import { gerarPdfsTemplates } from "../../../services/pdf/gerarPDFsTemplates";
 import { gerarCertidoes } from "./utils/GerarCertidoes";
-import MaskInput from './utils/inputs/MaskInput';
 import CPFInput from './utils/inputs/CPFInput';
-import RGInput from './utils/inputs/RGInput';
 import { SelectChangeEvent } from '@mui/material/Select';
+import DataNascimentoInput from "./utils/inputs/DataNascimentoInput";
 
 interface DadosPessoaisProps {
   visibilidadeSessao: boolean;
@@ -200,11 +199,25 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
             />
           </Grid>
           <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
-            <RGInput
+            <FormLabel htmlFor="rg" required>
+              RG
+            </FormLabel>
+            <OutlinedInput
+              id="rg"
               name="rg"
+              type="text"
+              placeholder="Digite seu RG"
+              autoComplete="rg"
+              required
               value={processoAggregate.rg || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
+              sx={{
+                backgroundColor: 'white',
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#1976D2 !important',
+                },
+              }}
             />
           </Grid>
           <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -224,25 +237,11 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
             />
           </Grid>
           <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
-            <FormLabel htmlFor="dataNascimento" required>
-              Data de Nascimento
-            </FormLabel>
-            <OutlinedInput
-              id="dataNascimento"
+            <DataNascimentoInput
               name="dataNascimento"
-              type="text"
-              placeholder="DD/MM/AAAA"
-              autoComplete="dataNascimento"
-              required
               value={processoAggregate.dataNascimento || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
-              inputComponent={MaskInput as any}
-              inputProps={{
-                mask: "00/00/0000",
-                name: "dataNascimento",
-                unmask: false,
-              }}
             />
           </Grid>
           <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
