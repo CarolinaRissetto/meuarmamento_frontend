@@ -1,4 +1,4 @@
-import React, { useState, MouseEvent } from "react";
+import React, { useState, MouseEvent, useMemo, useEffect } from "react";
 import Link from "@mui/material/Link";
 import DownloadIcon from "@mui/icons-material/Download";
 import WarningIcon from "@mui/icons-material/Warning";
@@ -15,19 +15,21 @@ import {
   Typography,
 } from "@mui/material";
 import { ModalColetaLead } from "../../../components/modalLead/ModalColetaLead";
-import { apiRequest } from "../../../services/api/apiRequestService";
+// import { apiRequest } from "../../../services/api/apiRequestService";
 import { LeadData } from "../domain/LeadData";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import FolderZipIcon from '@mui/icons-material/FolderZip';
+import { useProcesso } from "./context/useProcesso";
+import { DocumentoProcesso } from "../domain/ProcessoAggregate";
 
 const translations: { [key: string]: string } = {
   declaracaoIdoneidade: "8. Declaração não estar RESP INQ POL ou PROC CRIMINAL",
   segurancaAcervo: "12. Declaração de Segurança do Acervo",
-  certidaoJusticaFederal: "2. Certidão de antecedente Criminal Justiça Federal",
-  certidaoJusticaEstadual:
+  certidaoFederal: "2. Certidão de antecedente Criminal Justiça Federal",
+  certidaoEstadual:
     "5. Certidão de antecedente Criminal Justiça Estadual local domicílio últimos cinco anos",
-  certidaoJusticaMilitar: "6. Certidão de antecedente Criminal Justiça Militar",
+  certidaoMilitar: "6. Certidão de antecedente Criminal Justiça Militar",
 };
 
 function translateFileNames(arquivo: string): string {
@@ -35,20 +37,32 @@ function translateFileNames(arquivo: string): string {
 }
 
 export default function DocumentosParaAssinar({
-  urls: documentos = {},
   fullView = true,
   setActiveStep,
 }: {
-  urls: { [key: string]: { url: string | null; status: string | null } };
   fullView?: boolean;
   setActiveStep: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const missingFiles = Object.keys(translations).filter(
-    (key) => !documentos[key]
-  );
 
+  const { processoAggregate } = useProcesso();
   const [modalOpen, setModalOpen] = useState(false);
   const [pendingDownload, setPendingDownload] = useState<string | null>(null);
+  const [documentosProcessados, setDocumentosProcessados] = useState<DocumentoProcesso[]>([]);
+
+  useEffect(() => {
+    if (processoAggregate.documentos) {
+      setDocumentosProcessados(processoAggregate.documentos);
+    }
+  }, [processoAggregate.documentos]);
+
+  // const documentosProcessados = Array.from(processoAggregate.documentos || {});
+  // const documentosProcesso: DocumentoProcesso[] = processoAggregate.documentosProcesso || [];
+
+  const nomesDocumentosRecebidos = documentosProcessados.map(doc => doc.id).filter((id): id is string => !!id);
+
+  const missingFiles = Object.keys(translations).filter(
+    (key) => !nomesDocumentosRecebidos.includes(key)
+  );
 
   const leadData = localStorage.getItem("leadData");
 
@@ -73,15 +87,13 @@ export default function DocumentosParaAssinar({
 
     localStorage.setItem("leadData", JSON.stringify(data));
 
-    const uuid = localStorage.getItem("user-uuid");
-
-    apiRequest({
-      tipo: "salvarLead",
-      data: {
-        uuid,
-        ...data,
-      },
-    });
+    // apiRequest({
+    //   tipo: "salvarLead",
+    //   data: {
+    //     processoAggregate.id,
+    //     ...data,
+    //   },
+    // });
 
     setModalOpen(false);
 
@@ -91,7 +103,17 @@ export default function DocumentosParaAssinar({
     }
   };
 
+  const documentosValidos = documentosProcessados.filter(
+    (doc) => doc.status === "Gerado" && doc.urlDocumentoGerado
+  );
+
   const downloadAllDocuments = async () => {
+
+    if (documentosValidos.length === 0) {
+      alert("Nenhum documento disponível para download.");
+      return;
+    }
+
     const zip = new JSZip();
     const leadDataParsed = leadData ? JSON.parse(leadData) : { nome: "Cliente" };
     const nomeCliente = leadDataParsed.nome.replace(/\s+/g, "");
@@ -99,12 +121,12 @@ export default function DocumentosParaAssinar({
     const zipFileName = `${nomeCliente}_${nomeProcesso}.zip`;
 
     await Promise.all(
-      Object.entries(documentos).map(async ([, { url, status }]) => {
-        if (status === "CONCLUIDO" && url) {
-          const response = await fetch(url);
+      documentosProcessados.map(async (doc) => {
+        if (doc.status === "Gerado" && doc.urlDocumentoGerado) {
+          const response = await fetch(doc.urlDocumentoGerado);
           const blob = await response.blob();
 
-          const nomeArquivo = url.split("/").pop()?.split("?")[0];
+          const nomeArquivo = doc.urlDocumentoGerado.split("/").pop()?.split("?")[0];
 
           if (nomeArquivo) {
             zip.file(nomeArquivo, blob);
@@ -178,25 +200,30 @@ export default function DocumentosParaAssinar({
         </div>
       )}
       <List>
-        {Object.keys(documentos)
+        {documentosProcessados
           .reverse()
-          .map((arquivo, index) => {
+          .map((doc) => {
+
+            const isDownloadable = doc.urlDocumentoGerado && doc.status === "Gerado";
+
             return (
               <ListItem
                 sx={{ pt: 0, pb: 0, pl: fullView ? 2 : 0 }}
-                key={arquivo}
+                key={doc.id}
               >
                 {fullView && (
                   <ListItemIcon sx={{ minWidth: 30 }}>
                     {(() => {
-                      switch (documentos[arquivo].status) {
-                        case "INICIADO":
+                      switch (doc.status) {
+                        case "Gerando":
                           return <CircularProgress size={24} />;
-                        case "PENDENTE":
+                        case "ProntoParaGerar":
+                          return <CircularProgress size={24} />;
+                        case "Pendente":
                           return <HourglassEmptyIcon />;
-                        case "CONCLUIDO":
+                        case "Gerado":
                           return <DownloadIcon sx={{ color: "#1976d2" }} />;
-                        case "ERRO":
+                        case "Erro":
                           return (
                             <Tooltip
                               title="Ocorreu um erro ao gerar o arquivo :("
@@ -213,21 +240,21 @@ export default function DocumentosParaAssinar({
                     })()}
                   </ListItemIcon>
                 )}
-                {documentos[arquivo].status === "CONCLUIDO" ? (
+                {isDownloadable ? (
                   <Link
-                    href={documentos[arquivo].url || undefined}
+                    href={doc.urlDocumentoGerado || undefined}
                     target="_blank"
                     underline="hover"
                     sx={{ color: "#1976d2", cursor: "pointer" }}
                     onClick={(e) =>
-                      handleDownloadClick(e, documentos[arquivo].url)
+                      handleDownloadClick(e, doc.urlDocumentoGerado ?? null)
                     }
                   >
                     <ListItemText sx={{ marginTop: "3px", marginBottom: "3px" }}>
                       <Typography
                         sx={{ fontSize: fullView ? "1rem" : "0.85rem" }}
                       >
-                        {translateFileNames(arquivo)}
+                        {translateFileNames(doc.id || "")}
                       </Typography>
                     </ListItemText>
                   </Link>
@@ -236,7 +263,7 @@ export default function DocumentosParaAssinar({
                     <Typography
                       sx={{ fontSize: fullView ? "1rem" : "0.85rem" }}
                     >
-                      {translateFileNames(arquivo)}
+                      {translateFileNames(doc.id || "")}
                     </Typography>
                   </ListItemText>
                 )}
@@ -249,6 +276,7 @@ export default function DocumentosParaAssinar({
           variant="contained"
           startIcon={<FolderZipIcon />}
           onClick={downloadAllDocuments}
+          disabled={documentosValidos.length === 0}
           sx={{
             margin: "15px",
             padding: "10px 20px",

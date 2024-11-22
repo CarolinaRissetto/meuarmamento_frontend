@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Box, Grid, Typography, Card, CardActions, CardContent, useMediaQuery, Backdrop, CircularProgress } from "@mui/material";
-import { nanoid } from "nanoid";
 import DadosPessoais from "./sections/DadosPessoais";
 import Endereco from "./sections/Endereco";
 import DocumentosParaAssinar from "./sections/DocumentosParaAssinar";
@@ -12,13 +11,10 @@ import { validarStepper } from "./sections/utils/ValidarStepper";
 import { cancelarPoolingDocumentos } from "./sections/utils/BuscarDocumentosPolling";
 import { ProcessoAggregate } from './domain/ProcessoAggregate'
 import CustomSnackbar from './sections/utils/CustomSnackbar';
-import AddIcon from "@mui/icons-material/AddCircleOutline"; // Ícone para o botão "Iniciar Novo Processo"
+import AddIcon from "@mui/icons-material/AddCircleOutline";
+import { useProcesso } from "./sections/context/useProcesso";
 
-export default function Cadastro() {
-  const [uuid, setUuid] = useState<string | null>(null);
-  const [processoAggregate, setProcessoAggregate] = useState<ProcessoAggregate>({
-    endereco: {},
-  });
+export default function AutorizacaoArma() {
   const navigate = useNavigate();
   const location = useLocation();
   const urlParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
@@ -27,56 +23,47 @@ export default function Cadastro() {
     endereco: true,
     documentosParaAssinar: true,
   });
-  const [pdfUrls, setPdfUrls] = useState<{ [key: string]: { url: string | null; status: string | null; }; }>({});
   const [buttonText, setButtonText] = useState("Clique para copiar sua url");
   const [activeStep, setActiveStep] = React.useState<number>(0);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const [carregandoDadosIniciais, setCarregandoDadosIniciais] = useState(true);
   const documentosSessaoRef = useRef<HTMLDivElement>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const { processoAggregate, setProcessoAggregate, resetProcessoAggregate } = useProcesso();
 
   const atualizaUuidUrlELocalStorage = useCallback(
-    (uuid: string) => {
-      localStorage.setItem("user-uuid", uuid);
+    (id: string) => {
+      localStorage.setItem("user-uuid", id);
       const urlParams = new URLSearchParams(location.search);
-      if (!urlParams.has("uuid") || urlParams.get("uuid") !== uuid) {
-        urlParams.set("uuid", uuid);
+      if (!urlParams.has("id") || urlParams.get("id") !== id) {
+        urlParams.set("id", id);
         navigate(`?${urlParams.toString()}`, { replace: true });
       }
     },
     [navigate, location]
   );
 
-  const buscarDados = useCallback(async (uuid: string) => {
+  const buscarDados = useCallback(async (id: string) => {
     const response = await apiRequest({
-      tipo: "buscaDados",
-      data: {
-        uuid,
-      },
+      method: 'GET',
+      endpoint: `/${id}`,
     });
 
-    if (response.statusCode === 200) {
+    if (response.status === 200) {
       try {
-        let data = response.body;
-        const objetoRetornado = {
-          endereco: data.endereco ?? {},
-          ...data
-        }
+        const data: ProcessoAggregate = response.data;
 
-        setProcessoAggregate({
-          ...objetoRetornado
-        });
+        setProcessoAggregate(data);
 
-        setPdfUrls(data.documentos);
-        const step = validarStepper(objetoRetornado);
+        const step = validarStepper(data);
         setActiveStep(step);
 
       } catch (error) {
         console.error("Erro ao fazer o parse do JSON:", error);
         setSnackbarOpen(true);
       }
-    } else if (response.statusCode !== 404) {
-      console.error("Erro ao buscar dados:", response?.message || "Erro desconhecido");
+    } else if (response.status !== 404) {
+      console.error("Erro ao buscar dados:", response.data || "Erro desconhecido");
     }
 
     setCarregandoDadosIniciais(false);
@@ -86,53 +73,70 @@ export default function Cadastro() {
 
     const buscarDadosEAtualizarEstado = async () => {
       const urlParams = new URLSearchParams(location.search);
-      const urlUuid = urlParams.get("uuid");
-      const storedUuid = localStorage.getItem("user-uuid");
+      const urlId = urlParams.get("id");
+      const storedId = localStorage.getItem("user-id");
 
-      if (urlUuid && urlUuid !== storedUuid) {
-        setUuid(urlUuid);
-        await buscarDados(urlUuid);
-        atualizaUuidUrlELocalStorage(urlUuid);
-      } else if (storedUuid) {
-        setUuid(storedUuid);
-        await buscarDados(storedUuid);
-        atualizaUuidUrlELocalStorage(storedUuid);
+      if (urlId && urlId !== storedId) {
+        await buscarDados(urlId);
+        atualizaUuidUrlELocalStorage(urlId);
+      } else if (storedId) {
+        await buscarDados(storedId);
+        atualizaUuidUrlELocalStorage(storedId);
       } else {
-        const newUuid = nanoid(6);
-        setUuid(newUuid);
-        await buscarDados(newUuid);
-        atualizaUuidUrlELocalStorage(newUuid);
+
+        try {
+          const createResponse = await apiRequest({
+            method: 'POST',
+            endpoint: '/',
+            data: {},
+          });
+
+          if (createResponse.status === 200) {
+            const newId = createResponse.data.id;
+            await buscarDados(newId);
+            atualizaUuidUrlELocalStorage(newId);
+          } else {
+            console.error("Erro ao criar novo processo:", createResponse.data || "Erro desconhecido");
+            setSnackbarOpen(true);
+          }
+        } catch (error) {
+          console.error("Erro ao criar novo processo:", error);
+          setSnackbarOpen(true);
+        }
       }
     };
 
     buscarDadosEAtualizarEstado();
   }, [location.search, buscarDados, atualizaUuidUrlELocalStorage]);
 
-  const handleNovoProcesso = () => {
+  const handleNovoProcesso = async () => {
     console.log("Botão de novo cadastro clicado");
+
+    resetProcessoAggregate();
 
     const leadData = localStorage.getItem('leadData');
     const parsedLead = leadData ? JSON.parse(leadData) : {};
 
-    apiRequest({
-      tipo: "salvarLead",
-      data: {
-        uuid,
-        ...parsedLead
-      },
-    });
+    // apiRequest({
+    //   tipo: "salvarLead",
+    //   data: {
+    //     uuid,
+    //     ...parsedLead
+    //   },
+    // });
 
     cancelarPoolingDocumentos();
 
-    const newUuid = nanoid(6);
-    localStorage.setItem("user-uuid", newUuid);
-    setUuid(newUuid);
-    setProcessoAggregate({
-      endereco: {}
+    const createResponse = await apiRequest({
+      method: 'POST',
+      endpoint: '/',
+      data: {},
     });
-    setPdfUrls({});
 
-    urlParams.set("uuid", newUuid);
+    localStorage.setItem("user-id", createResponse.data.id);
+
+    urlParams.set("id", createResponse.data.id);
+
     navigate(`?${urlParams.toString()}`, { replace: true });
 
     setSectionVisibility((prev) => ({
@@ -192,7 +196,7 @@ export default function Cadastro() {
     {
       label: 'Documentos prontos',
       description: 'Aguarde alguns segundos para a finalização dos seus documentos e faça o download abaixo 👇',
-      content: <DocumentosParaAssinar urls={pdfUrls} fullView={false} setActiveStep={setActiveStep}
+      content: <DocumentosParaAssinar fullView={false} setActiveStep={setActiveStep}
       />
     }
   ];
@@ -257,10 +261,6 @@ export default function Cadastro() {
               visibilidadeSessao={sectionVisibility.dadosPessoais}
               alternarVisibilidadeSessao={() => alternarVisibilidadeSessao("dadosPessoais")}
               fecharSessaoPreenchida={() => fecharSessaoPreenchida("dadosPessoais")}
-              processoAggregate={processoAggregate}
-              setProcessoAggregate={setProcessoAggregate}
-              setPdfUrls={setPdfUrls}
-              uuid={uuid}
               setActiveStep={setActiveStep}
               inputRef={nameInputRef}
               carregandoDadosIniciais={carregandoDadosIniciais}
@@ -270,10 +270,6 @@ export default function Cadastro() {
               visibilidadeSessao={sectionVisibility.endereco}
               alternarVisibilidadeSessao={() => alternarVisibilidadeSessao("endereco")}
               fecharSessaoPreenchida={() => fecharSessaoPreenchida("endereco")}
-              processoAggregate={processoAggregate}
-              setProcessoAggregate={setProcessoAggregate}
-              setPdfUrls={setPdfUrls}
-              uuid={uuid}
               setActiveStep={setActiveStep}
               carregandoDadosIniciais={carregandoDadosIniciais}
             />
@@ -285,7 +281,6 @@ export default function Cadastro() {
               </Typography>
 
               <DocumentosParaAssinar
-                urls={pdfUrls}
                 setActiveStep={setActiveStep}
               />
 

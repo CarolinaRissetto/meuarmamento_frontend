@@ -19,12 +19,12 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { keyframes } from '@mui/system';
 import { apiRequest } from '../../../services/api/apiRequestService';
-import { gerarPdfsTemplates } from "../../../services/pdf/gerarPDFsTemplates";
 import axios from "axios";
-import { gerarCertidaoJusticaEstadual } from "../../../services/pdf/gerarCertidaoJusticaEstadual";
 import CustomSnackbar from './utils/CustomSnackbar';
 import { ProcessoAggregate, isEnderecoFilled } from '../domain/ProcessoAggregate';
 import CEPInput from './utils/inputs/CEPInput';
+import { useProcesso } from "./context/useProcesso";
+import { buscarDocumentosPolling } from "./utils/BuscarDocumentosPolling";
 
 const spin = keyframes`
   from {
@@ -67,10 +67,6 @@ interface EnderecoProps {
     visibilidadeSessao: boolean;
     alternarVisibilidadeSessao: () => void;
     fecharSessaoPreenchida: () => void;
-    processoAggregate: ProcessoAggregate;
-    setProcessoAggregate: React.Dispatch<React.SetStateAction<ProcessoAggregate>>;
-    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>;
-    uuid: string | null;
     setActiveStep: React.Dispatch<React.SetStateAction<number>>;
     carregandoDadosIniciais: boolean;
 }
@@ -79,12 +75,9 @@ const Endereco: React.FC<EnderecoProps> = ({
     visibilidadeSessao,
     alternarVisibilidadeSessao,
     fecharSessaoPreenchida,
-    processoAggregate,
-    setProcessoAggregate,
-    uuid,
-    setPdfUrls,
     carregandoDadosIniciais
 }) => {
+    const { processoAggregate, setProcessoAggregate } = useProcesso();
     const [sessaoAberta, setSessaoAberta] = useState(visibilidadeSessao);
     const [sameAddress, setSameAddress] = useState('yes');
     const [dirty, setDirty] = useState(false);
@@ -111,7 +104,7 @@ const Endereco: React.FC<EnderecoProps> = ({
     }, [carregandoDadosIniciais]);
 
     useEffect(() => {
-        if ( isEnderecoFilled(processoAggregate.endereco) && dirty && sessaoAberta && hasMounted.current) {
+        if (isEnderecoFilled(processoAggregate.endereco) && dirty && sessaoAberta && hasMounted.current) {
 
             if (timerRef.current) {
                 clearTimeout(timerRef.current);
@@ -120,12 +113,11 @@ const Endereco: React.FC<EnderecoProps> = ({
             timerRef.current = setTimeout(() => {
                 fecharSessaoPreenchida();
                 setSnackbarOpen(true);
-                gerarPdfsTemplates(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
-                gerarCertidaoJusticaEstadual(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
+                buscarDocumentosPolling(setProcessoAggregate, processoAggregate.id);
                 setDirty(false);
             }, 2500);
         }
-    }, [processoAggregate, dirty, sessaoAberta, fecharSessaoPreenchida, setPdfUrls, setProcessoAggregate, uuid]);
+    }, [processoAggregate, dirty, sessaoAberta, fecharSessaoPreenchida, setProcessoAggregate]);
 
     useEffect(() => {
         if (focusField === 'numero' && numeroInputRef.current) {
@@ -138,7 +130,18 @@ const Endereco: React.FC<EnderecoProps> = ({
     }, [focusField]);
 
     const handleInputBlur = async (event: React.FocusEvent<HTMLInputElement>) => {
+        if (!event || !event.target) {
+            console.error('handleInputBlur chamado sem um evento válido.');
+            return;
+        }
         const { name, value } = event.target;
+
+        await apiRequest({
+            method: 'PATCH',
+            endpoint: `/${processoAggregate.id}`,
+            path: `/endereco/${name}`,
+            data: value
+        });
 
         if (name === "cep" && !validarCEP(value)) {
             return;
@@ -148,15 +151,6 @@ const Endereco: React.FC<EnderecoProps> = ({
 
         setProcessoAggregate(updatedProcessoAggregate);
 
-        if (uuid) {
-            apiRequest({
-                tipo: "endereco",
-                data: {
-                    uuid,
-                    ...updatedProcessoAggregate,
-                },
-            }).catch(error => console.error(error));
-        }
     };
 
     const validarCEP = (cep: string): boolean => {
@@ -171,6 +165,15 @@ const Endereco: React.FC<EnderecoProps> = ({
             setBuscandoEndereco(false);
 
             if (endereco) {
+
+                const updates = [
+                    { path: "/endereco/rua", value: endereco.logradouro || "" },
+                    { path: "/endereco/bairro", value: endereco.bairro || "" },
+                    { path: "/endereco/cidade", value: endereco.localidade || "" },
+                    { path: "/endereco/uf", value: endereco.uf || "" },
+                    { path: "/endereco/cep", value: endereco.cep || value },
+                ];
+
                 const updatedProcessoAggregate = {
                     ...processoAggregate,
                     endereco: {
@@ -188,6 +191,13 @@ const Endereco: React.FC<EnderecoProps> = ({
                 } else {
                     setFocusField('rua');
                 }
+
+                await apiRequest({
+                    method: 'PATCH',
+                    endpoint: `/${processoAggregate.id}`,
+                    data: updates,
+                });
+
                 return updatedProcessoAggregate;
             }
         }
@@ -391,7 +401,7 @@ const Endereco: React.FC<EnderecoProps> = ({
                             disabled={buscandoEndereco}
                         />
                     </FormGrid>
-                    <Grid item xs={12} sx={{ display: "none"}}>
+                    <Grid item xs={12} sx={{ display: "none" }}>
                         <Typography sx={{ color: 'text.secondary', mt: 0.5 }}>
                             Caso queira que preparemos o documento
                             <Typography variant="overline" sx={{ pl: 1, color: 'text.primary', fontWeight: "bold" }}>

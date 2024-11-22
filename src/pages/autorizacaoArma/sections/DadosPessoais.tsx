@@ -15,20 +15,18 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import CustomSnackbar from './utils/CustomSnackbar';
 import { apiRequest } from "../../../services/api/apiRequestService";
 import { ProcessoAggregate, isDadosPessoaisFilled } from '../domain/ProcessoAggregate';
-import { gerarPdfsTemplates } from "../../../services/pdf/gerarPDFsTemplates";
-import { gerarCertidoes } from "./utils/GerarCertidoes";
 import CPFInput from './utils/inputs/CPFInput';
 import { SelectChangeEvent } from '@mui/material/Select';
 import DataNascimentoInput from "./utils/inputs/DataNascimentoInput";
+import { EstadoCivil } from "../domain/enums/EstadoCivil";
+import { useProcesso } from "./context/useProcesso";
+import { Sexo } from "../domain/enums/Sexo";
+import { buscarDocumentosPolling } from "./utils/BuscarDocumentosPolling";
 
 interface DadosPessoaisProps {
   visibilidadeSessao: boolean;
   alternarVisibilidadeSessao: () => void;
   fecharSessaoPreenchida: () => void;
-  processoAggregate: ProcessoAggregate;
-  setProcessoAggregate: React.Dispatch<React.SetStateAction<ProcessoAggregate>>;
-  setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>;
-  uuid: string | null;
   setActiveStep: React.Dispatch<React.SetStateAction<number>>;
   inputRef?: RefObject<HTMLInputElement>;
   carregandoDadosIniciais: boolean;
@@ -38,13 +36,10 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
   visibilidadeSessao,
   alternarVisibilidadeSessao,
   fecharSessaoPreenchida,
-  processoAggregate,
-  uuid,
-  setPdfUrls,
-  setProcessoAggregate,
   inputRef,
   carregandoDadosIniciais
 }) => {
+  const { processoAggregate, setProcessoAggregate } = useProcesso();
   const [isSessaoAberta, setIsSessaoAberta] = useState(visibilidadeSessao);
   const [isDirty, setIsDirty] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -62,7 +57,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
   }, [carregandoDadosIniciais]);
 
   useEffect(() => {
-    if (isDadosPessoaisFilled(processoAggregate) && isDirty && isSessaoAberta && hasMounted.current) {
+    if (isDadosPessoaisFilled(processoAggregate.dadosPessoais) && isDirty && isSessaoAberta && hasMounted.current) {
 
       if (timerRef.current) {
         clearTimeout(timerRef.current);
@@ -71,12 +66,11 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
       timerRef.current = setTimeout(() => {
         fecharSessaoPreenchida();
         setSnackbarOpen(true);
-        gerarPdfsTemplates(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
-        gerarCertidoes(uuid, setPdfUrls, processoAggregate, setProcessoAggregate);
+        buscarDocumentosPolling(setProcessoAggregate, processoAggregate.id);
         setIsDirty(false);
       }, 2500)
     }
-  }, [isDirty, isSessaoAberta, processoAggregate, uuid, fecharSessaoPreenchida, setPdfUrls, setProcessoAggregate]);
+  }, [isDirty, isSessaoAberta, processoAggregate, fecharSessaoPreenchida, setProcessoAggregate]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -86,15 +80,23 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
       return;
     }
 
-    const previousValue = processoAggregate[name as keyof ProcessoAggregate];
+    const previousValue = processoAggregate.dadosPessoais[name as keyof ProcessoAggregate['dadosPessoais']];
 
     if (previousValue !== value && hasMounted.current) {
       setIsDirty(true);
     }
 
-    setProcessoAggregate({
-      ...processoAggregate,
-      [name]: value
+    setProcessoAggregate(prev => {
+      const updatedDadosPessoais = {
+        ...prev.dadosPessoais,
+        [name]: value,
+      };
+
+      return {
+        ...prev,
+        dadosPessoais: updatedDadosPessoais,
+        dataAlteracao: new Date().toISOString(),
+      };
     });
   };
 
@@ -106,35 +108,50 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
       return;
     }
 
-    const previousValue = processoAggregate[name as keyof ProcessoAggregate];
+    const previousValue = processoAggregate.dadosPessoais[name as keyof ProcessoAggregate['dadosPessoais']];
 
     if (previousValue !== value && hasMounted.current) {
       setIsDirty(true);
     }
 
-    setProcessoAggregate({
-      ...processoAggregate,
-      [name]: value
+    setProcessoAggregate(prev => {
+      const updatedDadosPessoais = {
+        ...prev.dadosPessoais,
+        [name]: value,
+      };
+
+      return {
+        ...prev,
+        dadosPessoais: updatedDadosPessoais,
+        dataAlteracao: new Date().toISOString(),
+      };
     });
   };
 
   const handleInputBlur = async (event: React.FocusEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
 
-    setProcessoAggregate({
-      ...processoAggregate,
-      [name]: value
-    });
-
-    if (uuid) {
+    if (processoAggregate.id) {
       await apiRequest({
-        tipo: "dadosPessoais",
-        data: {
-          uuid,
-          ...processoAggregate,
-        },
+        method: 'PATCH',
+        endpoint: `/${processoAggregate.id}`,
+        path: `/dadosPessoais/${name}`,
+        data: value
       });
     }
+
+    setProcessoAggregate(prev => {
+      const updatedDadosPessoais = {
+        ...prev.dadosPessoais,
+        [name]: value,
+      };
+
+      return {
+        ...prev,
+        dadosPessoais: updatedDadosPessoais,
+        dataAlteracao: new Date().toISOString(),
+      };
+    });
   };
 
   return (
@@ -178,7 +195,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
               type="text"
               autoComplete="nomeCompleto"
               required
-              value={processoAggregate.nomeCompleto || ""}
+              value={processoAggregate.dadosPessoais.nomeCompleto || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
               inputRef={inputRef}
@@ -193,7 +210,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
           <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
             <CPFInput
               name="cpf"
-              value={processoAggregate.cpf || ""}
+              value={processoAggregate.dadosPessoais.cpf || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
@@ -209,7 +226,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
               placeholder="Digite seu RG"
               autoComplete="rg"
               required
-              value={processoAggregate.rg || ""}
+              value={processoAggregate.dadosPessoais.rg || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
               sx={{
@@ -231,7 +248,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
               placeholder="Brasileiro(a)"
               autoComplete="nacionalidade"
               required
-              value={processoAggregate.nacionalidade || ""}
+              value={processoAggregate.dadosPessoais.nacionalidade || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
@@ -239,7 +256,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
           <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
             <DataNascimentoInput
               name="dataNascimento"
-              value={processoAggregate.dataNascimento || ""}
+              value={processoAggregate.dadosPessoais.dataNascimento || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
@@ -255,7 +272,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
                 id="sexo"
                 name="sexo"
                 placeholder="Selecione"
-                value={processoAggregate.sexo || ""}
+                value={processoAggregate.dadosPessoais.sexo || ""}
                 label="Sexo"
                 required
                 onChange={handleSelectChange}
@@ -270,8 +287,11 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
                 <MenuItem value="" disabled>
                   <em style={{ color: '#aaa' }}>Selecione</em>
                 </MenuItem>
-                <MenuItem value="masculino">Masculino</MenuItem>
-                <MenuItem value="feminino">Feminino</MenuItem>
+                {Object.entries(Sexo).map(([key, value]) => (
+                  <MenuItem key={key} value={value}>
+                    {value}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
@@ -286,7 +306,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
                 id="estadoCivil"
                 name="estadoCivil"
                 required
-                value={processoAggregate.estadoCivil || ""}
+                value={processoAggregate.dadosPessoais.estadoCivil || ""}
                 label="Estado Civil"
                 onChange={handleSelectChange}
                 onBlur={handleInputBlur}
@@ -300,9 +320,11 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
                 <MenuItem value="" disabled>
                   <em style={{ color: '#aaa' }}>Selecione</em>
                 </MenuItem>
-                <MenuItem value="solteiro(a)">Solteiro(a)</MenuItem>
-                <MenuItem value="casado(a)">Casado(a)</MenuItem>
-                <MenuItem value="divorciado(a)">Divorciado(a)</MenuItem>
+                {Object.entries(EstadoCivil).map(([key, value]) => (
+                  <MenuItem key={key} value={key}>
+                    {key}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
@@ -317,7 +339,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
               placeholder="Nome Completo da Mãe"
               autoComplete="nomeMae"
               required
-              value={processoAggregate.nomeMae || ""}
+              value={processoAggregate.dadosPessoais.nomeMae || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
@@ -333,7 +355,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
               placeholder="Nome Completo do Pai"
               autoComplete="nomePai"
               required
-              value={processoAggregate.nomePai || ""}
+              value={processoAggregate.dadosPessoais.nomePai || ""}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
             />
