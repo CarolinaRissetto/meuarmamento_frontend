@@ -117,13 +117,12 @@ export default function AutorizacaoArma() {
     const leadData = localStorage.getItem('leadData');
     const parsedLead = leadData ? JSON.parse(leadData) : {};
 
-    // apiRequest({
-    //   tipo: "salvarLead",
-    //   data: {
-    //     uuid,
-    //     ...parsedLead
-    //   },
-    // });
+    await apiRequest({
+      method: 'POST',
+      endpoint: `/${processoAggregate.id}/lead`,
+      data: parsedLead
+    });
+
 
     cancelarPoolingDocumentos();
 

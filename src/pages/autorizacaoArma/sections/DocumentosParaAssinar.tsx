@@ -15,7 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import { ModalColetaLead } from "../../../components/modalLead/ModalColetaLead";
-// import { apiRequest } from "../../../services/api/apiRequestService";
+import { apiRequest } from "../../../services/api/apiRequestService";
 import { LeadData } from "../domain/LeadData";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -48,6 +48,11 @@ export default function DocumentosParaAssinar({
   const [modalOpen, setModalOpen] = useState(false);
   const [pendingDownload, setPendingDownload] = useState<string | null>(null);
   const [documentosProcessados, setDocumentosProcessados] = useState<DocumentoProcesso[]>([]);
+  const [pendingDownloadAll, setPendingDownloadAll] = useState(false);
+  const [leadData, setLeadData] = useState<LeadData | null>(() => {
+    const data = localStorage.getItem("leadData");
+    return data ? JSON.parse(data) : null;
+  });
 
   useEffect(() => {
     if (processoAggregate.documentos) {
@@ -55,16 +60,11 @@ export default function DocumentosParaAssinar({
     }
   }, [processoAggregate.documentos]);
 
-  // const documentosProcessados = Array.from(processoAggregate.documentos || {});
-  // const documentosProcesso: DocumentoProcesso[] = processoAggregate.documentosProcesso || [];
-
   const nomesDocumentosRecebidos = documentosProcessados.map(doc => doc.id).filter((id): id is string => !!id);
 
   const missingFiles = Object.keys(translations).filter(
     (key) => !nomesDocumentosRecebidos.includes(key)
   );
-
-  const leadData = localStorage.getItem("leadData");
 
   const handleDownloadClick = (
     e: MouseEvent<HTMLAnchorElement>,
@@ -82,18 +82,17 @@ export default function DocumentosParaAssinar({
     setPendingDownload(null);
   };
 
-  const handleLeadSubmit = (data: LeadData) => {
+  const handleLeadSubmit = async (data: LeadData) => {
     console.log("Dados do Lead:", data);
 
     localStorage.setItem("leadData", JSON.stringify(data));
+    setLeadData(data); 
 
-    // apiRequest({
-    //   tipo: "salvarLead",
-    //   data: {
-    //     processoAggregate.id,
-    //     ...data,
-    //   },
-    // });
+    await apiRequest({
+      method: 'POST',
+      endpoint: `/${processoAggregate.id}/lead`,
+      data: data
+    });
 
     setModalOpen(false);
 
@@ -101,11 +100,25 @@ export default function DocumentosParaAssinar({
       window.open(pendingDownload, "_blank");
       setPendingDownload(null);
     }
+
+    if (pendingDownloadAll) {
+      downloadAllDocuments();
+      setPendingDownloadAll(false);
+    }
   };
 
   const documentosValidos = documentosProcessados.filter(
     (doc) => doc.status === "Gerado" && doc.urlDocumentoGerado
   );
+
+  const handleDownloadAllClick = () => {
+    if (!leadData) {
+      setPendingDownloadAll(true);
+      setModalOpen(true);
+    } else {
+      downloadAllDocuments();
+    }
+  };
 
   const downloadAllDocuments = async () => {
 
@@ -115,7 +128,7 @@ export default function DocumentosParaAssinar({
     }
 
     const zip = new JSZip();
-    const leadDataParsed = leadData ? JSON.parse(leadData) : { nome: "Cliente" };
+    const leadDataParsed = leadData || { nome: "Cliente" };
     const nomeCliente = leadDataParsed.nome.replace(/\s+/g, "");
     const nomeProcesso = "AquisicaoArmasDeFogo";
     const zipFileName = `${nomeCliente}_${nomeProcesso}.zip`;
@@ -275,7 +288,7 @@ export default function DocumentosParaAssinar({
         <Button
           variant="contained"
           startIcon={<FolderZipIcon />}
-          onClick={downloadAllDocuments}
+          onClick={handleDownloadAllClick}
           disabled={documentosValidos.length === 0}
           sx={{
             margin: "15px",
