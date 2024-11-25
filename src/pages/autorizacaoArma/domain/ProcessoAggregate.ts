@@ -1,45 +1,43 @@
 import { EnderecoEntity } from "./EnderecoEntity";
+import { DadosPessoaisEntity } from "./DadosPessoaisEntity";
 
-export interface ProcessoAggregate {
-    nomeCompleto?: string;
-    cpf?: string;
-    rg?: string;
-    nacionalidade?: string;
-    dataNascimento?: string;
-    nomeMae?: string;
-    nomePai?: string;
-    sexo?: 'feminino' | 'masculino';
-    estadoCivil?: 'solteiro(a)' | 'casado(a)' | 'divorciado(a)';
-
-    endereco: EnderecoEntity;
-
-    //ultimosEnderecosComprovante: List<EnderecoComprovanteEntity>;
-
-    //documentos: List<Documentos>;
+export interface DocumentoProcesso {
+    id: string | null;
+    nome: string | null;
+    status?: string | null;
+    urlDocumentoGerado?: string | null;
 }
 
-export const isDadosPessoaisFilled = (data: ProcessoAggregate): boolean => {
+export interface ProcessoAggregate {
+    id: string | null;
+    dadosPessoais: DadosPessoaisEntity;
+    endereco: EnderecoEntity;
+    documentos: DocumentoProcesso[];
+    dataCriacao: string | null;
+    dataAlteracao: string | null;
+}
+
+export const isDadosPessoaisFilled = (data: DadosPessoaisEntity): boolean => {
     return (
-        data.nomeCompleto != null && data.nomeCompleto.trim() !== '' &&
-        data.cpf != null && data.cpf.trim() !== '' &&
-        data.rg != null && data.rg.trim() !== '' &&
-        data.nacionalidade != null && data.nacionalidade.trim() !== '' &&
-        data.dataNascimento != null && data.dataNascimento.trim() !== '' &&
-        data.nomeMae != null && data.nomeMae.trim() !== '' &&
-        data.nomePai != null && data.nomePai.trim() !== '' &&
-        data.sexo != null &&
-        data.estadoCivil != null
+        data.nomeCompleto !== null && data.nomeCompleto.trim() !== '' &&
+        data.cpf !== null && data.cpf.trim() !== '' &&
+        data.rg !== null && data.rg.trim() !== '' &&
+        data.nacionalidade !== null && data.nacionalidade.trim() !== '' &&
+        data.dataNascimento !== null &&
+        data.nomeMae !== null && data.nomeMae.trim() !== '' &&
+        data.nomePai !== null && data.nomePai.trim() !== '' &&
+        data.sexo !== null &&
+        data.estadoCivil !== null
     );
 };
 
 export const isEnderecoFilled = (data: EnderecoEntity): boolean => {
-    const { cep, rua, numero, cidade, bairro, uf } = data;
     return (
-        cep != null && cep.trim() !== '' &&
-        rua != null && rua.trim() !== '' &&
-        numero != null && numero.trim() !== '' &&
-        cidade != null && cidade.trim() !== '' &&
-        bairro != null && bairro.trim() !== '' &&
-        uf != null && uf.trim() !== ''
+        data.cep !== null && data.cep.trim() !== '' &&
+        data.rua !== null && data.rua.trim() !== '' &&
+        data.numero !== null && data.numero.trim() !== '' &&
+        data.cidade !== null && data.cidade.trim() !== '' &&
+        data.bairro !== null && data.bairro.trim() !== '' &&
+        data.uf !== null && data.uf.trim() !== ''
     );
 };

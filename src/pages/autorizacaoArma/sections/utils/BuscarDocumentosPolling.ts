@@ -1,11 +1,11 @@
 import { apiRequest } from "../../../../services/api/apiRequestService";
+import { ProcessoAggregate } from "../../domain/ProcessoAggregate";
 
 let currentPollingIntervalId: number | NodeJS.Timeout | null = null;
 
 export const buscarDocumentosPolling = (
-    setFormData: (data: any) => void, //TODO: tipar corretamente
-    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
-    uuid: string | null,
+    setProcessoAggregate: React.Dispatch<React.SetStateAction<ProcessoAggregate>>,
+    idProcesso: string | null,
     checkInterval = 9000,
     maxAttempts = 20
 ) => {
@@ -21,7 +21,7 @@ export const buscarDocumentosPolling = (
         console.log(`Tentativa ${attempts} de ${maxAttempts}`);
 
         try {
-            const documentos = await buscarDocumentos(setFormData, setPdfUrls, uuid);
+            const documentos = await buscarDocumentos(setProcessoAggregate, idProcesso);
 
             if (buscouTodosDocumentos(documentos)) {
                 console.log("Todos os 5 documentos foram obtidos. Parando o polling.");
@@ -45,41 +45,32 @@ export const cancelarPoolingDocumentos = () => {
 };
 
 const buscarDocumentos = async (
-    setFormData: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>,
-    setPdfUrls: React.Dispatch<React.SetStateAction<{ [key: string]: { url: string | null; status: string | null; }; }>>,
-    uuid: string | null
+    setProcessoAggregate: React.Dispatch<React.SetStateAction<ProcessoAggregate>>,
+    id: string | null
 ) => {
     try {
         const response = await apiRequest({
-            tipo: "buscaDados",
-            data: {
-                uuid,
-            },
+            method: 'GET',
+            endpoint: `/${id}`,
         });
 
         if (response) {
             const parsedData = typeof response === "string" ? JSON.parse(response) : response;
-            let data = parsedData;
-
-            if (data.body) {
-                data = data.body;
-            }
+            let data = parsedData.data || parsedData;
 
             console.log('Dados obtidos:', data);
 
-            const documentosAtualizados = mapearDadosDocumentos(data.documentos);
-
-            setFormData(prevFormData => ({
-                ...prevFormData,
-                ...parsedData,
+            setProcessoAggregate((prevAggregate) => ({
+                ...prevAggregate,
+                documentos: Array.isArray(data.documentos) ? data.documentos.map((doc: any) => ({
+                    id: doc.id,
+                    nome: doc.nome,
+                    status: doc.status,
+                    urlDocumentoGerado: doc.urlDocumentoGerado,
+                })) : [],
             }));
 
-            setPdfUrls(prevPdfUrls => ({
-                ...prevPdfUrls,
-                ...documentosAtualizados,
-            }));
-
-            return documentosAtualizados;
+            return data.documentos;
         }
     } catch (error) {
         console.error("Erro ao buscar documentos:", error);
@@ -87,22 +78,9 @@ const buscarDocumentos = async (
     }
 };
 
-const mapearDadosDocumentos = (documentos: { [key: string]: any }) => {
-    const documentosMapeados: { [key: string]: { url: string | null, status: string | null } } = {};
-
-    Object.keys(documentos).forEach((tipoDocumento) => {
-        documentosMapeados[tipoDocumento] = {
-            url: documentos[tipoDocumento]?.url || null,
-            status: documentos[tipoDocumento]?.status || null,
-        };
-    });
-
-    return documentosMapeados;
-};
-
 const buscouTodosDocumentos = (documentos: {
     [key: string]: { url: string | null; status: string | null; };
 } | undefined
 ) => {
-    return documentos && Object.values(documentos).every(doc => doc?.status === 'concluido');
+    return documentos && Object.values(documentos).every(doc => doc?.status === 'Gerado');
 };

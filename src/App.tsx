@@ -1,5 +1,5 @@
 import React from 'react';
-import Cadastro from './pages/autorizacaoArma'
+import AutorizacaoArma from './pages/autorizacaoArma'
 import "./styles/styles.css";
 import {
   CssBaseline,
@@ -7,6 +7,7 @@ import {
 } from "@mui/material";
 import defaultTheme from './styles/theme'
 import Header from './components/header/Header';
+import { ProcessoProvider } from './pages/autorizacaoArma/sections/context/ProcessoContext'; 
 
 function App() {
   return (
@@ -14,7 +15,9 @@ function App() {
       <ThemeProvider theme={defaultTheme}>
         <Header />
         <CssBaseline />
-        <Cadastro />
+        <ProcessoProvider>
+          <AutorizacaoArma />
+        </ProcessoProvider>
       </ThemeProvider>
     </div>
   );

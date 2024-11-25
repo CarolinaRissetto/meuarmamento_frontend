@@ -1,10 +1,11 @@
-import React, { useState, MouseEvent } from "react";
+import React, { useState, MouseEvent, useMemo, useEffect } from "react";
 import Link from "@mui/material/Link";
 import DownloadIcon from "@mui/icons-material/Download";
 import WarningIcon from "@mui/icons-material/Warning";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassBottom";
 import FileDownloadOffIcon from "@mui/icons-material/FileDownloadOff";
 import {
+  Button,
   CircularProgress,
   List,
   ListItem,
@@ -16,14 +17,19 @@ import {
 import { ModalColetaLead } from "../../../components/modalLead/ModalColetaLead";
 import { apiRequest } from "../../../services/api/apiRequestService";
 import { LeadData } from "../domain/LeadData";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
+import FolderZipIcon from '@mui/icons-material/FolderZip';
+import { useProcesso } from "./context/useProcesso";
+import { DocumentoProcesso } from "../domain/ProcessoAggregate";
 
 const translations: { [key: string]: string } = {
   declaracaoIdoneidade: "8. Declaração não estar RESP INQ POL ou PROC CRIMINAL",
   segurancaAcervo: "12. Declaração de Segurança do Acervo",
-  certidaoJusticaFederal: "2. Certidão de antecedente Criminal Justiça Federal",
-  certidaoJusticaEstadual:
+  certidaoFederal: "2. Certidão de antecedente Criminal Justiça Federal",
+  certidaoEstadual:
     "5. Certidão de antecedente Criminal Justiça Estadual local domicílio últimos cinco anos",
-  certidaoJusticaMilitar: "6. Certidão de antecedente Criminal Justiça Militar",
+  certidaoMilitar: "6. Certidão de antecedente Criminal Justiça Militar",
 };
 
 function translateFileNames(arquivo: string): string {
@@ -31,20 +37,34 @@ function translateFileNames(arquivo: string): string {
 }
 
 export default function DocumentosParaAssinar({
-  urls: documentos = {},
   fullView = true,
+  setActiveStep,
 }: {
-  urls: { [key: string]: { url: string | null; status: string | null } };
   fullView?: boolean;
+  setActiveStep: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const missingFiles = Object.keys(translations).filter(
-    (key) => !documentos[key]
-  );
 
+  const { processoAggregate } = useProcesso();
   const [modalOpen, setModalOpen] = useState(false);
   const [pendingDownload, setPendingDownload] = useState<string | null>(null);
+  const [documentosProcessados, setDocumentosProcessados] = useState<DocumentoProcesso[]>([]);
+  const [pendingDownloadAll, setPendingDownloadAll] = useState(false);
+  const [leadData, setLeadData] = useState<LeadData | null>(() => {
+    const data = localStorage.getItem("leadData");
+    return data ? JSON.parse(data) : null;
+  });
 
-  const leadData = localStorage.getItem("leadData");
+  useEffect(() => {
+    if (processoAggregate.documentos) {
+      setDocumentosProcessados(processoAggregate.documentos);
+    }
+  }, [processoAggregate.documentos]);
+
+  const nomesDocumentosRecebidos = documentosProcessados.map(doc => doc.id).filter((id): id is string => !!id);
+
+  const missingFiles = Object.keys(translations).filter(
+    (key) => !nomesDocumentosRecebidos.includes(key)
+  );
 
   const handleDownloadClick = (
     e: MouseEvent<HTMLAnchorElement>,
@@ -62,19 +82,16 @@ export default function DocumentosParaAssinar({
     setPendingDownload(null);
   };
 
-  const handleLeadSubmit = (data: LeadData) => {
+  const handleLeadSubmit = async (data: LeadData) => {
     console.log("Dados do Lead:", data);
 
     localStorage.setItem("leadData", JSON.stringify(data));
+    setLeadData(data); 
 
-    const uuid = localStorage.getItem("user-uuid");
-
-    apiRequest({
-      tipo: "salvarLead",
-      data: {
-        uuid,
-        ...data,
-      },
+    await apiRequest({
+      method: 'POST',
+      endpoint: `/${processoAggregate.id}/lead`,
+      data: data
     });
 
     setModalOpen(false);
@@ -83,6 +100,56 @@ export default function DocumentosParaAssinar({
       window.open(pendingDownload, "_blank");
       setPendingDownload(null);
     }
+
+    if (pendingDownloadAll) {
+      downloadAllDocuments();
+      setPendingDownloadAll(false);
+    }
+  };
+
+  const documentosValidos = documentosProcessados.filter(
+    (doc) => doc.status === "Gerado" && doc.urlDocumentoGerado
+  );
+
+  const handleDownloadAllClick = () => {
+    if (!leadData) {
+      setPendingDownloadAll(true);
+      setModalOpen(true);
+    } else {
+      downloadAllDocuments();
+    }
+  };
+
+  const downloadAllDocuments = async () => {
+
+    if (documentosValidos.length === 0) {
+      alert("Nenhum documento disponível para download.");
+      return;
+    }
+
+    const zip = new JSZip();
+    const leadDataParsed = leadData || { nome: "Cliente" };
+    const nomeCliente = leadDataParsed.nome.replace(/\s+/g, "");
+    const nomeProcesso = "AquisicaoArmasDeFogo";
+    const zipFileName = `${nomeCliente}_${nomeProcesso}.zip`;
+
+    await Promise.all(
+      documentosProcessados.map(async (doc) => {
+        if (doc.status === "Gerado" && doc.urlDocumentoGerado) {
+          const response = await fetch(doc.urlDocumentoGerado);
+          const blob = await response.blob();
+
+          const nomeArquivo = doc.urlDocumentoGerado.split("/").pop()?.split("?")[0];
+
+          if (nomeArquivo) {
+            zip.file(nomeArquivo, blob);
+          }
+        }
+      })
+    );
+
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    saveAs(zipBlob, zipFileName);
   };
 
   return (
@@ -105,11 +172,8 @@ export default function DocumentosParaAssinar({
                     {fullView && (
                       <ListItemIcon sx={{ minWidth: 30 }}>
                         <Tooltip
-                          title={
-                            arquivo === "certidaoJusticaEstadual"
-                              ? "Esse documento ainda não está disponível, estamos trabalhando nele"
-                              : "Preencha o formulário acima para que a automação possa ser iniciada"
-                          } arrow
+                          title={"Preencha o formulário acima para que a automação possa ser iniciada"}
+                          arrow
                         >
                           <FileDownloadOffIcon />
                         </Tooltip>
@@ -149,25 +213,30 @@ export default function DocumentosParaAssinar({
         </div>
       )}
       <List>
-        {Object.keys(documentos)
+        {documentosProcessados
           .reverse()
-          .map((arquivo, index) => {
+          .map((doc) => {
+
+            const isDownloadable = doc.urlDocumentoGerado && doc.status === "Gerado";
+
             return (
               <ListItem
                 sx={{ pt: 0, pb: 0, pl: fullView ? 2 : 0 }}
-                key={arquivo}
+                key={doc.id}
               >
                 {fullView && (
                   <ListItemIcon sx={{ minWidth: 30 }}>
                     {(() => {
-                      switch (documentos[arquivo].status) {
-                        case "INICIADO":
+                      switch (doc.status) {
+                        case "Gerando":
                           return <CircularProgress size={24} />;
-                        case "PENDENTE":
+                        case "ProntoParaGerar":
+                          return <CircularProgress size={24} />;
+                        case "Pendente":
                           return <HourglassEmptyIcon />;
-                        case "CONCLUIDO":
+                        case "Gerado":
                           return <DownloadIcon sx={{ color: "#1976d2" }} />;
-                        case "ERRO":
+                        case "Erro":
                           return (
                             <Tooltip
                               title="Ocorreu um erro ao gerar o arquivo :("
@@ -184,21 +253,21 @@ export default function DocumentosParaAssinar({
                     })()}
                   </ListItemIcon>
                 )}
-                {documentos[arquivo].status === "CONCLUIDO" ? (
+                {isDownloadable ? (
                   <Link
-                    href={documentos[arquivo].url || undefined}
+                    href={doc.urlDocumentoGerado || undefined}
                     target="_blank"
                     underline="hover"
                     sx={{ color: "#1976d2", cursor: "pointer" }}
                     onClick={(e) =>
-                      handleDownloadClick(e, documentos[arquivo].url)
+                      handleDownloadClick(e, doc.urlDocumentoGerado ?? null)
                     }
                   >
                     <ListItemText sx={{ marginTop: "3px", marginBottom: "3px" }}>
                       <Typography
                         sx={{ fontSize: fullView ? "1rem" : "0.85rem" }}
                       >
-                        {translateFileNames(arquivo)}
+                        {translateFileNames(doc.id || "")}
                       </Typography>
                     </ListItemText>
                   </Link>
@@ -207,7 +276,7 @@ export default function DocumentosParaAssinar({
                     <Typography
                       sx={{ fontSize: fullView ? "1rem" : "0.85rem" }}
                     >
-                      {translateFileNames(arquivo)}
+                      {translateFileNames(doc.id || "")}
                     </Typography>
                   </ListItemText>
                 )}
@@ -215,6 +284,21 @@ export default function DocumentosParaAssinar({
             );
           })}
       </List>
+      {fullView && (
+        <Button
+          variant="contained"
+          startIcon={<FolderZipIcon />}
+          onClick={handleDownloadAllClick}
+          disabled={documentosValidos.length === 0}
+          sx={{
+            margin: "15px",
+            padding: "10px 20px",
+            minWidth: "250px",
+          }}
+        >
+          Baixe todos documentos juntos
+        </Button>
+      )}
       <ModalColetaLead
         modalOpen={modalOpen}
         handleModalClose={handleModalClose}

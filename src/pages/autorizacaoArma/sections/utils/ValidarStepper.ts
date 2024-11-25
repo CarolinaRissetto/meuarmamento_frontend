@@ -1,12 +1,14 @@
 export const validarStepper = (formData: Record<string, any>): number => {
     const dadosPessoaisPreenchidos =
-        formData.nomeCompleto &&
-        formData.cpf &&
-        formData.rg &&
-        formData.nacionalidade &&
-        formData.dataNascimento &&
-        formData.nomeMae &&
-        formData.nomePai;
+        formData.dadosPessoais.nomeCompleto &&
+        formData.dadosPessoais.cpf &&
+        formData.dadosPessoais.rg &&
+        formData.dadosPessoais.nacionalidade &&
+        formData.dadosPessoais.dataNascimento &&
+        formData.dadosPessoais.nomeMae &&
+        formData.dadosPessoais.nomePai &&
+        formData.dadosPessoais.sexo &&
+        formData.dadosPessoais.estadoCivil;
 
     const enderecoPreenchido =
         formData.endereco &&

@@ -17,6 +17,8 @@
     "@types/react-dom": "^18.3.0",
     "axios": "^1.7.2",
     "eslint": "^8.57.0",
+    "file-saver": "^2.0.5",
+    "jszip": "^3.10.1",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -52,5 +54,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/file-saver": "^2.0.7"
   }
 }

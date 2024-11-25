@@ -1,10 +1,10 @@
 export interface EnderecoEntity {
-    cep?: string;
-    rua?: string;
-    complemento?: string;
-    numero?: string;
-    bairro?: string;
-    cidade?: string;
-    uf?: string;
-    quantosEnderecosMorou?: number;
+    cep: string | null;
+    rua: string | null;
+    complemento: string | null;
+    numero: string | null;
+    bairro: string | null;
+    cidade: string | null;
+    uf: string | null;
+    quantosEnderecosMorou: number | null;
 }
