@@ -67,7 +67,7 @@ export default function AutorizacaoArma() {
     }
 
     setCarregandoDadosIniciais(false);
-  }, []);
+  }, [setProcessoAggregate]);
 
   useEffect(() => {
 
