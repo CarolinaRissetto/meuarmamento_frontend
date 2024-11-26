@@ -24,7 +24,8 @@ import CustomSnackbar from './utils/CustomSnackbar';
 import { ProcessoAggregate, isEnderecoFilled } from '../domain/ProcessoAggregate';
 import CEPInput from './utils/inputs/CEPInput';
 import { useProcesso } from "./context/useProcesso";
-import { buscarDocumentosPolling } from "./utils/BuscarDocumentosPolling";
+import { buscarDocumentosPolling } from "./hooks/BuscarDocumentosPolling";
+import useAutoSave from "./hooks/useAutoSave";
 
 const spin = keyframes`
   from {
@@ -90,8 +91,19 @@ const Endereco: React.FC<EnderecoProps> = ({
     const numeroInputRef = useRef<HTMLInputElement>(null);
     const ruaInputRef = useRef<HTMLInputElement>(null);
     const [focusField, setFocusField] = useState<string | null>(null);
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
     const hasMounted = useRef(false);
+
+    useAutoSave({
+        isFilled: isEnderecoFilled(processoAggregate.endereco),
+        isDirty: dirty,
+        isOpen: sessaoAberta,
+        hasMounted,
+        processoId: processoAggregate.id,
+        fecharSessaoPreenchida,
+        setSnackbarOpen,
+        buscarDocumentos: () => buscarDocumentosPolling(setProcessoAggregate, processoAggregate.id!),
+        setIsDirty: setDirty
+      });
 
     useEffect(() => {
         setSessaoAberta(visibilidadeSessao);
@@ -102,22 +114,6 @@ const Endereco: React.FC<EnderecoProps> = ({
             hasMounted.current = true;
         }
     }, [carregandoDadosIniciais]);
-
-    useEffect(() => {
-        if (isEnderecoFilled(processoAggregate.endereco) && dirty && sessaoAberta && hasMounted.current) {
-
-            if (timerRef.current) {
-                clearTimeout(timerRef.current);
-            }
-
-            timerRef.current = setTimeout(() => {
-                fecharSessaoPreenchida();
-                setSnackbarOpen(true);
-                buscarDocumentosPolling(setProcessoAggregate, processoAggregate.id);
-                setDirty(false);
-            }, 2500);
-        }
-    }, [processoAggregate, dirty, sessaoAberta, fecharSessaoPreenchida, setProcessoAggregate]);
 
     useEffect(() => {
         if (focusField === 'numero' && numeroInputRef.current) {

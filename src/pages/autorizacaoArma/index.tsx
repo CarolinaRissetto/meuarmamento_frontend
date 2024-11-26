@@ -3,12 +3,12 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Box, Grid, Typography, Card, CardActions, CardContent, useMediaQuery, Backdrop, CircularProgress } from "@mui/material";
 import DadosPessoais from "./sections/DadosPessoais";
 import Endereco from "./sections/Endereco";
-import DocumentosParaAssinar from "./sections/DocumentosParaAssinar";
+import DocumentosParaAssinar from "./sections/DocumentosParaAssinar/DocumentosParaAssinar";
 import SideBar from "../../components/sideBar/SideBar";
 import StepperMobile from '../../components/stepper/StepperMobile';
 import { apiRequest } from "../../services/api/apiRequestService";
 import { validarStepper } from "./sections/utils/ValidarStepper";
-import { cancelarPoolingDocumentos } from "./sections/utils/BuscarDocumentosPolling";
+import { cancelarPoolingDocumentos } from "./sections/hooks/BuscarDocumentosPolling";
 import { ProcessoAggregate } from './domain/ProcessoAggregate'
 import CustomSnackbar from './sections/utils/CustomSnackbar';
 import AddIcon from "@mui/icons-material/AddCircleOutline";
@@ -122,7 +122,6 @@ export default function AutorizacaoArma() {
       endpoint: `/${processoAggregate.id}/lead`,
       data: parsedLead
     });
-
 
     cancelarPoolingDocumentos();
 

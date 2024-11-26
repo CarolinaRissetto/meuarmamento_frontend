@@ -21,7 +21,8 @@ import DataNascimentoInput from "./utils/inputs/DataNascimentoInput";
 import { EstadoCivil } from "../domain/enums/EstadoCivil";
 import { useProcesso } from "./context/useProcesso";
 import { Sexo } from "../domain/enums/Sexo";
-import { buscarDocumentosPolling } from "./utils/BuscarDocumentosPolling";
+import { buscarDocumentosPolling } from "./hooks/BuscarDocumentosPolling";
+import useAutoSave from "./hooks/useAutoSave";
 
 interface DadosPessoaisProps {
   visibilidadeSessao: boolean;
@@ -43,8 +44,19 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
   const [isSessaoAberta, setIsSessaoAberta] = useState(visibilidadeSessao);
   const [isDirty, setIsDirty] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const hasMounted = useRef(false);
+
+  useAutoSave({
+    isFilled: isDadosPessoaisFilled(processoAggregate.dadosPessoais),
+    isDirty,
+    isOpen: isSessaoAberta,
+    hasMounted,
+    processoId: processoAggregate.id,
+    fecharSessaoPreenchida,
+    setSnackbarOpen,
+    buscarDocumentos: () => buscarDocumentosPolling(setProcessoAggregate, processoAggregate.id),
+    setIsDirty
+  });
 
   useEffect(() => {
     setIsSessaoAberta(visibilidadeSessao);
@@ -56,23 +68,8 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
     }
   }, [carregandoDadosIniciais]);
 
-  useEffect(() => {
-    if (isDadosPessoaisFilled(processoAggregate.dadosPessoais) && isDirty && isSessaoAberta && hasMounted.current) {
-
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-
-      timerRef.current = setTimeout(() => {
-        fecharSessaoPreenchida();
-        setSnackbarOpen(true);
-        buscarDocumentosPolling(setProcessoAggregate, processoAggregate.id);
-        setIsDirty(false);
-      }, 2500)
-    }
-  }, [isDirty, isSessaoAberta, processoAggregate, fecharSessaoPreenchida, setProcessoAggregate]);
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
+  ) => {
     const { name, value } = event.target;
 
     if (typeof name !== 'string') {
@@ -86,46 +83,14 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
       setIsDirty(true);
     }
 
-    setProcessoAggregate(prev => {
-      const updatedDadosPessoais = {
+    setProcessoAggregate(prev => ({
+      ...prev,
+      dadosPessoais: {
         ...prev.dadosPessoais,
         [name]: value,
-      };
-
-      return {
-        ...prev,
-        dadosPessoais: updatedDadosPessoais,
-        dataAlteracao: new Date().toISOString(),
-      };
-    });
-  };
-
-  const handleSelectChange = (event: SelectChangeEvent<string>) => {
-    const { name, value } = event.target;
-
-    if (typeof name !== 'string') {
-      console.error("O atributo 'name' está ausente ou não é uma string.");
-      return;
-    }
-
-    const previousValue = processoAggregate.dadosPessoais[name as keyof ProcessoAggregate['dadosPessoais']];
-
-    if (previousValue !== value && hasMounted.current) {
-      setIsDirty(true);
-    }
-
-    setProcessoAggregate(prev => {
-      const updatedDadosPessoais = {
-        ...prev.dadosPessoais,
-        [name]: value,
-      };
-
-      return {
-        ...prev,
-        dadosPessoais: updatedDadosPessoais,
-        dataAlteracao: new Date().toISOString(),
-      };
-    });
+      },
+      dataAlteracao: new Date().toISOString(),
+    }));
   };
 
   const handleInputBlur = async (event: React.FocusEvent<HTMLInputElement>) => {
@@ -140,18 +105,14 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
       });
     }
 
-    setProcessoAggregate(prev => {
-      const updatedDadosPessoais = {
+    setProcessoAggregate(prev => ({
+      ...prev,
+      dadosPessoais: {
         ...prev.dadosPessoais,
         [name]: value,
-      };
-
-      return {
-        ...prev,
-        dadosPessoais: updatedDadosPessoais,
-        dataAlteracao: new Date().toISOString(),
-      };
-    });
+      },
+      dataAlteracao: new Date().toISOString(),
+    }));
   };
 
   return (
@@ -275,7 +236,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
                 value={processoAggregate.dadosPessoais.sexo || ""}
                 label="Sexo"
                 required
-                onChange={handleSelectChange}
+                onChange={handleInputChange}
                 onBlur={handleInputBlur}
                 sx={{
                   backgroundColor: 'white',
@@ -308,7 +269,7 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
                 required
                 value={processoAggregate.dadosPessoais.estadoCivil || ""}
                 label="Estado Civil"
-                onChange={handleSelectChange}
+                onChange={handleInputChange}
                 onBlur={handleInputBlur}
                 sx={{
                   backgroundColor: 'white',
