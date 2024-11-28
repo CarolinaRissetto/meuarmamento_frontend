@@ -1,4 +1,3 @@
-import { cwd } from "process";
 import { apiRequest } from "../../../../services/api/apiRequestService";
 import { ProcessoAggregate } from "../../domain/ProcessoAggregate";
 
