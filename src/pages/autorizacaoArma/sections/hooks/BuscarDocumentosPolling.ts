@@ -1,9 +1,10 @@
+import { cwd } from "process";
 import { apiRequest } from "../../../../services/api/apiRequestService";
 import { ProcessoAggregate } from "../../domain/ProcessoAggregate";
 
 let currentPollingIntervalId: number | NodeJS.Timeout | null = null;
 
-export const buscarDocumentosPolling = (
+export const buscarDocumentosPolling = async (
     setProcessoAggregate: React.Dispatch<React.SetStateAction<ProcessoAggregate>>,
     idProcesso: string | null,
     checkInterval = 9000,
@@ -15,6 +16,8 @@ export const buscarDocumentosPolling = (
     }
 
     let attempts = 0;
+
+    await buscarDocumentos(setProcessoAggregate, idProcesso);
 
     currentPollingIntervalId = setInterval(async () => {
         attempts += 1;

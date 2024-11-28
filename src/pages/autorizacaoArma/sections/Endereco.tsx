@@ -4,13 +4,10 @@ import {
     Box,
     Button,
     Collapse,
-    FormControlLabel,
     FormLabel,
     Grid,
     IconButton,
     OutlinedInput,
-    Radio,
-    RadioGroup,
     Typography,
     styled,
 } from "@mui/material";
@@ -80,7 +77,6 @@ const Endereco: React.FC<EnderecoProps> = ({
 }) => {
     const { processoAggregate, setProcessoAggregate } = useProcesso();
     const [sessaoAberta, setSessaoAberta] = useState(visibilidadeSessao);
-    const [sameAddress, setSameAddress] = useState('yes');
     const [dirty, setDirty] = useState(false);
     const formRef = useRef<HTMLDivElement>(null);
     const currentYear = new Date().getFullYear();
@@ -250,39 +246,6 @@ const Endereco: React.FC<EnderecoProps> = ({
             </Box>
             <Collapse in={sessaoAberta}>
                 <Grid container spacing={3} marginTop={"5px"} id="endereco-form" marginBottom={"70px"} ref={formRef} >
-                    <FormGrid item xs={12}>
-                        <FormLabel component="legend">
-                            Morou no mesmo endereço nos últimos 5 anos?
-                        </FormLabel>
-                        <RadioGroup
-                            row
-                            aria-label="same-address"
-                            name="same-address"
-                            defaultValue="yes"
-                            value={sameAddress}
-                            onChange={(e) => setSameAddress((e.target as HTMLInputElement).value)}
-                        >
-                            <FormControlLabel value="yes" control={<Radio />} label="Sim" />
-                            <FormControlLabel value="no" control={<Radio />} label="Não" />
-                        </RadioGroup>
-                    </FormGrid>
-                    {sameAddress === 'no' && (
-                        <FormGrid item xs={12} md={6}>
-                            <FormLabel htmlFor="num-addresses">
-                                Quantos endereços diferentes morou nos últimos 5 anos?
-                            </FormLabel>
-                            <OutlinedInput
-                                id="num-addresses"
-                                name="quantosEnderecosMorou"
-                                type="number"
-                                autoComplete="num-addresses"
-                                value={processoAggregate.endereco.quantosEnderecosMorou || ""}
-                                onChange={handleInputChange}
-                                onBlur={handleInputBlur}
-                                disabled={buscandoEndereco}
-                            />
-                        </FormGrid>
-                    )}
                     <FormGrid item xs={12} md={6}>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <CEPInput
