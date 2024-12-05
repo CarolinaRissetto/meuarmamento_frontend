@@ -6,5 +6,4 @@ export interface EnderecoEntity {
     bairro: string | null;
     cidade: string | null;
     uf: string | null;
-    quantosEnderecosMorou: number | null;
 }

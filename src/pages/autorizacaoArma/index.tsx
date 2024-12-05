@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo, useCallback, useRef } from "react"
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Box, Grid, Typography, Card, CardActions, CardContent, useMediaQuery, Backdrop, CircularProgress } from "@mui/material";
 import DadosPessoais from "./sections/DadosPessoais";
-import Endereco from "./sections/Endereco";
+import Endereco from "./sections/endereco/Endereco";
 import DocumentosParaAssinar from "./sections/DocumentosParaAssinar/DocumentosParaAssinar";
 import SideBar from "../../components/sideBar/SideBar";
 import StepperMobile from '../../components/stepper/StepperMobile';
@@ -13,6 +13,7 @@ import { ProcessoAggregate } from './domain/ProcessoAggregate'
 import CustomSnackbar from './sections/utils/CustomSnackbar';
 import AddIcon from "@mui/icons-material/AddCircleOutline";
 import { useProcesso } from "./sections/context/useProcesso";
+import ComprovanteResidencia from "./sections/endereco/ComprovanteResidencia";
 
 export default function AutorizacaoArma() {
   const navigate = useNavigate();
@@ -271,6 +272,8 @@ export default function AutorizacaoArma() {
               setActiveStep={setActiveStep}
               carregandoDadosIniciais={carregandoDadosIniciais}
             />
+
+            <ComprovanteResidencia />
 
             <Grid ref={documentosSessaoRef} item xs={12} sx={{ padding: '10px', paddingBottom: 0 }}>
 
