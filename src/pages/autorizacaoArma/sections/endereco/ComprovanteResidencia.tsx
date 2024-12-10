@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Grid,
     Button,
@@ -11,167 +11,162 @@ import {
     Typography,
     Tooltip,
     Box,
+    InputAdornment,
 } from "@mui/material";
 import CamposEndereco from "../hooks/CamposEndereco";
 import { useProcesso } from "../context/useProcesso";
 import { apiRequest } from "../../../../services/api/apiRequestService";
-import { ComprovanteResidenciaEntity } from "../../domain/ComprovanteResidenciaEntity";
+import CPFInput from "../utils/inputs/CPFInput";
+import CEPInput from "../utils/inputs/CEPInput";
 
 interface ComprovanteResidenciaProps {
 
 }
 
 const ComprovanteResidencia: React.FC<ComprovanteResidenciaProps> = ({ }) => {
-    const [titular, setTitular] = useState<{ [year: number]: string }>({});
     const { processoAggregate, setProcessoAggregate } = useProcesso();
-    const currentYear = new Date().getFullYear();
-    const anos = Array.from({ length: 5 }, (_, i) => currentYear - i);
-    const [, setFiles] = useState<{ [key: number]: File | null }>({});
+    const [files, setFiles] = useState<{ [key: number]: File | null }>({});
+    const [fileNames, setFileNames] = useState<{ [key: number]: string }>({});
 
-    const handleFileChange = (
-        year: number,
-        event: React.ChangeEvent<HTMLInputElement>,
-    ) => {
+    useEffect(() => {
+        if (processoAggregate && processoAggregate.comprovantesResidencia) {
+            const initialFileNames: { [key: number]: string } = {};
+
+            processoAggregate.comprovantesResidencia.forEach((comprovante, index) => {
+                if (comprovante.arquivo) {
+                    initialFileNames[comprovante.ano!] = `Comprovante de ${comprovante.ano} enviado`; // Substitua pelo nome real se estiver disponível no backend
+                }
+            });
+
+            setFileNames(initialFileNames);
+        }
+    }, [processoAggregate]);
+
+    const handleFileChange = async (year: number, event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
-            setFiles((prevFiles) => ({
-                ...prevFiles,
-                [year]: event.target.files![0],
-            }));
+            const file = event.target.files[0];
+
+            const allowedTypes = ['image/png', 'image/jpeg', 'application/pdf'];
+            if (!allowedTypes.includes(file.type)) {
+                alert("Por favor, selecione um arquivo PNG, JPEG ou PDF.");
+                return;
+            }
+
+            setFiles((prevFiles) => ({ ...prevFiles, [year]: file }));
+            setFileNames((prevNames) => ({ ...prevNames, [year]: file.name }));
+
+            const reader = new FileReader();
+            reader.onload = async () => {
+                const base64String = reader.result?.toString().split(',')[1];
+
+                if (!base64String) {
+                    alert("Erro ao processar o arquivo. Tente novamente.");
+                    return;
+                }
+
+                const index = processoAggregate.comprovantesResidencia.findIndex(
+                    (comprovante) => comprovante.ano === year
+                );
+
+                if (index === -1) {
+                    alert(`Não foi possível encontrar o índice para o ano ${year}.`);
+                    return;
+                }
+
+                const fileOperation = {
+                    path: `comprovantesResidencia/${index}/arquivo`,
+                    value: base64String,
+                };
+
+                try {
+                    const response = await apiRequest({
+                        method: 'PATCH',
+                        endpoint: `/${processoAggregate.id}`,
+                        data: [fileOperation],
+                    });
+
+                    console.log("Upload successful:", response.data);
+                } catch (error) {
+                    console.error("Erro ao enviar o arquivo:", error);
+                }
+            };
+
+            reader.readAsDataURL(file);
         }
     };
-
 
     const handleChange = (ano: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
-    
-        setProcessoAggregate((prev) => {
-            const comprovantesResidencia = prev.comprovantesResidencia.map((comprovante) => {
-                if (comprovante.ano === ano) {
-                    // Clonar o comprovante atual
-                    const updatedComprovante: ComprovanteResidenciaEntity = { ...comprovante };
-    
-                    // Inicializar dadosTitular se estiver undefined
-                    const dadosTitular = updatedComprovante.dadosTitular || {
-                        nome: null,
-                        rg: null,
-                        cpf: null,
-                        endereco: {
-                            cep: null,
-                            rua: null,
-                            complemento: null,
-                            numero: null,
-                            bairro: null,
-                            cidade: null,
-                            uf: null,
+
+        const updatedComprovantesResidencia = processoAggregate.comprovantesResidencia.map((comprovante) => {
+            if (comprovante.ano === ano) {
+                if (["cep", "rua", "numero", "bairro", "cidade", "uf", "complemento"].includes(name)) {
+                    return {
+                        ...comprovante,
+                        dadosTitular: {
+                            ...comprovante.dadosTitular,
+                            endereco: {
+                                ...comprovante.dadosTitular.endereco,
+                                [name]: value,
+                            },
                         },
                     };
-    
-                    // Se for um campo de endereço
-                    if (name.startsWith("endereco.")) {
-                        const enderecoField = name.split(".")[1];
-    
-                        // Inicializar endereco se estiver undefined
-                        const endereco = dadosTitular.endereco || {
-                            cep: null,
-                            rua: null,
-                            complemento: null,
-                            numero: null,
-                            bairro: null,
-                            cidade: null,
-                            uf: null,
-                        };
-    
-                        // Atualizar o campo específico do endereço
-                        updatedComprovante.dadosTitular = {
-                            ...dadosTitular,
-                            endereco: {
-                                ...endereco,
-                                [enderecoField]: value || null, // Garante que não seja undefined
-                            },
-                        };
-                    } else {
-                        // Atualizar o campo específico de dadosTitular
-                        updatedComprovante.dadosTitular = {
-                            ...dadosTitular,
-                            [name]: value || null, // Garante que não seja undefined
-                        };
-                    }
-    
-                    return updatedComprovante;
+                } else {
+                    return {
+                        ...comprovante,
+                        dadosTitular: {
+                            ...comprovante.dadosTitular,
+                            [name]: value,
+                        },
+                    };
                 }
-                return comprovante;
-            });
-    
-            return { ...prev, comprovantesResidencia };
+            }
+            return comprovante;
         });
+
+        const updatedProcessoAggregate = {
+            ...processoAggregate,
+            comprovantesResidencia: updatedComprovantesResidencia,
+        };
+
+        setProcessoAggregate(updatedProcessoAggregate);
     };
-    
+
     const handleBlur = (ano: number) => async (event: React.FocusEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
 
-        try {
-            setProcessoAggregate((prev) => {
-                const comprovantesResidencia = prev.comprovantesResidencia.map((comprovante) => {
-                    if (comprovante.ano === ano) {
-                        const updatedComprovante: ComprovanteResidenciaEntity = { ...comprovante };
+        const index = processoAggregate.comprovantesResidencia.findIndex(comprovante => comprovante.ano === ano);
 
-                        // if (name.startsWith("endereco.")) {
-                        //     const enderecoField = name.split(".")[1];
-                        //     updatedComprovante.dadosTitular = {
-                        //         ...comprovante.dadosTitular,
-                        //         endereco: {
-                        //             ...comprovante.dadosTitular?.endereco,
-                        //             [enderecoField]: value || null,
-                        //         },
-                        //     };
-                        // } else {
-                        //     updatedComprovante.dadosTitular = {
-                        //         ...comprovante.dadosTitular,
-                        //         [name]: value || null,
-                        //     };
-                        // }
+        if (index >= 0 && processoAggregate.id) {
+            let path;
 
-                        return updatedComprovante;
-                    }
-                    return comprovante;
-                });
-
-                return { ...prev, comprovantesResidencia };
-            });
-
-            const comprovante = processoAggregate.comprovantesResidencia.find((c) => c.ano === ano);
-
-            if (comprovante) {
-                const payload = {
-                    ano: comprovante.ano,
-                    arquivo: comprovante.arquivo,
-                    titular: comprovante.titular,
-                    dadosTitular: comprovante.titular
-                        ? null
-                        : {
-                            nome: comprovante.dadosTitular?.nome,
-                            rg: comprovante.dadosTitular?.rg,
-                            cpf: comprovante.dadosTitular?.cpf,
-                            endereco: comprovante.dadosTitular?.endereco,
-                        },
-                };
-
-                await apiRequest({
-                    method: "PATCH",
-                    endpoint: `/processo/${processoAggregate.id}/comprovantes-residencia`,
-                    data: payload,
-                });
+            if (["cep", "rua", "numero", "bairro", "cidade", "uf", "complemento"].includes(name)) {
+                path = `comprovantesResidencia/${index}/dadosTitular/endereco/${name}`;
+            } else {
+                path = `comprovantesResidencia/${index}/dadosTitular/${name}`;
             }
-        } catch (error) {
-            console.error("Erro ao salvar o campo:", error);
+
+            const operations = [
+                {
+                    path,
+                    value,
+                },
+            ];
+
+            try {
+                const response = await apiRequest({
+                    method: 'PATCH',
+                    endpoint: `/${processoAggregate.id}`,
+                    data: operations,
+                });
+                console.log("Patch response", response);
+            } catch (error) {
+                console.error("Erro ao salvar os dados:", error);
+            }
         }
     };
-    
-    const handleTitularChange = (ano: number, valor: string) => {
-        setTitular((prev) => ({
-            ...prev,
-            [ano]: valor,
-        }));
+
+    const handleTitularChange = async (ano: number, valor: string) => {
 
         setProcessoAggregate((prev) => {
             const comprovantesResidencia = prev.comprovantesResidencia.map((comprovante) => {
@@ -185,6 +180,33 @@ const ComprovanteResidencia: React.FC<ComprovanteResidenciaProps> = ({ }) => {
             });
             return { ...prev, comprovantesResidencia };
         });
+
+        const index = processoAggregate.comprovantesResidencia.findIndex(comprovante => comprovante.ano === ano);
+
+        if (index === -1) {
+            console.error(`Comprovante para o ano ${ano} não encontrado.`);
+            return;
+        }
+
+        const path = `comprovantesResidencia/${index}/titular`;
+
+        const operations = [
+            {
+                path,
+                value: valor === 'sim',
+            },
+        ];
+
+        try {
+            const response = await apiRequest({
+                method: 'PATCH',
+                endpoint: `/${processoAggregate.id}`,
+                data: operations,
+            });
+            console.log("Titular change saved:", response.data);
+        } catch (error) {
+            console.error("Erro ao salvar o titular:", error);
+        }
     };
 
     return (
@@ -203,18 +225,32 @@ const ComprovanteResidencia: React.FC<ComprovanteResidenciaProps> = ({ }) => {
                         <Button
                             variant="contained"
                             component="label"
-                            sx={{ mr: 1, marginTop: '5px', marginBottom: '15px', display: "flex", width: "100px", height: "50px" }}
+                            sx={{
+                                mr: 1,
+                                marginTop: '5px',
+                                marginBottom: '15px',
+                                display: "flex",
+                                width: "100px",
+                                height: "50px",
+                                justifyContent: "center"
+
+                            }}
                         >
-                            {ano}
+                            {comprovante.ano}
                             <input
                                 type="file"
-                                id={`comprovante-${ano}`}
-                                name={`comprovante-${ano}`}
-                                onChange={(event) => handleFileChange(ano, event)} // Passando year e event
+                                id={`comprovante-${comprovante.ano}`}
+                                name={`comprovante-${comprovante.ano}`}
+                                onChange={(event) => handleFileChange(comprovante.ano!, event)} // Passando year e event
                                 hidden
                                 accept=".png, .jpeg, .jpg, .pdf"
                             />
                         </Button>
+                        {comprovante.ano !== null && comprovante.ano !== undefined && fileNames[comprovante.ano] && (
+                            <Typography variant="body2" sx={{ mt: 1 }}>
+                                {fileNames[comprovante.ano]}
+                            </Typography>
+                        )}
                     </Grid>
                     <Grid item sx={{ marginLeft: '10px' }}>
                         <FormControl>
@@ -233,83 +269,93 @@ const ComprovanteResidencia: React.FC<ComprovanteResidenciaProps> = ({ }) => {
                             </FormLabel>
                             <RadioGroup
                                 row
-                                name={`titular-${ano}`}
-                                onChange={(e) => handleTitularChange(ano, e.target.value)}
+                                name={`titular-${comprovante.ano}`}
+                                value={comprovante.titular ? 'sim' : 'nao'}
+                                onChange={(e) => handleTitularChange(comprovante.ano!, e.target.value)}
                             >
                                 <FormControlLabel value="sim" control={<Radio />} label="Sim" />
                                 <FormControlLabel value="nao" control={<Radio />} label="Não" />
                             </RadioGroup>
                         </FormControl>
                     </Grid>
-                    {titular[ano] === "nao" && (
+                    {!comprovante.titular && (
                         <Grid container spacing={2} sx={{ paddingLeft: '10px' }}>
                             <Grid item xs={12} md={6}>
                                 <FormControl fullWidth>
-                                    <FormLabel htmlFor={`nome-${ano}`}>Nome</FormLabel>
+                                    <FormLabel htmlFor={`nome-${comprovante.ano}`}>Nome</FormLabel>
                                     <OutlinedInput
-                                        id={`nome-${ano}`}
-                                        name={`nome-${ano}`}
+                                        id={`nome`}
+                                        name={`nome`}
                                         placeholder="Nome completo do titular"
-                                        value={
-                                            processoAggregate.comprovantesResidencia.find(
-                                                (comprovante) => comprovante.ano === ano
-                                            )?.dadosTitular?.nome || ""
-                                        }
-                                        onChange={handleChange(ano)}
-                                        onBlur={handleBlur(ano)}
+                                        value={comprovante.dadosTitular?.nome || ""}
+                                        onChange={handleChange(comprovante.ano!)}
+                                        onBlur={handleBlur(comprovante.ano!)}
                                     />
                                 </FormControl>
                             </Grid>
                             <Grid item xs={12} md={6}>
                                 <FormControl fullWidth>
-                                    <FormLabel htmlFor={`rg-${ano}`}>RG</FormLabel>
+                                    <FormLabel htmlFor={`rg-${comprovante.ano}`}>RG</FormLabel>
                                     <OutlinedInput
-                                        id={`rg-${ano}`}
-                                        name={`rg-${ano}`}
+                                        id={`rg`}
+                                        name={`rg`}
                                         placeholder="RG do titular"
-                                        value={
-                                            processoAggregate.comprovantesResidencia.find(
-                                                (comprovante) => comprovante.ano === ano
-                                            )?.dadosTitular?.rg || ""
-                                        }
-                                        onChange={handleChange(ano)}
-                                        onBlur={handleBlur(ano)}
+                                        value={comprovante.dadosTitular?.rg || ""}
+                                        onChange={handleChange(comprovante.ano!)}
+                                        onBlur={handleBlur(comprovante.ano!)}
                                     />
                                 </FormControl>
                             </Grid>
-                            <Grid item xs={12} md={6}>
-                                <FormControl fullWidth>
-                                    <FormLabel htmlFor={`cpf-${ano}`}>CPF</FormLabel>
-                                    <OutlinedInput
-                                        id={`cpf-${ano}`}
-                                        name={`cpf-${ano}`}
-                                        placeholder="CPF do titular"
-                                        value={
-                                            processoAggregate.comprovantesResidencia.find(
-                                                (comprovante) => comprovante.ano === ano
-                                            )?.dadosTitular?.cpf || ""
-                                        }
-                                        onChange={handleChange(ano)}
-                                        onBlur={handleBlur(ano)}
+                            <Grid container item xs={12} spacing={2}>
+                                <Grid item xs={12} md={6}>
+                                    <CPFInput
+                                        name={`cpf`}
+                                        value={comprovante.dadosTitular?.cpf || ""}
+                                        onChange={handleChange(comprovante.ano!)}
+                                        onBlur={handleBlur(comprovante.ano!)}
                                     />
-                                </FormControl>
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <CEPInput
+                                        name={`cep`}
+                                        value={comprovante.dadosTitular?.endereco.cep || ""}
+                                        onChange={handleChange(comprovante.ano!)}
+                                        onBlur={handleBlur(comprovante.ano!)}
+                                        endAdornment={ 
+                                            <InputAdornment position="end">
+                                                <Tooltip title="Preencha o endereço exatamente como consta no comprovante de residência do titular." arrow>
+                                                    <Typography
+                                                        component="span"
+                                                        sx={{
+                                                            color: 'text.secondary',
+                                                            cursor: 'help',
+                                                            fontSize: '1.2rem',
+                                                            ml: 1,
+                                                        }}
+                                                    >
+                                                        ⓘ
+                                                    </Typography>
+                                                </Tooltip>
+                                            </InputAdornment>
+                                        }
+                                    />
+                                </Grid>
                             </Grid>
                             <Grid item xs={12}>
                                 <CamposEndereco
-                                    endereco={
-                                        processoAggregate.comprovantesResidencia.find((comprovante) => comprovante.ano === ano)?.dadosTitular?.endereco || {
-                                            cep: "",
-                                            rua: "",
-                                            numero: "",
-                                            bairro: "",
-                                            cidade: "",
-                                            uf: "",
-                                            complemento: "",
-                                        }
+                                    endereco={comprovante.dadosTitular?.endereco || {
+                                        cep: "",
+                                        rua: "",
+                                        numero: "",
+                                        bairro: "",
+                                        cidade: "",
+                                        uf: "",
+                                        complemento: "",
                                     }
-                                    handleInputChange={handleChange(ano)}
-                                    handleInputBlur={handleBlur(ano)}
-                                    mostrarTooltipCep={true}
+                                    }
+                                    handleInputChange={handleChange(comprovante.ano!)}
+                                    handleInputBlur={handleBlur(comprovante.ano!)}
+                                    mostrarCep={false}
                                 />
                             </Grid>
                         </Grid>

@@ -2,7 +2,6 @@ import * as React from "react";
 import { useState, useEffect, useRef } from "react";
 import {
     Box,
-    Button,
     Collapse,
     Grid,
     IconButton,
@@ -16,7 +15,6 @@ import axios from "axios";
 import CustomSnackbar from '../utils/CustomSnackbar';
 import { ProcessoAggregate, isEnderecoFilled } from '../../domain/ProcessoAggregate';
 import { useProcesso } from "../context/useProcesso";
-import { buscarDocumentosPolling } from "../hooks/BuscarDocumentosPolling";
 import useAutoSave from "../hooks/useAutoSave";
 import CamposEndereco from "../hooks/CamposEndereco";
 
@@ -68,7 +66,6 @@ const Endereco: React.FC<EnderecoProps> = ({
         processoId: processoAggregate.id,
         fecharSessaoPreenchida,
         setSnackbarOpen,
-        buscarDocumentos: () => buscarDocumentosPolling(setProcessoAggregate, processoAggregate.id!),
         setIsDirty: setDirty
     });
 

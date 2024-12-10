@@ -318,7 +318,6 @@ export default function AutorizacaoArma() {
               Iniciar um novo processo
             </Button>
           </Box>
-
           <Box
             sx={{
               width: "275px",

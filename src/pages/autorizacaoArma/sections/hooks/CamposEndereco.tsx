@@ -13,7 +13,7 @@ interface CamposEnderecoProps {
     formRef?: React.RefObject<HTMLDivElement>;
     numeroInputRef?: React.RefObject<HTMLInputElement>;
     ruaInputRef?: React.RefObject<HTMLInputElement>;
-    mostrarTooltipCep?: boolean; // Nova propriedade para exibir a tooltip
+    mostrarCep?: boolean;
 }
 
 const spin = keyframes`
@@ -38,34 +38,25 @@ const CamposEndereco: React.FC<CamposEnderecoProps> = ({
     buscandoEndereco = false,
     numeroInputRef,
     ruaInputRef,
-    mostrarTooltipCep = false,
-
+    mostrarCep = true,
 }) => {
     return (
         <Grid container spacing={2}>
-            <FormGrid item xs={12} md={6}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {mostrarCep && (
+                <FormGrid item xs={12} md={6}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <CEPInput
-                            name="cep"
-                            value={endereco.cep || ""}
-                            onChange={handleInputChange}
-                            onBlur={handleInputBlur}
-                        />
-                        <RefreshIcon sx={{ visibility: buscandoEndereco ? 'visible' : 'hidden', animation: `${spin} 0.8s linear infinite` }} />
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <CEPInput
+                                name="cep"
+                                value={endereco.cep || ""}
+                                onChange={handleInputChange}
+                                onBlur={handleInputBlur}
+                            />
+                            <RefreshIcon sx={{ visibility: buscandoEndereco ? 'visible' : 'hidden', animation: `${spin} 0.8s linear infinite` }} />
+                        </Box>
                     </Box>
-                    {mostrarTooltipCep && (
-                        <Tooltip title="Preencha o endereço exatamente como consta no comprovante de residencia do titular.">
-                            <Typography
-                                component="span"
-                                sx={{ color: 'text.secondary', cursor: 'help', fontSize: '1.2rem' }}
-                            >
-                                ⓘ
-                            </Typography>
-                        </Tooltip>
-                    )}
-                </Box>
-            </FormGrid>
+                </FormGrid>
+            )}
             <FormGrid item xs={12}>
                 <FormLabel htmlFor="rua" required>
                     Rua

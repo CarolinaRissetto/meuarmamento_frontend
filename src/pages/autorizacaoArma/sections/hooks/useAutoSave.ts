@@ -8,7 +8,6 @@ interface UseAutoSaveProps {
   processoId: string | null;
   fecharSessaoPreenchida: () => void;
   setSnackbarOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  buscarDocumentos: () => void;
   setIsDirty: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -20,7 +19,6 @@ interface UseAutoSaveProps {
   processoId,
   fecharSessaoPreenchida,
   setSnackbarOpen,
-  buscarDocumentos,
   setIsDirty
 }: UseAutoSaveProps) => {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -35,7 +33,6 @@ interface UseAutoSaveProps {
       timerRef.current = setTimeout(() => {
         fecharSessaoPreenchida();
         setSnackbarOpen(true);
-        buscarDocumentos();
         setIsDirty(false);
       }, 2500);
     }
@@ -45,7 +42,7 @@ interface UseAutoSaveProps {
         clearTimeout(timerRef.current);
       }
     };
-  }, [isFilled, isDirty, isOpen, hasMounted, processoId, fecharSessaoPreenchida, setSnackbarOpen, buscarDocumentos, setIsDirty]);
+  }, [isFilled, isDirty, isOpen, hasMounted, processoId, fecharSessaoPreenchida, setSnackbarOpen, setIsDirty]);
 };
 
 export default useAutoSave;

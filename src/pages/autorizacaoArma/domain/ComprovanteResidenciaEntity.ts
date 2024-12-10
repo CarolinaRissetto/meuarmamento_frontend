@@ -2,13 +2,13 @@ import { EnderecoEntity } from "./EnderecoEntity";
 
 export interface ComprovanteResidenciaEntity {
     id: string | null;
-    ano: number | null;
+    ano: number;
     arquivo: string| null; 
     titular: boolean | null;
-    dadosTitular?: {
+    dadosTitular: {
         nome: string | null;
         rg: string | null;
         cpf: string | null;
-         endereco?: EnderecoEntity;
+         endereco: EnderecoEntity;
     };
 }
