@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FormControl, FormHelperText, FormLabel, OutlinedInput } from "@mui/material";
+import { FormControl, FormHelperText, FormLabel, OutlinedInput, OutlinedInputProps } from "@mui/material";
 import MaskInput from './MaskInput';
 
 interface CEPInputProps {
@@ -7,6 +7,7 @@ interface CEPInputProps {
   value: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: (event: React.FocusEvent<HTMLInputElement>) => void;
+  endAdornment?: React.ReactNode;
 }
 
 const validarCEP = (cep: string): boolean => {
@@ -17,7 +18,7 @@ const validarCEP = (cep: string): boolean => {
   return regex.test(cep);
 };
 
-const CEPInput: React.FC<CEPInputProps> = ({ name, value, onChange, onBlur }) => {
+const CEPInput: React.FC<CEPInputProps> = ({ name, value, onChange, onBlur, endAdornment, ...rest }) => {
   const [error, setError] = useState<boolean>(false);
 
   const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
@@ -47,7 +48,8 @@ const CEPInput: React.FC<CEPInputProps> = ({ name, value, onChange, onBlur }) =>
           unmask: false,
           value: value || "",
         }}
-      />
+        endAdornment={endAdornment}
+        {...rest} />
       {error && (
         <FormHelperText>CEP inválido</FormHelperText>
       )}

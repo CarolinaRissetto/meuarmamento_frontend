@@ -20,6 +20,8 @@ import { apiRequest } from "../../../../services/api/apiRequestService";
 import { LeadData } from "../../domain/LeadData";
 import { useProcesso } from "../context/useProcesso";
 import { DocumentoProcesso } from "../../domain/ProcessoAggregate";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import { buscarDocumentosPolling } from "../hooks/BuscarDocumentosPolling";
 
 const NOME_PROCESSO = "AquisicaoArmasDeFogo";
 
@@ -31,7 +33,7 @@ export default function DocumentosParaAssinar({
   setActiveStep: React.Dispatch<React.SetStateAction<number>>;
 }) {
 
-  const { processoAggregate } = useProcesso();
+  const { processoAggregate, setProcessoAggregate } = useProcesso();
   const [modalOpen, setModalOpen] = useState(false);
   const [downloadPendente, setDownloadPendente] = useState<string | null>(null);
   const [documentosProcessados, setDocumentosProcessados] = useState<DocumentoProcesso[]>([]);
@@ -137,6 +139,20 @@ export default function DocumentosParaAssinar({
     saveAs(zipBlob, zipFileName);
   };
 
+  const handleGerarDocumentos = async () => {
+    try {
+      await apiRequest({
+        method: 'POST',
+        endpoint: `/${processoAggregate.id}/gerarDocumentos`,
+      });
+
+      await buscarDocumentosPolling(setProcessoAggregate, processoAggregate.id);
+
+    } catch (error) {
+      console.error('Erro ao gerar documentos:', error);
+    }
+  };
+
   return (
     <div>
       {fullView && (
@@ -210,12 +226,29 @@ export default function DocumentosParaAssinar({
             />
           ))}
       </List>
-      {fullView && (
+      {fullView &&
+        <Button
+          onClick={handleGerarDocumentos}
+          startIcon={<AssignmentIcon />}
+          variant="contained"
+          sx={{
+            margin: "20px 15px 15px 25px",
+            padding: "10px 20px",
+            minWidth: "250px",
+            backgroundColor: "#549F5E",
+            "&:hover": {
+              backgroundColor: "#4a8a54",
+            },
+          }}
+        >
+          Gerar documentos
+        </Button>
+      }
+      {fullView && documentosValidos.length > 0 && (
         <Button
           variant="contained"
           startIcon={<FolderZipIcon />}
           onClick={handleBaixarTodosDocumentos}
-          disabled={documentosValidos.length === 0}
           sx={{
             margin: "15px",
             padding: "10px 20px",

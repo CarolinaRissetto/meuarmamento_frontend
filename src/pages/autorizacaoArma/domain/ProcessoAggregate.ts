@@ -1,5 +1,6 @@
 import { EnderecoEntity } from "./EnderecoEntity";
 import { DadosPessoaisEntity } from "./DadosPessoaisEntity";
+import { ComprovanteResidenciaEntity } from "./ComprovanteResidenciaEntity";
 
 export interface DocumentoProcesso {
     id: string | null;
@@ -15,6 +16,7 @@ export interface ProcessoAggregate {
     documentos: DocumentoProcesso[];
     dataCriacao: string | null;
     dataAlteracao: string | null;
+    comprovantesResidencia: ComprovanteResidenciaEntity[];
 }
 
 export const isDadosPessoaisFilled = (data: DadosPessoaisEntity): boolean => {

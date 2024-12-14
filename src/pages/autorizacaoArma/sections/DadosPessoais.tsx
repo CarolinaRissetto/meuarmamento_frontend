@@ -21,7 +21,6 @@ import DataNascimentoInput from "./utils/inputs/DataNascimentoInput";
 import { EstadoCivil } from "../domain/enums/EstadoCivil";
 import { useProcesso } from "./context/useProcesso";
 import { Sexo } from "../domain/enums/Sexo";
-import { buscarDocumentosPolling } from "./hooks/BuscarDocumentosPolling";
 import useAutoSave from "./hooks/useAutoSave";
 
 interface DadosPessoaisProps {
@@ -54,7 +53,6 @@ const DadosPessoais: React.FC<DadosPessoaisProps> = ({
     processoId: processoAggregate.id,
     fecharSessaoPreenchida,
     setSnackbarOpen,
-    buscarDocumentos: () => buscarDocumentosPolling(setProcessoAggregate, processoAggregate.id),
     setIsDirty
   });
 
