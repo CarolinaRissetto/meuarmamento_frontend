@@ -23,9 +23,9 @@ interface ComprovanteResidenciaProps {
 
 }
 
-const ComprovanteResidencia: React.FC<ComprovanteResidenciaProps> = ({ }) => {
+const ComprovanteResidencia: React.FC<ComprovanteResidenciaProps> = () => {
     const { processoAggregate, setProcessoAggregate } = useProcesso();
-    const [files, setFiles] = useState<{ [key: number]: File | null }>({});
+    const [, setFiles] = useState<{ [key: number]: File | null }>({});
     const [fileNames, setFileNames] = useState<{ [key: number]: string }>({});
 
     useEffect(() => {

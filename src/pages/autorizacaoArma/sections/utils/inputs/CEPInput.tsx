@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FormControl, FormHelperText, FormLabel, OutlinedInput, OutlinedInputProps } from "@mui/material";
+import { FormControl, FormHelperText, FormLabel, OutlinedInput } from "@mui/material";
 import MaskInput from './MaskInput';
 
 interface CEPInputProps {
