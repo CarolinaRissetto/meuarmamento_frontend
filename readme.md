@@ -1,4 +1,4 @@
-# Projeto CAC
+# Projeto Meu Armamento
 
 Um sistema para gerenciamento e registro de certificados e emissão de autorizações CAC (Colecionador, Atirador e Caçador), incluindo formulários de registro, armazenamento de dados.
 
@@ -21,11 +21,11 @@ Aqui você tem os passos necessários para ter um ambiente de desenvolvimento em
 
 Clone o repositório do projeto: 
 ```sh
-https://github.com/CarolinaRissetto/cac_facil
+https://github.com/CarolinaRissetto/meuarmamento_frontend
 ```
 Navegue até o diretório do projeto:
 ```sh
-cd cac_facil
+cd meuarmamento_frontend
 ```
 Instale as dependências:
 ```sh
